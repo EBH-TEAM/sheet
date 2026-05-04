@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>EBH Sheets - Perfect Copy/Paste for Google Sheets</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #eef2f7;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      background: white;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0b2b44 0%, #1e5a88 100%);
+      padding: 10px 16px;
+      flex-shrink: 0;
+    }
+    .logo-area {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .logo-wrapper {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 1px;
+    }
+    .logo-sub {
+      font-size: 12px;
+      font-weight: 400;
+      color: #FFE4B5;
+      font-style: italic;
+    }
+    .undo-redo-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(255,255,255,0.15);
+      padding: 4px 10px;
+      border-radius: 40px;
+    }
+    .icon-btn {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      touch-action: manipulation;
+      padding: 4px 6px;
+      border-radius: 30px;
+      transition: 0.2s;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn:active {
+      transform: scale(0.9);
+      background: rgba(255,255,255,0.2);
+    }
+    .row-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 12px;
+      color: white;
+      white-space: nowrap;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      flex: 1;
+      min-width: 70px;
+      border: none;
+      padding: 8px 10px;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: 0.2s;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .btn:active {
+      transform: scale(0.96);
+    }
+    .btn-select { background: #137333; color: white; }
+    .btn-copy { background: #1a73e8; color: white; }
+    .btn-delete { background: #dc2626; color: white; }
+    .btn-clear { background: #ea580c; color: white; }
+
+    .resize-panel {
+      padding: 6px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .resize-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e3a5f;
+    }
+    input[type="range"] {
+      flex: 2;
+      min-width: 140px;
+      accent-color: #1a73e8;
+    }
+    .width-value {
+      background: #e2e8f0;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .table-wrapper {
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: white;
+    }
+    table {
+      border-collapse: collapse;
+      table-layout: fixed;
+      min-width: 650px;
+    }
+    th, td {
+      border: 1px solid #dce5ef;
+      padding: 8px 10px;
+      font-size: 14px;
+      line-height: 1.4;
+      vertical-align: top;
+      white-space: nowrap;
+      overflow-x: auto;
+      background-color: white;
+    }
+    th {
+      background: #f7f9fd;
+      font-weight: 600;
+      color: #1f2e4a;
+      position: relative;
+    }
+    th:first-child, td:first-child {
+      background-color: #f2f4f8;
+      text-align: center;
+      font-weight: 500;
+      color: #2c3e66;
+      width: 55px !important;
+      min-width: 55px !important;
+      max-width: 55px !important;
+    }
+    td:first-child {
+      background-color: #fafbfd;
+      cursor: default;
+    }
+    .resize-handle {
+      position: absolute;
+      top: 0;
+      right: -6px;
+      width: 12px;
+      height: 100%;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 10;
+      touch-action: none;
+    }
+    .resize-handle:active {
+      background: rgba(26,115,232,0.3);
+      border-right: 2px solid #1a73e8;
+    }
+    td.selected {
+      background-color: #cce5ff !important;
+      outline: 1px solid #1366d0;
+    }
+    td.duplicate-error {
+      background-color: #ffdddd !important;
+      color: #aa2e2e;
+    }
+    td[contenteditable="true"]:focus {
+      outline: 2px solid #1a73e8;
+      background-color: #fff7e0;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e2f3f;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 40px;
+      font-size: 13px;
+      z-index: 2000;
+      opacity: 0;
+      transition: 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo-wrapper">
+        <span class="logo">EBH</span>
+        <span class="logo-sub">smart sheets</span>
+        <div class="undo-redo-group">
+          <button id="undoBtn" class="icon-btn" title="পিছনে যান (Undo)">↩️</button>
+          <button id="redoBtn" class="icon-btn" title="সামনে যান (Redo)">🔁</button>
+        </div>
+      </div>
+      <div class="row-badge">২০০ সারি</div>
+    </div>
+    <div class="button-group">
+      <button id="selectAllColsBtn" class="btn btn-select">📌 সব কলাম</button>
+      <button id="copyBtn" class="btn btn-copy">📋 কপি</button>
+      <button id="deleteBtn" class="btn btn-delete">🗑️ ডিলিট</button>
+      <button id="clearSelectionBtn" class="btn btn-clear">✖️ ক্লিয়ার</button>
+    </div>
+  </div>
+
+  <div class="resize-panel">
+    <span class="resize-label">কলাম প্রস্থ (B,C,D,E,F):</span>
+    <input type="range" id="colWidthSlider" min="70" max="280" step="2" value="120">
+    <span id="widthValue" class="width-value">120px</span>
+  </div>
+
+  <div class="table-wrapper">
+    <table id="masterSheet" style="table-layout: fixed;">
+      <thead id="sheetHeader">
+        <tr id="headerRow">
+          <th data-col="0"># সিরিয়াল</th>
+          <th data-col="1">A (শুধু সংখ্যা)</th>
+          <th data-col="2">B</th>
+          <th data-col="3">C</th>
+          <th data-col="4">D</th>
+          <th data-col="5">E</th>
+        </td>
+      </thead>
+      <tbody id="sheetBody"></tbody>
+    </table>
+  </div>
+</div>
+<div id="liveToast" class="toast-msg"></div>
+
+<script>
+  (function() {
+    const ROWS = 200;
+    const COLS = 6;
+    let colWidths = [55, 120, 120, 120, 120, 120];
+    
+    let selectedCells = new Set();
+    let sheetData = [];
+    const STORAGE_KEY = "EBH_Sheet_Undo_SessionFresh";
+    
+    let undoStack = [];
+    let redoStack = [];
+    let isUndoRedo = false;
+    const MAX_HISTORY = 50;
+    
+    const sheetBody = document.getElementById('sheetBody');
+    const slider = document.getElementById('colWidthSlider');
+    const widthSpan = document.getElementById('widthValue');
+    
+    function pushToUndo() {
+      if (isUndoRedo) return;
+      const copy = JSON.parse(JSON.stringify(sheetData));
+      undoStack.push(copy);
+      if (undoStack.length > MAX_HISTORY) undoStack.shift();
+      redoStack = [];
+    }
+    
+    function undo() {
+      if (undoStack.length === 0) {
+        showToast("❌ আর Undo করার কিছু নেই");
+        return;
+      }
+      isUndoRedo = true;
+      const current = JSON.parse(JSON.stringify(sheetData));
+      redoStack.push(current);
+      const prevState = undoStack.pop();
+      sheetData = prevState;
+      renderGridFull();
+      saveToLocalStorage();
+      isUndoRedo = false;
+      showToast("↩️ পিছনে গেলাম");
+    }
+    
+    function redo() {
+      if (redoStack.length === 0) {
+        showToast("❌ আর Redo করার কিছু নেই");
+        return;
+      }
+      isUndoRedo = true;
+      const current = JSON.parse(JSON.stringify(sheetData));
+      undoStack.push(current);
+      const nextState = redoStack.pop();
+      sheetData = nextState;
+      renderGridFull();
+      saveToLocalStorage();
+      isUndoRedo = false;
+      showToast("🔁 সামনে গেলাম");
+    }
+    
+    function loadDataFromStorage() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length === ROWS && parsed[0].length === COLS) {
+            sheetData = parsed;
+            return;
+          }
+        } catch(e) {}
+      }
+      sheetData = Array(ROWS).fill().map(() => Array(COLS).fill(''));
+      for (let i = 0; i < ROWS; i++) sheetData[i][0] = (i+1).toString();
+    }
+    
+    function saveToLocalStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sheetData));
+    }
+    
+    function checkDuplicateAndHighlight() {
+      const allCells = document.querySelectorAll('#sheetBody td');
+      allCells.forEach(cell => cell.classList.remove('duplicate-error'));
+      const colAValues = new Map();
+      for (let row = 0; row < ROWS; row++) {
+        const cellElem = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='1']`);
+        if (cellElem) {
+          let val = cellElem.innerText.trim();
+          if (val !== "") {
+            if (!colAValues.has(val)) colAValues.set(val, []);
+            colAValues.get(val).push(cellElem);
+          }
+        }
+      }
+      for (let [value, cells] of colAValues.entries()) {
+        if (cells.length > 1) cells.forEach(cell => cell.classList.add('duplicate-error'));
+      }
+    }
+    
+    // পেস্ট ইভেন্ট হ্যান্ডলার - Google Sheets থেকে কপি করা ডাটা আলাদা কলামে বসাবে
+    function setupPasteHandler() {
+      document.addEventListener('paste', (e) => {
+        // চেক করি কোনো সেল সিলেক্টেড আছে কিনা
+        if (selectedCells.size === 0) return;
+        
+        e.preventDefault();
+        const pasteData = e.clipboardData.getData('text/plain');
+        if (!pasteData) return;
+        
+        // সিলেক্টেড সেলগুলো থেকে সাজানো শুরু (সবচেয়ে উপরের বাম সেল)
+        const cellsArray = Array.from(selectedCells);
+        let minRow = Infinity, minCol = Infinity;
+        for (let cell of cellsArray) {
+          let r = parseInt(cell.getAttribute('data-row'));
+          let c = parseInt(cell.getAttribute('data-col'));
+          if (!isNaN(r) && !isNaN(c)) {
+            if (r < minRow) minRow = r;
+            if (c < minCol) minCol = c;
+          }
+        }
+        if (minRow === Infinity) return;
+        
+        // ট্যাব (\t) এবং নতুন লাইন (\n) দিয়ে ডাটা পার্স
+        const rows = pasteData.split(/\r?\n/);
+        
+        pushToUndo(); // Undo স্ট্যাকের জন্য
+        
+        for (let i = 0; i < rows.length; i++) {
+          const cols = rows[i].split('\t');
+          const targetRow = minRow + i;
+          if (targetRow >= ROWS) break;
+          
+          for (let j = 0; j < cols.length; j++) {
+            const targetCol = minCol + j;
+            if (targetCol >= COLS) break;
+            if (targetCol === 0) continue; // সিরিয়াল কলাম এড়িয়ে যান
+            
+            const cellValue = cols[j];
+            const targetCell = document.querySelector(`#sheetBody td[data-row='${targetRow}'][data-col='${targetCol}']`);
+            if (targetCell) {
+              targetCell.innerText = cellValue;
+              sheetData[targetRow][targetCol] = cellValue;
+            }
+          }
+        }
+        
+        // A কলামে সংখ্যা যাচাই (পেস্ট করার পর)
+        for (let row = 0; row < ROWS; row++) {
+          const aCell = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='1']`);
+          if (aCell) {
+            let raw = aCell.innerText;
+            let onlyNumbers = raw.replace(/[^0-9]/g, '');
+            if (onlyNumbers !== raw) {
+              aCell.innerText = onlyNumbers;
+              sheetData[row][1] = onlyNumbers;
+            }
+          }
+        }
+        
+        saveToLocalStorage();
+        checkDuplicateAndHighlight();
+        showToast(`📋 পেস্ট সম্পন্ন: ${rows.length} সারি`);
+      });
+    }
+    
+    function renderGridFull() {
+      sheetBody.innerHTML = '';
+      for (let row = 0; row < ROWS; row++) {
+        const tr = document.createElement('tr');
+        for (let col = 0; col < COLS; col++) {
+          const td = document.createElement('td');
+          if (col === 0) {
+            td.contentEditable = "false";
+            td.innerText = sheetData[row][col] || (row+1).toString();
+            td.style.backgroundColor = "#fafbfd";
+            td.style.cursor = "default";
+            td.addEventListener('click', (e) => e.stopPropagation());
+          } else {
+            td.contentEditable = "true";
+            td.innerText = sheetData[row][col] || '';
+            
+            if (col === 1) {
+              td.addEventListener('input', (function(r, c, cell) {
+                return function() {
+                  let raw = cell.innerText;
+                  let onlyNumbers = raw.replace(/[^0-9]/g, '');
+                  if (onlyNumbers !== raw) {
+                    cell.innerText = onlyNumbers;
+                    putCaretAtEnd(cell);
+                  }
+                  if (!isUndoRedo) pushToUndo();
+                  sheetData[r][c] = cell.innerText;
+                  saveToLocalStorage();
+                  checkDuplicateAndHighlight();
+                };
+              })(row, col, td));
+            } else {
+              td.addEventListener('input', (function(r, c, cell) {
+                return function() {
+                  if (!isUndoRedo) pushToUndo();
+                  sheetData[r][c] = cell.innerText;
+                  saveToLocalStorage();
+                };
+              })(row, col, td));
+            }
+            
+            td.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (!e.ctrlKey && !e.metaKey) clearAllSelection();
+              td.classList.add('selected');
+              selectedCells.add(td);
+            });
+            
+            let pressTimer = null;
+            td.addEventListener('touchstart', (e) => {
+              pressTimer = setTimeout(() => {
+                if (selectedCells.has(td)) {
+                  td.classList.remove('selected');
+                  selectedCells.delete(td);
+                } else {
+                  td.classList.add('selected');
+                  selectedCells.add(td);
+                }
+                if (navigator.vibrate) navigator.vibrate(20);
+                e.preventDefault();
+              }, 400);
+            });
+            td.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
+            td.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
+          }
+          td.setAttribute('data-row', row);
+          td.setAttribute('data-col', col);
+          tr.appendChild(td);
+        }
+        sheetBody.appendChild(tr);
+      }
+      applyColumnWidths();
+      checkDuplicateAndHighlight();
+    }
+    
+    function putCaretAtEnd(el) {
+      try { let range = document.createRange(), sel = window.getSelection(); range.selectNodeContents(el); range.collapse(false); sel.removeAllRanges(); sel.addRange(range); } catch(e) {}
+    }
+    
+    function clearAllSelection() {
+      for (let cell of selectedCells) cell.classList.remove('selected');
+      selectedCells.clear();
+    }
+    
+    function applyColumnWidths() {
+      const headers = document.querySelectorAll('#headerRow th');
+      const allRows = document.querySelectorAll('#sheetBody tr');
+      for (let c = 0; c < COLS; c++) {
+        let w = colWidths[c] + 'px';
+        if (headers[c]) { headers[c].style.width = w; headers[c].style.minWidth = w; headers[c].style.maxWidth = w; }
+        for (let r = 0; r < allRows.length; r++) {
+          let cell = allRows[r].querySelectorAll('td')[c];
+          if (cell) { cell.style.width = w; cell.style.minWidth = w; cell.style.maxWidth = w; }
+        }
+      }
+    }
+    
+    function setAllColumnsWidth(px) {
+      for (let i = 1; i < COLS; i++) colWidths[i] = px;
+      applyColumnWidths();
+    }
+    
+    function addResizeHandles() {
+      const ths = document.querySelectorAll('#headerRow th');
+      ths.forEach((th, idx) => {
+        if (idx === 0) return;
+        let handle = document.createElement('div');
+        handle.className = 'resize-handle';
+        let startX = 0, startW = 0, isResizing = false;
+        const onMove = (e) => {
+          if (!isResizing) return;
+          let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          let diff = clientX - startX;
+          let newW = startW + diff;
+          if (newW < 70) newW = 70;
+          if (newW > 320) newW = 320;
+          colWidths[idx] = newW;
+          applyColumnWidths();
+          if (slider) slider.value = newW;
+          if (widthSpan) widthSpan.innerText = newW + 'px';
+        };
+        const onUp = () => {
+          isResizing = false;
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+          window.removeEventListener('touchmove', onMove);
+          window.removeEventListener('touchend', onUp);
+        };
+        handle.addEventListener('touchstart', (e) => { e.preventDefault(); isResizing = true; startX = e.touches[0].clientX; startW = colWidths[idx]; window.addEventListener('touchmove', onMove, { passive: false }); window.addEventListener('touchend', onUp); });
+        handle.addEventListener('mousedown', (e) => { e.preventDefault(); isResizing = true; startX = e.clientX; startW = colWidths[idx]; window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp); });
+        th.appendChild(handle);
+        th.style.position = 'relative';
+      });
+    }
+    
+    function bindColumnSelection() {
+      const headers = document.querySelectorAll('#headerRow th');
+      headers.forEach((th, colIdx) => {
+        if (colIdx === 0) return;
+        th.addEventListener('click', (e) => {
+          if (e.target.classList?.contains('resize-handle')) return;
+          e.stopPropagation();
+          clearAllSelection();
+          const allCellsCol = document.querySelectorAll(`#sheetBody td[data-col='${colIdx}']`);
+          for (let cell of allCellsCol) { cell.classList.add('selected'); selectedCells.add(cell); }
+        });
+      });
+    }
+    
+    function selectAllDataColumns() {
+      clearAllSelection();
+      for (let col = 1; col < COLS; col++) {
+        const cells = document.querySelectorAll(`#sheetBody td[data-col='${col}']`);
+        for (let cell of cells) { cell.classList.add('selected'); selectedCells.add(cell); }
+      }
+      showToast("📌 সব ডাটা কলাম সিলেক্ট হয়েছে");
+    }
+    
+    // কপি ফাংশন - গুগল শীটে পেস্ট করলে সেম টু সেম হবে
+    async function copySelectedToClipboard() {
+      if (selectedCells.size === 0) { 
+        showToast("⚠️ কোন সেল সিলেক্ট করা নেই"); 
+        return; 
+      }
+      
+      const cellsArr = Array.from(selectedCells);
+      
+      let minRow = Infinity, maxRow = -Infinity, minCol = Infinity, maxCol = -Infinity;
+      for (let cell of cellsArr) {
+        let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col'));
+        if (!isNaN(r) && !isNaN(c)) { 
+          minRow = Math.min(minRow, r); 
+          maxRow = Math.max(maxRow, r); 
+          minCol = Math.min(minCol, c); 
+          maxCol = Math.max(maxCol, c); 
+        }
+      }
+      if (minRow === Infinity) return;
+      
+      const rowCount = maxRow - minRow + 1, colCount = maxCol - minCol + 1;
+      const matrix = Array(rowCount).fill().map(() => Array(colCount).fill(''));
+      for (let cell of cellsArr) {
+        let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col'));
+        if (r >= minRow && r <= maxRow && c >= minCol && c <= maxCol) {
+          matrix[r - minRow][c - minCol] = cell.innerText;
+        }
+      }
+      
+      // ট্যাব সেপারেটেড ফরম্যাট (গুগল শীট ও এক্সেল সাপোর্ট করে)
+      const tsvString = matrix.map(row => row.join('\t')).join('\n');
+      
+      try { 
+        await navigator.clipboard.writeText(tsvString); 
+        showToast(`📋 ${selectedCells.size} টি সেল কপি হয়েছে (Google Sheets-এ পেস্ট করুন)`); 
+      } catch(err) { 
+        showToast("❌ কপি ব্যর্থ"); 
+      }
+    }
+    
+    function deleteSelectedContent() {
+      if (selectedCells.size === 0) { showToast("⚠️ কোন সেল সিলেক্ট করা নেই"); return; }
+      pushToUndo();
+      for (let cell of selectedCells) {
+        let row = parseInt(cell.getAttribute('data-row')), col = parseInt(cell.getAttribute('data-col'));
+        cell.innerText = '';
+        sheetData[row][col] = '';
+        saveToLocalStorage();
+      }
+      checkDuplicateAndHighlight();
+      showToast("🗑️ ডিলিট সম্পন্ন");
+    }
+    
+    function showToast(msg) {
+      let toast = document.getElementById('liveToast');
+      toast.style.opacity = '1';
+      toast.innerText = msg;
+      setTimeout(() => toast.style.opacity = '0', 1800);
+    }
+    
+    function initSlider() {
+      if (!slider) return;
+      slider.value = colWidths[1];
+      widthSpan.innerText = colWidths[1] + 'px';
+      slider.addEventListener('input', (e) => { let val = parseInt(e.target.value); widthSpan.innerText = val + 'px'; setAllColumnsWidth(val); });
+    }
+    
+    function bindButtons() {
+      document.getElementById('undoBtn').addEventListener('click', () => undo());
+      document.getElementById('redoBtn').addEventListener('click', () => redo());
+      document.getElementById('copyBtn').addEventListener('click', () => copySelectedToClipboard());
+      document.getElementById('deleteBtn').addEventListener('click', () => deleteSelectedContent());
+      document.getElementById('clearSelectionBtn').addEventListener('click', () => { clearAllSelection(); showToast("সিলেকশন ক্লিয়ার"); });
+      document.getElementById('selectAllColsBtn').addEventListener('click', () => selectAllDataColumns());
+    }
+    
+    function init() {
+      loadDataFromStorage();
+      renderGridFull();
+      addResizeHandles();
+      bindColumnSelection();
+      bindButtons();
+      initSlider();
+      applyColumnWidths();
+      setupPasteHandler(); // পেস্ট হ্যান্ডলার যোগ করা হলো
+    }
+    
+    init();
+  })();
+</script>
+</body>
+</html>
