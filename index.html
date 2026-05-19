@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>EBH Sheets - Small Row Height</title>
+  <title>EBH Sheets - Save Scroll Position</title>
   <style>
     * {
       box-sizing: border-box;
@@ -198,16 +198,13 @@
       border: 1px solid #dce5ef;
       padding: 0;
       background-color: white;
-      /* Fixed width - never grows */
       width: 100px;
       min-width: 100px;
       max-width: 100px;
-      /* Small row height - change this value to adjust height */
       height: 35px;
       min-height: 35px;
       max-height: 35px;
     }
-    /* Content div with horizontal scroll only */
     td .cell-content {
       width: 100%;
       height: 100%;
@@ -220,7 +217,6 @@
       outline: none;
       cursor: text;
     }
-    /* Custom scrollbar */
     td .cell-content::-webkit-scrollbar {
       height: 3px;
     }
@@ -232,15 +228,14 @@
       background: #c1c1c1;
       border-radius: 2px;
     }
-    /* First column (serial) - no scroll */
     th:first-child, td:first-child {
       background-color: #f2f4f8;
       text-align: center;
       font-weight: 500;
       color: #2c3e66;
       width: 55px !important;
-      min-width: 55px !important;
-      max-width: 55px !important;
+      min-width: 35px !important;
+      max-width: 35px !important;
       position: sticky;
       left: 0;
       z-index: 2;
@@ -257,7 +252,6 @@
       overflow: hidden;
       white-space: nowrap;
     }
-    /* Header row */
     th {
       background-color: #f7f9fd;
       font-weight: 600;
@@ -385,7 +379,7 @@
     <div class="logo-area">
       <div class="logo-wrapper">
         <span class="logo">EBH</span>
-        <span class="logo-sub">small rows</span>
+        <span class="logo-sub">Smart Sheet ✔</span>
         <div class="undo-redo-group">
           <button id="undoBtn" class="icon-btn">↩️</button>
           <button id="redoBtn" class="icon-btn">🔁</button>
@@ -403,7 +397,7 @@
 
   <div class="telegram-section">
     <div class="tg-input-group">
-      <label> টেলিগ্রাম ইউজারনেম:</label>
+      <label>টেলিগ্রাম ইউজারনেম:</label>
       <input type="text" id="tgUsername" placeholder="যেমন @username" autocomplete="off">
     </div>
     <button id="submitToTelegram" class="submit-telegram">📤 সাবমিট করুন</button>
@@ -413,10 +407,10 @@
     <table id="masterSheet">
       <thead id="sheetHeader">
         <tr id="headerRow">
-          <th data-col="0"># সিরিয়াল</th>
-          <th data-col="1">A (ID)</th>
-          <th data-col="2">B (পাসওয়ার্ড)</th>
-          <th data-col="3">C</th>
+          <th data-col="0">#</th>
+          <th data-col="1">UID</th>
+          <th data-col="2">পাসওয়ার্ড</th>
+          <th data-col="3">কুকিজ/2FA</th>
           <th data-col="4">D</th>
           <th data-col="5">E</th>
         </tr>
@@ -432,13 +426,14 @@
   (function() {
     const ROWS = 1000;
     const COLS = 6;
-    let colWidths = [55, 100, 100, 100, 100, 100];
+    let colWidths = [55, 110, 110, 110, 110, 110];
     
     let selectedCells = new Set();
     let sheetData = [];
     const STORAGE_KEY = "EBH_Sheet_SmallRow";
     const SUBMIT_HASH_KEY = "EBH_Submitted_Hash_V8";
     const TG_USERNAME_KEY = "EBH_TG_Username";
+    const SCROLL_POSITION_KEY = "EBH_Scroll_Position";
     
     let undoStack = [];
     let redoStack = [];
@@ -446,6 +441,7 @@
     const MAX_HISTORY = 30;
     
     let sheetBody;
+    let tableWrapper;
     
     function loadTGUsername() {
       const saved = localStorage.getItem(TG_USERNAME_KEY);
@@ -454,6 +450,32 @@
     }
     function saveTGUsername(username) {
       localStorage.setItem(TG_USERNAME_KEY, username);
+    }
+    
+    // Save scroll position
+    function saveScrollPosition() {
+      if (tableWrapper) {
+        const scrollPos = {
+          scrollTop: tableWrapper.scrollTop,
+          scrollLeft: tableWrapper.scrollLeft
+        };
+        localStorage.setItem(SCROLL_POSITION_KEY, JSON.stringify(scrollPos));
+      }
+    }
+    
+    // Restore scroll position
+    function restoreScrollPosition() {
+      if (!tableWrapper) return;
+      const saved = localStorage.getItem(SCROLL_POSITION_KEY);
+      if (saved) {
+        try {
+          const scrollPos = JSON.parse(saved);
+          setTimeout(() => {
+            tableWrapper.scrollTop = scrollPos.scrollTop || 0;
+            tableWrapper.scrollLeft = scrollPos.scrollLeft || 0;
+          }, 100);
+        } catch(e) {}
+      }
     }
     
     function getMasterPassword() {
@@ -646,9 +668,9 @@
     
     function escapeHtml(str) { 
       return str.replace(/[&<>]/g, function(m){ 
-        if(m === '&') return '&amp;'; 
-        if(m === '<') return '&lt;'; 
-        if(m === '>') return '&gt;'; 
+        if(m === '&') return '&'; 
+        if(m === '<') return '<'; 
+        if(m === '>') return '>'; 
         return m;
       }); 
     }
@@ -850,6 +872,9 @@
           }
         });
       }
+      
+      // Restore scroll position after render
+      restoreScrollPosition();
     }
     
     function clearAllSelection() {
@@ -970,6 +995,15 @@
     
     function init() {
       sheetBody = document.getElementById('sheetBody');
+      tableWrapper = document.querySelector('.table-wrapper');
+      
+      // Save scroll position when user scrolls
+      if (tableWrapper) {
+        tableWrapper.addEventListener('scroll', () => {
+          saveScrollPosition();
+        });
+      }
+      
       loadDataFromStorage();
       loadTGUsername();
       fullRender();
@@ -977,6 +1011,7 @@
       bindColumnSelection();
       bindButtons();
     }
+    
     init();
   })();
 </script>
