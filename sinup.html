@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>EBH TEAM | ইউজার রেজিস্ট্রেশন প্যানেল</title>
+    <title>EBH TEAM | ইউজার রেজিস্ট্রেশন</title>
     <style>
         * {
             margin: 0;
@@ -14,60 +14,81 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Bengali', sans-serif;
-            background: linear-gradient(135deg, #0a0f1e 0%, #0c1122 50%, #0f1428 100%);
+            background: linear-gradient(145deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+        }
+
+        /* ব্যাকগ্রাউন্ড এফেক্ট */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="15" cy="15" r="2" fill="rgba(255,255,255,0.08)"/><circle cx="85" cy="25" r="3" fill="rgba(255,255,255,0.06)"/><circle cx="45" cy="80" r="2.5" fill="rgba(255,255,255,0.08)"/></svg>');
+            background-size: 50px;
+            pointer-events: none;
         }
 
         .reg-container {
             max-width: 500px;
             width: 100%;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
-        /* হেডার কার্ড */
+        /* হেডার কার্ড - গ্লাসমরফিজম */
         .header-card {
-            background: linear-gradient(145deg, rgba(26, 31, 46, 0.95), rgba(18, 22, 38, 0.98));
-            backdrop-filter: blur(12px);
-            border-radius: 48px;
-            padding: 28px 22px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+            border-radius: 60px;
+            padding: 28px 25px;
             text-align: center;
-            margin-bottom: 22px;
-            border: 1px solid rgba(255,215,0,0.35);
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
 
         .logo {
-            font-size: 44px;
+            font-size: 46px;
             font-weight: 900;
-            background: linear-gradient(135deg, #ffd700, #ffaa33);
+            background: linear-gradient(135deg, #fff, #ffd89b);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            letter-spacing: 3px;
         }
 
         .subtitle {
-            color: #ffd700;
+            color: rgba(255,255,255,0.9);
             font-size: 13px;
             margin-top: 10px;
+            font-weight: 600;
         }
 
         /* রেজিস্ট্রেশন কার্ড */
         .reg-card {
-            background: rgba(22, 27, 42, 0.92);
-            backdrop-filter: blur(12px);
-            border-radius: 38px;
-            padding: 28px 24px;
-            border: 1px solid rgba(255,215,0,0.25);
-            box-shadow: 0 25px 45px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 50px;
+            padding: 35px 28px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.5);
         }
 
         .reg-title {
-            color: #ffd700;
-            font-size: 22px;
-            font-weight: 800;
+            background: linear-gradient(135deg, #203a43, #2c5364);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 24px;
+            font-weight: 900;
             text-align: center;
             margin-bottom: 28px;
             display: flex;
@@ -77,78 +98,124 @@
         }
 
         .reg-title i {
-            font-size: 28px;
+            font-size: 30px;
+            background: linear-gradient(135deg, #203a43, #2c5364);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .input-group {
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
 
         .input-label {
             display: block;
-            color: #e0e0e0;
+            color: #2d3748;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 10px;
         }
 
         .input-label i {
-            color: #ffd700;
-            margin-right: 8px;
+            color: #2c5364;
+            margin-right: 10px;
+            font-size: 14px;
         }
 
         .input-field {
             width: 100%;
             padding: 16px 20px;
-            background: #0f1322;
-            border: 1.5px solid rgba(255,215,0,0.25);
-            border-radius: 32px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 40px;
             font-size: 15px;
-            color: #fff;
-            transition: all 0.2s;
+            color: #2d3748;
+            transition: all 0.3s;
         }
 
         .input-field:focus {
             outline: none;
-            border-color: #ffd700;
-            box-shadow: 0 0 0 3px rgba(255,215,0,0.1);
+            border-color: #2c5364;
+            box-shadow: 0 0 0 4px rgba(44, 83, 100, 0.15);
         }
 
         .input-field::placeholder {
-            color: #5a6380;
+            color: #a0aec0;
         }
 
         .helper-text {
             font-size: 11px;
-            color: #ffd700;
-            margin-top: 6px;
-            margin-left: 12px;
-            opacity: 0.7;
+            color: #718096;
+            margin-top: 8px;
+            margin-left: 18px;
+        }
+
+        .helper-text a {
+            color: #2c5364;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        /* চ্যাট আইডি বের করার বাটন */
+        .chatid-help {
+            background: rgba(44, 83, 100, 0.08);
+            border-radius: 35px;
+            padding: 12px 18px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            text-align: center;
+            border: 1px dashed #2c5364;
+        }
+
+        .chatid-help p {
+            font-size: 12px;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .get-id-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #203a43, #2c5364);
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(44,83,100,0.3);
+        }
+
+        .get-id-btn:active {
+            transform: scale(0.96);
         }
 
         /* রেজিস্ট্রেশন বাটন */
         .register-btn {
             width: 100%;
             padding: 18px;
-            background: linear-gradient(145deg, #ffd700, #ffaa33);
+            background: linear-gradient(135deg, #203a43, #2c5364);
             border: none;
-            border-radius: 48px;
+            border-radius: 50px;
             font-size: 18px;
             font-weight: 800;
-            color: #1a1e2b;
+            color: white;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            box-shadow: 0 8px 0 #b27d00;
-            transition: 0.1s ease;
-            margin-top: 10px;
+            transition: all 0.3s;
+            margin-top: 20px;
+            box-shadow: 0 8px 20px rgba(44,83,100,0.4);
         }
 
         .register-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #b27d00;
+            transform: scale(0.97);
+            box-shadow: 0 4px 12px rgba(44,83,100,0.3);
         }
 
         .register-btn:disabled {
@@ -157,109 +224,39 @@
             cursor: not-allowed;
         }
 
-        /* স্ট্যাটাস বার */
+        /* স্ট্যাটাস বার (সার্ভার স্ট্যাটাস) */
         .status-bar {
-            background: rgba(0,0,0,0.4);
-            border-radius: 60px;
-            padding: 12px 18px;
-            margin-top: 24px;
+            background: rgba(44, 83, 100, 0.1);
+            border-radius: 50px;
+            padding: 12px 20px;
+            margin-top: 25px;
             text-align: center;
             font-size: 13px;
-            color: #ffd700;
+            font-weight: 600;
+            color: #2c5364;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            flex-wrap: wrap;
+            border: 1px solid rgba(44,83,100,0.2);
         }
 
         .status-dot {
             width: 10px;
             height: 10px;
-            background: #4CAF50;
+            background: #48bb78;
             border-radius: 50%;
             animation: pulse 1.5s infinite;
+        }
+
+        .status-dot.offline {
+            background: #f56565;
+            animation: none;
         }
 
         @keyframes pulse {
             0% { opacity: 0.4; transform: scale(0.8); }
             100% { opacity: 1; transform: scale(1.2); }
-        }
-
-        /* ইউজার লিস্ট সেকশন */
-        .user-list-section {
-            margin-top: 24px;
-            background: rgba(0,0,0,0.25);
-            border-radius: 28px;
-            padding: 16px;
-        }
-
-        .user-list-title {
-            color: #ffd700;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-list-container {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .user-item {
-            background: rgba(255,215,0,0.08);
-            border-radius: 20px;
-            padding: 10px 14px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            border-left: 3px solid #ffd700;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .user-username {
-            font-weight: bold;
-            color: #ffd700;
-            font-size: 13px;
-        }
-
-        .user-chatid {
-            font-size: 11px;
-            color: #aaa;
-            font-family: monospace;
-        }
-
-        .delete-user-btn {
-            background: rgba(255,100,100,0.2);
-            border: none;
-            padding: 6px 14px;
-            border-radius: 30px;
-            color: #ff8888;
-            font-size: 11px;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-
-        .delete-user-btn:active {
-            transform: scale(0.95);
-        }
-
-        .empty-list {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-            font-size: 13px;
         }
 
         /* টোস্ট মেসেজ */
@@ -268,7 +265,7 @@
             bottom: 30px;
             left: 20px;
             right: 20px;
-            background: #1e2338;
+            background: #1e293b;
             color: white;
             padding: 14px 20px;
             border-radius: 50px;
@@ -280,32 +277,21 @@
             max-width: 450px;
             margin: 0 auto;
             font-size: 14px;
+            font-weight: 500;
         }
 
         .toast.show {
             transform: translateY(0);
         }
 
-        .toast.success { border-left-color: #4CAF50; background: #1e2338; }
-        .toast.error { border-left-color: #f44336; background: #1e2338; }
-        .toast.warning { border-left-color: #ffd700; background: #1e2338; }
-
-        /* রিফ্রেশ বাটন */
-        .refresh-btn {
-            background: rgba(255,215,0,0.15);
-            border: 1px solid rgba(255,215,0,0.3);
-            border-radius: 30px;
-            padding: 4px 12px;
-            font-size: 11px;
-            cursor: pointer;
-            color: #ffd700;
-            margin-left: 8px;
-        }
+        .toast.success { border-left-color: #48bb78; background: #1e293b; }
+        .toast.error { border-left-color: #f56565; background: #1e293b; }
+        .toast.warning { border-left-color: #f59e0b; background: #1e293b; }
 
         footer {
             text-align: center;
             margin-top: 20px;
-            color: #666;
+            color: rgba(255,255,255,0.6);
             font-size: 11px;
         }
     </style>
@@ -317,7 +303,7 @@
     <div class="reg-container">
         <div class="header-card">
             <div class="logo">EBH TEAM</div>
-            <div class="subtitle">✦ ইউজার রেজিস্ট্রেশন প্যানেল ✦</div>
+            <div class="subtitle">✦ অ্যাডমিন রেজিস্ট্রেশন প্যানেল ✦</div>
         </div>
 
         <div class="reg-card">
@@ -338,23 +324,22 @@
                 <div class="helper-text">ইউজারের চ্যাট আইডি নম্বর দিন</div>
             </div>
 
+            <!-- চ্যাট আইডি বের করার হেল্পার -->
+            <div class="chatid-help">
+                <p><i class="fas fa-question-circle"></i> আপনার চ্যাট আইডি জানেন না?</p>
+                <a href="https://t.me/userinfobot" target="_blank" class="get-id-btn">
+                    <i class="fab fa-telegram"></i> @userinfobot -এ ক্লিক করুন
+                </a>
+                <p style="font-size: 10px; margin-top: 8px;">বটে /start দিন, আপনার চ্যাট আইডি দেখাবে</p>
+            </div>
+
             <button class="register-btn" id="registerBtn" onclick="registerUser()">
                 <i class="fas fa-check-circle"></i> রেজিস্ট্রেশন করুন
             </button>
 
-            <div class="status-bar">
-                <div class="status-dot"></div>
-                <span id="connectionStatus">সংযোগ স্থাপিত হচ্ছে...</span>
-            </div>
-        </div>
-
-        <div class="user-list-section">
-            <div class="user-list-title">
-                <i class="fas fa-users"></i> রেজিস্টার্ড ইউজার লিস্ট
-                <button class="refresh-btn" onclick="loadUserList()"><i class="fas fa-sync-alt"></i> রিফ্রেশ</button>
-            </div>
-            <div id="userListContainer" class="user-list-container">
-                <div class="empty-list"><i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...</div>
+            <div class="status-bar" id="statusBar">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="connectionStatus">সার্ভারের সাথে সংযোগ হচ্ছে...</span>
             </div>
         </div>
 
@@ -380,24 +365,57 @@
         let firebaseDb = null;
         let isConnected = false;
 
-        // Firebase ইনিশিয়ালাইজ
-        try {
-            firebase.initializeApp(firebaseConfig);
-            firebaseDb = firebase.database();
-            isConnected = true;
-            console.log("✅ Firebase connected");
-            document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-check-circle"></i> সংযুক্ত (Online)';
-            loadUserList();
-        } catch(e) {
-            console.error("Firebase error:", e);
-            document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-exclamation-triangle"></i> সংযোগ সমস্যা';
-            showToast("❌ Firebase সংযোগ ব্যর্থ", "error");
+        // ========== সার্ভার কানেকশন ফাংশন (পেজ লোড হওয়ার সাথে সাথে) ==========
+        async function connectToServer() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('connectionStatus');
+            
+            statusText.innerHTML = 'সার্ভারের সাথে সংযোগ হচ্ছে...';
+            statusDot.className = 'status-dot';
+            
+            try {
+                // Firebase ইতিমধ্যে initialized কিনা চেক
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                firebaseDb = firebase.database();
+                
+                // সার্ভার কানেকশন টেস্ট (একটি ছোট রেফারেন্স চেক)
+                const testRef = firebaseDb.ref('.info/connected');
+                testRef.on('value', (snapshot) => {
+                    if (snapshot.val() === true) {
+                        isConnected = true;
+                        statusDot.className = 'status-dot';
+                        statusDot.style.background = '#48bb78';
+                        statusText.innerHTML = '✅ সার্ভারের সাথে সংযুক্ত (সার্ভারে ডাটা সেভ করা আছে)';
+                        console.log("✅ Server connected");
+                        
+                        // সংযোগ成功后 লিস্ট লোড
+                        loadUserList();
+                    } else {
+                        isConnected = false;
+                        statusDot.className = 'status-dot offline';
+                        statusDot.style.background = '#f56565';
+                        statusText.innerHTML = '⚠️ সার্ভারের সাথে সংযোগ নেই';
+                    }
+                });
+                
+            } catch(e) {
+                console.error("Server connection error:", e);
+                statusDot.className = 'status-dot offline';
+                statusDot.style.background = '#f56565';
+                statusText.innerHTML = '❌ সার্ভার সংযোগ ব্যর্থ';
+                showToast("❌ সার্ভার সংযোগ ব্যর্থ, ইন্টারনেট চেক করুন", "error");
+            }
         }
+
+        // পেজ লোড হওয়ার সাথে সাথে কানেকশন শুরু
+        connectToServer();
 
         // ========== ইউজার রেজিস্ট্রেশন ফাংশন ==========
         window.registerUser = async function() {
-            if (!firebaseDb) {
-                showToast("❌ Firebase সংযোগ নেই", "error");
+            if (!firebaseDb || !isConnected) {
+                showToast("❌ সার্ভারের সাথে সংযোগ নেই", "error");
                 return;
             }
 
@@ -428,8 +446,21 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> রেজিস্ট্রেশন হচ্ছে...';
 
             try {
-                // চেক করা আগে থেকে আছে কিনা
+                // চেক করা আগে থেকে আছে কিনা (ডুপ্লিকেট চেক)
                 const checkSnapshot = await firebaseDb.ref(`telegramUsers/${cleanUsername}`).once('value');
+                const chatIdSnapshot = await firebaseDb.ref('telegramUsers').orderByChild('chatId').equalTo(parseInt(chatId)).once('value');
+                
+                let duplicateChatIdUser = null;
+                chatIdSnapshot.forEach((snap) => {
+                    duplicateChatIdUser = snap.val().username;
+                });
+                
+                if (duplicateChatIdUser && duplicateChatIdUser !== username) {
+                    showToast(`⚠️ এই চ্যাট আইডি ইতিমধ্যে "${duplicateChatIdUser}" ইউজারের জন্য রেজিস্টার্ড আছে!`, "warning");
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> রেজিস্ট্রেশন করুন';
+                    return;
+                }
                 
                 if (checkSnapshot.exists()) {
                     // আপডেট করুন
@@ -438,7 +469,7 @@
                         username: username,
                         updatedAt: Date.now()
                     });
-                    showToast(`✅ ${username} আপডেট করা হয়েছে`, "success");
+                    showToast(`✅ ${username} আপডেট করা হয়েছে (সার্ভারে সেভ হয়েছে)`, "success");
                 } else {
                     // নতুন রেজিস্ট্রেশন
                     await firebaseDb.ref(`telegramUsers/${cleanUsername}`).set({
@@ -448,15 +479,16 @@
                         registeredAt: Date.now(),
                         lastActive: Date.now()
                     });
-                    showToast(`✅ ${username} সফলভাবে রেজিস্টার হয়েছে!`, "success");
+                    showToast(`✅ ${username} সফলভাবে রেজিস্টার হয়েছে! (সার্ভারে সংরক্ষিত)`, "success");
                 }
 
                 // ফিল্ড ক্লিয়ার
                 document.getElementById('regUsername').value = '';
                 document.getElementById('regChatId').value = '';
                 
-                // লিস্ট রিফ্রেশ
-                loadUserList();
+                // লিস্ট রিফ্রেশ (শুধুমাত্র অ্যাডমিনের জন্য, ইউজার দেখবে না)
+                // আমরা শুধু কনসোল এ লগ রাখছি, UI তে কিছু দেখাবো না
+                console.log("User registered successfully");
 
             } catch(e) {
                 console.error("Register error:", e);
@@ -467,80 +499,22 @@
             }
         };
 
-        // ========== ইউজার লিস্ট লোড করা ==========
-        window.loadUserList = async function() {
-            if (!firebaseDb) {
-                document.getElementById('userListContainer').innerHTML = '<div class="empty-list">❌ ডাটাবেজ সংযোগ নেই</div>';
-                return;
-            }
-
+        // ========== ইউজার লিস্ট লোড (শুধু কনসোলের জন্য, UI তে দেখাবে না) ==========
+        async function loadUserList() {
+            if (!firebaseDb || !isConnected) return;
+            
             try {
                 const snapshot = await firebaseDb.ref('telegramUsers').once('value');
-                const container = document.getElementById('userListContainer');
-                
-                if (!snapshot.exists()) {
-                    container.innerHTML = '<div class="empty-list"><i class="fas fa-user-slash"></i> কোন ইউজার রেজিস্টার হয়নি</div>';
-                    return;
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    const count = Object.keys(users).length;
+                    // শুধু স্ট্যাটাস বারে মোট কাউন্ট দেখাবেন না (সার্ভার স্ট্যাটাস শুধু দেখাবেন)
+                    console.log(`📊 Total registered users: ${count}`);
                 }
-
-                const users = snapshot.val();
-                let html = '';
-                
-                // ইউজারদের সাজানো (নতুন থেকে পুরাতন)
-                const sortedUsers = Object.entries(users).sort((a, b) => {
-                    const timeA = a[1].registeredAt || 0;
-                    const timeB = b[1].registeredAt || 0;
-                    return timeB - timeA;
-                });
-
-                for (const [key, user] of sortedUsers) {
-                    const username = user.username || key;
-                    const chatId = user.chatId || 'N/A';
-                    const registeredDate = user.registeredAt ? new Date(user.registeredAt).toLocaleString('bn-BD') : 'অজানা';
-                    
-                    html += `
-                        <div class="user-item" data-key="${key}">
-                            <div class="user-info">
-                                <span class="user-username"><i class="fab fa-telegram"></i> ${escapeHtml(username)}</span>
-                                <span class="user-chatid"><i class="fas fa-id-card"></i> Chat ID: ${chatId}</span>
-                                <span style="font-size: 9px; color: #666;"><i class="far fa-clock"></i> ${registeredDate}</span>
-                            </div>
-                            <button class="delete-user-btn" onclick="deleteUser('${key}')">
-                                <i class="fas fa-trash-alt"></i> ডিলিট
-                            </button>
-                        </div>
-                    `;
-                }
-                
-                container.innerHTML = html;
-                
-                // কাউন্ট শো করার জন্য স্ট্যাটাস আপডেট
-                const count = Object.keys(users).length;
-                document.getElementById('connectionStatus').innerHTML = `<i class="fas fa-users"></i> ${count} জন ইউজার রেজিস্টার্ড`;
-                
             } catch(e) {
-                console.error("Load users error:", e);
-                document.getElementById('userListContainer').innerHTML = '<div class="empty-list">❌ লোড করতে সমস্যা</div>';
+                console.error("Load error:", e);
             }
-        };
-
-        // ========== ইউজার ডিলিট ফাংশন ==========
-        window.deleteUser = async function(usernameKey) {
-            if (!confirm(`⚠️ "${usernameKey}" ইউজারটি ডিলিট করবেন?\nএটি স্থায়ীভাবে মুছে যাবে!`)) {
-                return;
-            }
-            
-            if (!firebaseDb) return;
-            
-            try {
-                await firebaseDb.ref(`telegramUsers/${usernameKey}`).remove();
-                showToast(`✅ ${usernameKey} ডিলিট করা হয়েছে`, "success");
-                loadUserList();
-            } catch(e) {
-                console.error("Delete error:", e);
-                showToast("❌ ডিলিট ব্যর্থ", "error");
-            }
-        };
+        }
 
         // ========== হেল্পার ফাংশন ==========
         function escapeHtml(str) {
@@ -575,13 +549,6 @@
                 document.getElementById('regChatId').focus();
             }
         });
-
-        // প্রতি 30 সেকেন্ড পর পর লিস্ট রিফ্রেশ
-        setInterval(() => {
-            if (document.getElementById('userListContainer').innerHTML !== '<div class="empty-list"><i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...</div>') {
-                loadUserList();
-            }
-        }, 30000);
     </script>
 </body>
 </html>
