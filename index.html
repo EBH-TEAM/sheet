@@ -3,1110 +3,521 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>EBH Sheets - Telegram Confirm</title>
+  <title>EBH Sheets - Final</title>
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: #eef2f7;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      width: 100%;
-      background: white;
-    }
-
-    .header {
-      background: linear-gradient(135deg, #0b2b44 0%, #1e5a88 100%);
-      padding: 10px 16px;
-      flex-shrink: 0;
-    }
-    .logo-area {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .logo-wrapper {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .logo {
-      font-size: 26px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #FFD700, #FFA500);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: 1px;
-    }
-    .logo-sub {
-      font-size: 12px;
-      font-weight: 400;
-      color: #FFE4B5;
-      font-style: italic;
-    }
-    .undo-redo-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      background: rgba(255,255,255,0.15);
-      padding: 4px 10px;
-      border-radius: 40px;
-    }
-    .icon-btn {
-      background: transparent;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      touch-action: manipulation;
-      padding: 4px 6px;
-      border-radius: 30px;
-      transition: 0.2s;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .icon-btn:active {
-      transform: scale(0.9);
-      background: rgba(255,255,255,0.2);
-    }
-    .row-badge {
-      background: rgba(255,255,255,0.2);
-      padding: 4px 12px;
-      border-radius: 30px;
-      font-size: 12px;
-      color: white;
-      white-space: nowrap;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .btn {
-      flex: 1;
-      min-width: 70px;
-      border: none;
-      padding: 8px 10px;
-      border-radius: 40px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: 0.2s;
-      text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
-    .btn:active {
-      transform: scale(0.96);
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #eef2f7; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    .app-container { display: flex; flex-direction: column; height: 100%; width: 100%; background: white; }
+    
+    /* হেডার - কোন গ্যাপ ছাড়া */
+    .header { background: linear-gradient(135deg, #0b2b44 0%, #1e5a88 100%); padding: 6px 12px; flex-shrink: 0; }
+    .logo-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px; }
+    .logo-wrapper { display: flex; align-items: baseline; gap: 6px; }
+    .logo { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .logo-sub { font-size: 9px; color: #FFE4B5; }
+    .undo-redo-group { display: flex; gap: 8px; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 30px; }
+    .icon-btn { background: transparent; border: none; font-size: 16px; cursor: pointer; color: white; padding: 4px 8px; border-radius: 25px; min-width: 36px; }
+    .icon-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
+    .row-badge { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 20px; font-size: 10px; color: white; }
+    
+    /* বাটন গ্রুপ - নীল ব্যাকগ্রাউন্ড */
+    .button-group { background: #1e5a88; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 6px 12px; margin: 0; }
+    .btn { flex: 1; min-width: 55px; border: none; padding: 5px 6px; border-radius: 30px; font-size: 10px; font-weight: 600; cursor: pointer; text-align: center; background: white; color: #1e5a88; }
     .btn-select { background: #137333; color: white; }
     .btn-copy { background: #1a73e8; color: white; }
     .btn-delete { background: #dc2626; color: white; }
     .btn-clear { background: #ea580c; color: white; }
-
-    .telegram-section {
-      background: #f1f5f9;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      border-bottom: 1px solid #cbd5e1;
-      flex-shrink: 0;
-    }
-    .tg-input-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: white;
-      padding: 4px 12px;
-      border-radius: 40px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      flex: 2;
-      min-width: 180px;
-    }
-    .tg-input-group label {
-      font-weight: 600;
-      font-size: 13px;
-      color: #1e293b;
-    }
-    .tg-input-group input {
-      border: none;
-      padding: 8px 0;
-      font-size: 13px;
-      flex: 1;
-      outline: none;
-      background: transparent;
-    }
-    .submit-telegram {
-      background: linear-gradient(95deg, #0088cc, #2aabee);
-      border: none;
-      padding: 8px 20px;
-      border-radius: 40px;
-      color: white;
-      font-weight: bold;
-      font-size: 13px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: 0.2s;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .submit-telegram:active {
-      transform: scale(0.96);
-    }
-
-    .table-wrapper {
-      flex: 1;
-      overflow-x: auto;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      background: white;
-    }
-    table {
-      border-collapse: collapse;
-      table-layout: fixed;
-      min-width: max-content;
-    }
-    th, td {
-      border: 1px solid #dce5ef;
-      padding: 0;
-      background-color: white;
-      width: 100px;
-      min-width: 100px;
-      max-width: 100px;
-      height: 35px;
-      min-height: 35px;
-      max-height: 35px;
-    }
-    td .cell-content {
-      width: 100%;
-      height: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-      padding: 4px 6px;
-      font-size: 12px;
-      line-height: 1.3;
-      white-space: nowrap;
-      outline: none;
-      cursor: text;
-    }
-    td .cell-content::-webkit-scrollbar {
-      height: 3px;
-    }
-    td .cell-content::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 2px;
-    }
-    td .cell-content::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 2px;
-    }
-    th:first-child, td:first-child {
-      background-color: #f2f4f8;
-      text-align: center;
-      font-weight: 500;
-      color: #2c3e66;
-      width: 55px !important;
-      min-width: 35px !important;
-      max-width: 35px !important;
-      position: sticky;
-      left: 0;
-      z-index: 2;
-    }
-    td:first-child {
-      background-color: #fafbfd;
-      cursor: default;
-      position: sticky;
-      left: 0;
-      z-index: 1;
-    }
-    td:first-child .cell-content {
-      text-align: center;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    th {
-      background-color: #f7f9fd;
-      font-weight: 600;
-      padding: 6px 4px;
-      font-size: 12px;
-      text-align: center;
-    }
-    .resize-handle {
-      position: absolute;
-      top: 0;
-      right: -6px;
-      width: 12px;
-      height: 100%;
-      cursor: col-resize;
-      background: transparent;
-      z-index: 10;
-      touch-action: none;
-    }
-    td.selected {
-      background-color: #cce5ff !important;
-      outline: 1px solid #1366d0;
-    }
-    td.selected .cell-content {
-      background-color: #cce5ff;
-    }
-    td.duplicate-error {
-      background-color: #ffdddd !important;
-    }
-    td.duplicate-error .cell-content {
-      background-color: #ffdddd;
-      color: #aa2e2e;
-    }
-    .toast-msg {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1e2f3f;
-      color: white;
-      padding: 6px 16px;
-      border-radius: 40px;
-      font-size: 13px;
-      z-index: 2000;
-      opacity: 0;
-      transition: 0.2s;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-
-    .confirm-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      backdrop-filter: blur(3px);
-    }
-    .confirm-modal {
-      background: white;
-      border-radius: 24px;
-      max-width: 340px;
-      width: 85%;
-      padding: 24px 20px 20px;
-      text-align: center;
-    }
-    .confirm-modal p {
-      font-size: 18px;
-      margin-bottom: 24px;
-      color: #1e293b;
-    }
-    .confirm-buttons {
-      display: flex;
-      gap: 12px;
-    }
-    .confirm-btn {
-      flex: 1;
-      padding: 10px;
-      border-radius: 50px;
-      border: none;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .confirm-ok { background: #1e5a88; color: white; }
-    .confirm-cancel { background: #e2e8f0; color: #334155; }
-    .confirm-ok:active, .confirm-cancel:active { transform: scale(0.97); }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10001;
-      backdrop-filter: blur(3px);
-    }
-    .modal-content {
-      background: white;
-      border-radius: 24px;
-      max-width: 400px;
-      width: 90%;
-      padding: 24px 20px 20px;
-      text-align: center;
-    }
-    .modal-icon { font-size: 56px; margin-bottom: 12px; }
-    .modal-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; color: #0b2b44; }
-    .modal-details { background: #f1f5f9; padding: 14px; border-radius: 20px; text-align: left; font-size: 14px; margin: 16px 0; }
-    .modal-details p { margin: 6px 0; display: flex; justify-content: space-between; }
-    .modal-note { background: #fff3e0; padding: 10px; border-radius: 14px; font-size: 12px; color: #b45309; margin: 12px 0; }
-    .close-modal-btn { background: #1e5a88; border: none; color: white; font-weight: bold; padding: 12px 20px; border-radius: 50px; width: 100%; font-size: 16px; cursor: pointer; margin-top: 8px; }
+    
+    /* দুইটা ছোট বক্স এক লাইনে - গ্যাপ ছাড়া */
+    .telegram-section { background: #f1f5f9; padding: 8px 12px; margin: 0; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: nowrap; border-bottom: none; flex-shrink: 0; }
+    .tg-input-group { display: flex; align-items: center; gap: 5px; background: white; padding: 4px 10px; border-radius: 30px; width: auto; min-width: 140px; max-width: 180px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .tg-input-group label { font-weight: 600; font-size: 10px; color: #1e293b; white-space: nowrap; }
+    .tg-input-group input { border: none; padding: 5px 0; font-size: 11px; width: 100px; outline: none; background: transparent; }
+    
+    /* সেভ বাটন - নিচে বড় করে */
+    .save-btn-container { display: flex; justify-content: center; margin: 6px 12px; flex-shrink: 0; }
+    .save-user-btn { background: linear-gradient(135deg, #137333, #0d5a28); border: none; padding: 7px 18px; border-radius: 40px; color: white; font-weight: bold; font-size: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.15); width: auto; min-width: 180px; display: none; }
+    .save-user-btn.show { display: block; }
+    .save-user-btn:active { transform: scale(0.97); }
+    
+    /* ওয়ার্নিং */
+    .warning-container { background: #fff9f0; border-left: 4px solid #f59e0b; margin: 0 10px 6px 10px; padding: 8px; border-radius: 10px; display: none; flex-shrink: 0; }
+    .warning-container.show { display: block; }
+    .warning-title { color: #d97706; font-size: 12px; font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+    .warning-title span { font-size: 16px; }
+    .warning-text { color: #78350f; font-size: 10px; line-height: 1.3; margin-bottom: 6px; }
+    .warning-step { background: #fffbeb; padding: 5px; border-radius: 6px; margin: 5px 0; font-size: 9px; }
+    .warning-step strong { color: #b45309; }
+    .warning-note { background: #fef3c7; padding: 5px; border-radius: 6px; font-size: 9px; color: #92400e; margin-top: 5px; }
+    .warning-highlight { background: #e6f7e6; padding: 4px 6px; border-radius: 6px; font-size: 9px; color: #2e7d32; margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+    
+    /* টেবিল - সরাসরি সংযুক্ত, কোন গ্যাপ নেই */
+    .table-wrapper { flex: 1; overflow-x: auto; overflow-y: auto; background: white; margin: 0; }
+    table { border-collapse: collapse; table-layout: fixed; min-width: max-content; }
+    th, td { border: 1px solid #e2e8f0; padding: 0; background-color: white; width: 90px; min-width: 90px; max-width: 90px; height: 28px; }
+    td .cell-content { width: 100%; height: 100%; overflow-x: auto; padding: 3px 5px; font-size: 10px; white-space: nowrap; outline: none; cursor: text; }
+    td .cell-content::-webkit-scrollbar { height: 3px; }
+    th:first-child, td:first-child { background-color: #f2f4f8; text-align: center; width: 40px !important; min-width: 40px !important; max-width: 40px !important; position: sticky; left: 0; z-index: 2; }
+    td:first-child .cell-content { text-align: center; overflow: hidden; }
+    th { background-color: #f7f9fd; font-weight: 600; padding: 4px 3px; font-size: 10px; text-align: center; }
+    td.selected { background-color: #cce5ff !important; outline: 1px solid #1366d0; }
+    td.duplicate-error { background-color: #ffdddd !important; }
+    td .cell-content.disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+    .toast-msg { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); background: #1e2f3f; color: white; padding: 5px 14px; border-radius: 30px; font-size: 11px; z-index: 2000; opacity: 0; transition: 0.2s; pointer-events: none; }
+    
+    .system-off-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 10001; backdrop-filter: blur(4px); }
+    .system-off-card { background: white; border-radius: 24px; max-width: 280px; width: 85%; padding: 18px; text-align: center; }
+    .system-off-card .icon { font-size: 38px; margin-bottom: 8px; }
+    .system-off-card h3 { color: #dc2626; margin-bottom: 6px; font-size: 17px; }
+    .system-off-card .reason { background: #fef2f2; padding: 8px; border-radius: 12px; color: #b91c1c; font-size: 11px; margin: 8px 0; }
   </style>
-  <!-- Firebase SDK - আপনার পেমেন্ট সিস্টেমের আসল Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="app-container">
   <div class="header">
     <div class="logo-area">
-      <div class="logo-wrapper">
-        <span class="logo">EBH</span>
-        <span class="logo-sub">Smart Sheet ✔</span>
-        <div class="undo-redo-group">
-          <button id="undoBtn" class="icon-btn">↩️</button>
-          <button id="redoBtn" class="icon-btn">🔁</button>
-        </div>
-      </div>
-      <div class="row-badge">১০০০ সারি</div>
+      <div class="logo-wrapper"><span class="logo">EBH</span><span class="logo-sub">Smart Sheet </span><div class="undo-redo-group"><button id="undoBtn" class="icon-btn">↩️</button><button id="redoBtn" class="icon-btn">🔁</button></div></div>
+      <div class="row-badge">২০০ সারি</div>
     </div>
     <div class="button-group">
-      <button id="selectAllColsBtn" class="btn btn-select">📌 সব কলাম</button>
-      <button id="copyBtn" class="btn btn-copy">📋 কপি</button>
+      <button id="selectAllColsBtn" class="btn btn-select">📌 সব সেলেক্ট</button>
+      <button id="copyBtn" class="btn btn-copy">📋 কপি করুন</button>
       <button id="deleteBtn" class="btn btn-delete">🗑️ ডিলিট</button>
       <button id="clearSelectionBtn" class="btn btn-clear">✖️ ক্লিয়ার</button>
     </div>
   </div>
 
+  <!-- দুইটা ছোট বক্স এক লাইনে -->
   <div class="telegram-section">
-    <div class="tg-input-group">
-      <label>টেলিগ্রাম ইউজারনেম:</label>
-      <input type="text" id="tgUsername" placeholder="যেমন @username" autocomplete="off">
-    </div>
-    <button id="submitToTelegram" class="submit-telegram">📤 সাবমিট করুন</button>
+    <div class="tg-input-group"><label>👤 ইউজারনেম:</label><input type="text" id="tgUsername" placeholder="@username" autocomplete="off"></div>
+    <div class="tg-input-group"><label>🆔 চ্যাট আইডি:</label><input type="text" id="tgChatId" placeholder="123456789" autocomplete="off" inputmode="numeric" pattern="[0-9]*"></div>
   </div>
 
-  <div class="table-wrapper">
+  <div class="save-btn-container">
+    <button id="saveUserBtn" class="save-user-btn">✅ টেলিগ্রাম তথ্য সংরক্ষণ করুন</button>
+  </div>
+
+  <div id="warningContainer" class="warning-container">
+    <div class="warning-title">
+      <span>⚠️</span> আপনার টেলিগ্রাম তথ্য সেট করা নেই!
+    </div>
+    <div class="warning-text">
+      <strong>আপনি এখানে কোনো ডাটা রাখতে পারবেন না যতক্ষণ না আপনার টেলিগ্রাম তথ্য সঠিকভাবে সেট না করছেন।</strong> নিচের ধাপগুলো অনুসরণ করুন:
+    </div>
+    
+    <div class="warning-step">
+      <strong>📌 ধাপ ১:</strong> উপরের <strong style="color:#b45309;">"👤 ইউজারনেম"</strong> বক্সে আপনার টেলিগ্রাম ইউজারনেম লিখুন<br>
+      <span style="font-size:9px; color:#78350f;">উদাহরণ: @yourusername</span>
+    </div>
+    
+    <div class="warning-step">
+      <strong>📌 ধাপ ২:</strong> <strong style="color:#b45309;">"🆔 চ্যাট আইডি"</strong> বক্সে আপনার চ্যাট আইডি লিখুন<br>
+      <span style="font-size:9px; color:#78350f;">শুধুমাত্র সংখ্যা, উদাহরণ: 123456789</span>
+    </div>
+    
+    <div class="warning-step">
+      <strong>📌 ধাপ ৩:</strong> সবশেষে নিচের <strong style="color:#b45309;">"✅ টেলিগ্রাম তথ্য সংরক্ষণ করুন"</strong> বাটনে ক্লিক করুন
+    </div>
+    
+    <div class="warning-note">
+      <strong>❓ চ্যাট আইডি কীভাবে পাবেন?</strong><br>
+      ১. টেলিগ্রাম অ্যাপ খুলুন 🔍<br>
+      ২. সার্চ বক্সে <strong>@userinfobot</strong> লিখুন<br>
+      ৩. বটটি খুঁজে পেয়ে <strong>📤 Start</strong> বাটনে ক্লিক করুন<br>
+      ৪. বটটি আপনার চ্যাট আইডি দেখাবে (যেমন: 123456789)<br>
+      ৫. এই নম্বরটি কপি করে উপরের বক্সে পেস্ট করুন
+    </div>
+    
+    <div class="warning-note" style="background:#fef3c7; color:#92400e;">
+      <strong>⚠️ গুরুত্বপূর্ণ:</strong> একবার সঠিক তথ্য সেট করলেই পরবর্তীতে আর দিতে হবে না। সঠিক তথ্য ছাড়া শীটে কিছু লেখা যাবে না এবং আপনার ফাইল কখনো সাবমিট হবে না।
+    </div>
+    
+    <div class="warning-highlight">
+      <span>✅</span> <strong>সঠিক তথ্য দিলেই শীট আনলক হবে এবং আপনি ডাটা রাখতে পারবেন!</strong>
+    </div>
+  </div>
+
+  <div class="table-wrapper" id="tableWrapper">
     <table id="masterSheet">
-      <thead id="sheetHeader">
-        <tr id="headerRow">
-          <th data-col="0">#</th>
-          <th data-col="1">UID</th>
-          <th data-col="2">পাসওয়ার্ড</th>
-          <th data-col="3">কুকিজ/2FA</th>
-          <th data-col="4">D</th>
-          <th data-col="5">E</th>
-        </tr>
-      </thead>
+      <thead><tr><th>#</th><th>UID</th><th>পাসওয়ার্ড</th><th>কুকিজ</th><th>D</th><th>E</th></tr></thead>
       <tbody id="sheetBody"></tbody>
     </table>
   </div>
 </div>
 <div id="liveToast" class="toast-msg"></div>
 
-<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
-  (function() {
-    // ========== আপনার পেমেন্ট সিস্টেমের আসল Firebase (saprahik-kaj) ==========
-    const firebaseConfig = {
-      apiKey: "AIzaSyCHqx6dAHeGFdtvY8682b_iQkdnk2ie0ug",
-      authDomain: "saprahik-kaj.firebaseapp.com",
-      databaseURL: "https://saprahik-kaj-default-rtdb.firebaseio.com",
-      projectId: "saprahik-kaj",
-      storageBucket: "saprahik-kaj.firebasestorage.app",
-      messagingSenderId: "336661054558",
-      appId: "1:336661054558:web:1beb394b660c9d6cf520cf"
-    };
+(function() {
+  const firebaseConfig = { apiKey: "AIzaSyCHqx6dAHeGFdtvY8682b_iQkdnk2ie0ug", authDomain: "saprahik-kaj.firebaseapp.com", databaseURL: "https://saprahik-kaj-default-rtdb.firebaseio.com", projectId: "saprahik-kaj", storageBucket: "saprahik-kaj.firebasestorage.app", messagingSenderId: "336661054558", appId: "1:336661054558:web:1beb394b660c9d6cf520cf" };
+  let firebaseDb = null;
+  try { firebase.initializeApp(firebaseConfig); firebaseDb = firebase.database(); } catch(e) { console.warn(e); }
+  
+  const ROWS = 200, COLS = 6;
+  let colWidths = [40, 90, 90, 90, 90, 90];
+  let selectedCells = new Set();
+  let sheetData = [];
+  let currentUsername = "";
+  let currentChatId = "";
+  let realtimeListenerRef = null;
+  let systemStatusListener = null;
+  let isSystemOn = true;
+  let resetListener = null;
+  
+  const STORAGE_KEY = "EBH_Sheet_Data";
+  const USER_DATA_KEY = "EBH_User_Info";
+  const SCROLL_POSITION_KEY = "EBH_Scroll_Position";
+  
+  let undoStack = [], redoStack = [], isUndoRedo = false;
+  let sheetBody, tableWrapper;
+  
+  function showToast(msg) { const toast = document.getElementById('liveToast'); toast.innerText = msg; toast.style.opacity = '1'; setTimeout(() => toast.style.opacity = '0', 1800); }
+  function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, m => ({'&':'&','<':'<','>':'>'})[m] || m); }
+  
+  // 🔥 চ্যাট আইডি ইনপুটে শুধুমাত্র নাম্বার অনুমোদনের ফাংশন 🔥
+  function setupChatIdInput() {
+    const chatIdInput = document.getElementById('tgChatId');
+    if (!chatIdInput) return;
     
-    let firebaseDb = null;
-    try {
-      firebase.initializeApp(firebaseConfig);
-      firebaseDb = firebase.database();
-      console.log("✅ Firebase connected - saprahik-kaj");
-    } catch(e) { console.warn(e); }
-    
-    // ========== ইউজারের Chat ID খোঁজার ফাংশন (এই Firebase থেকেই) ==========
-    async function getUserChatId(telegramUsername) {
-      if (!firebaseDb || !telegramUsername || telegramUsername === '@') return null;
-      const cleanUsername = telegramUsername.replace('@', '').toLowerCase().trim();
-      if (!cleanUsername) return null;
-      try {
-        const snapshot = await firebaseDb.ref(`telegramUsers/${cleanUsername}/chatId`).once('value');
-        if (snapshot.exists()) {
-          return snapshot.val();
-        }
-        return null;
-      } catch(e) {
-        console.error("Firebase read error:", e);
-        return null;
+    chatIdInput.addEventListener('input', function(e) {
+      let rawValue = this.value;
+      let onlyNumbers = rawValue.replace(/[^0-9]/g, '');
+      if (onlyNumbers !== rawValue) {
+        this.value = onlyNumbers;
+        showToast("⚠️ শুধুমাত্র সংখ্যা দেওয়া যাবে! (0-9)");
       }
-    }
+    });
     
-    // ========== টেলিগ্রাম বট সেটিংস ==========
-    const BOT_TOKEN = "8675351739:AAHGiFLJvQM4cmoDtwnBsXEsK4A2D_SsGs4";
-    const YOUR_CHAT_ID = "6140196943";
-    
-    async function sendTelegramFile(chatId, file, caption) {
-      if (!chatId) return false;
-      try {
-        const formData = new FormData();
-        formData.append("chat_id", chatId);
-        formData.append("document", file);
-        formData.append("caption", caption);
-        formData.append("parse_mode", "HTML");
-        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
-          method: "POST",
-          body: formData
-        });
-        const result = await response.json();
-        return result.ok;
-      } catch (error) {
-        console.error("Telegram file send error:", error);
-        return false;
+    // পেস্ট করলেও শুধু সংখ্যা নিবে
+    chatIdInput.addEventListener('paste', function(e) {
+      e.preventDefault();
+      let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+      let onlyNumbers = pastedText.replace(/[^0-9]/g, '');
+      if (onlyNumbers) {
+        this.value = onlyNumbers;
       }
-    }
-    
-    async function sendTelegramMessage(chatId, message) {
-      if (!chatId) return false;
-      try {
-        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
-        });
-        const result = await response.json();
-        return result.ok;
-      } catch (error) {
-        return false;
-      }
-    }
-    
-    function createConfirmationMessage(count, timestamp) {
-      const timeStr = new Date(timestamp).toLocaleString('bn-BD');
-      return `✅ <b>আপনার সাবমিট সফল হয়েছে!</b> ✅\n━━━━━━━━━━━━━━━━━━━━\n📊 মোট: ${count} টি সারি\n━━━━━━━━━━━━━━━━━━━━\n⏰ সময়: ${timeStr}\n\n❤️ <b>EBH TEAM</b>`;
-    }
-    
-    // ========== আপনার আসল EBH Sheets কোড (100% অপরিবর্তিত) ==========
-    const ROWS = 1000;
-    const COLS = 6;
-    let colWidths = [55, 110, 110, 110, 110, 110];
-    
-    let selectedCells = new Set();
-    let sheetData = [];
-    const STORAGE_KEY = "EBH_Sheet_SmallRow";
-    const SUBMIT_HASH_KEY = "EBH_Submitted_Hash_V8";
-    const TG_USERNAME_KEY = "EBH_TG_Username";
-    const SCROLL_POSITION_KEY = "EBH_Scroll_Position";
-    
-    let undoStack = [];
-    let redoStack = [];
-    let isUndoRedo = false;
-    const MAX_HISTORY = 30;
-    
-    let sheetBody;
-    let tableWrapper;
-    
-    function loadTGUsername() {
-      const saved = localStorage.getItem(TG_USERNAME_KEY);
-      const input = document.getElementById('tgUsername');
-      if (saved && input) input.value = saved;
-    }
-    function saveTGUsername(username) {
-      localStorage.setItem(TG_USERNAME_KEY, username);
-    }
-    
-    function saveScrollPosition() {
-      if (tableWrapper) {
-        const scrollPos = {
-          scrollTop: tableWrapper.scrollTop,
-          scrollLeft: tableWrapper.scrollLeft
-        };
-        localStorage.setItem(SCROLL_POSITION_KEY, JSON.stringify(scrollPos));
-      }
-    }
-    
-    function restoreScrollPosition() {
-      if (!tableWrapper) return;
-      const saved = localStorage.getItem(SCROLL_POSITION_KEY);
-      if (saved) {
-        try {
-          const scrollPos = JSON.parse(saved);
-          setTimeout(() => {
-            tableWrapper.scrollTop = scrollPos.scrollTop || 0;
-            tableWrapper.scrollLeft = scrollPos.scrollLeft || 0;
-          }, 100);
-        } catch(e) {}
-      }
-    }
-    
-    function getMasterPassword() {
-      return (sheetData[0] && sheetData[0][2]) ? sheetData[0][2] : '';
-    }
-    
-    function updateBFromARow(row, newAValue) {
-      sheetData[row][1] = newAValue;
-      if (newAValue && newAValue.toString().trim() !== "") {
-        const masterPass = getMasterPassword();
-        if (masterPass && masterPass.trim() !== "") {
-          sheetData[row][2] = masterPass;
-          const bContent = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='2'] .cell-content`);
-          if (bContent && bContent.innerText !== masterPass) bContent.innerText = masterPass;
-        }
-      } else {
-        sheetData[row][2] = "";
-        const bContent = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='2'] .cell-content`);
-        if (bContent) bContent.innerText = "";
-      }
-      saveToLocalStorage();
-      checkDuplicateHighlight();
-    }
-    
-    function pushToUndo() {
-      if (isUndoRedo) return;
-      const copy = JSON.parse(JSON.stringify(sheetData));
-      undoStack.push(copy);
-      if (undoStack.length > MAX_HISTORY) undoStack.shift();
-      redoStack = [];
-    }
-    
-    function undo() {
-      if (undoStack.length === 0) { showToast("❌ আর Undo নেই"); return; }
-      isUndoRedo = true;
-      redoStack.push(JSON.parse(JSON.stringify(sheetData)));
-      sheetData = undoStack.pop();
-      fullRender();
-      saveToLocalStorage();
-      isUndoRedo = false;
-      showToast("↩️ Undone");
-    }
-    
-    function redo() {
-      if (redoStack.length === 0) { showToast("❌ আর Redo নেই"); return; }
-      isUndoRedo = true;
-      undoStack.push(JSON.parse(JSON.stringify(sheetData)));
-      sheetData = redoStack.pop();
-      fullRender();
-      saveToLocalStorage();
-      isUndoRedo = false;
-      showToast("🔁 Redone");
-    }
-    
-    function loadDataFromStorage() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length === ROWS && parsed[0].length === COLS) {
-            sheetData = parsed;
-            return;
-          }
-        } catch(e) {}
-      }
-      sheetData = Array(ROWS).fill().map(() => Array(COLS).fill(''));
-      for (let i = 0; i < ROWS; i++) sheetData[i][0] = (i+1).toString();
-      sheetData[0][2] = '';
-    }
-    
-    function saveToLocalStorage() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sheetData));
-    }
-    
-    function checkDuplicateHighlight() {
-      const cellsA = document.querySelectorAll('#sheetBody td[data-col="1"] .cell-content');
-      cellsA.forEach(cell => {
-        if (cell.parentElement) cell.parentElement.classList.remove('duplicate-error');
-      });
-      const valueMap = new Map();
-      for (let content of cellsA) {
-        let val = content.innerText.trim();
-        if (val !== "") {
-          if (!valueMap.has(val)) valueMap.set(val, []);
-          valueMap.get(val).push(content.parentElement);
-        }
-      }
-      for (let [val, cells] of valueMap.entries()) {
-        if (cells.length > 1) cells.forEach(c => c.classList.add('duplicate-error'));
-      }
-    }
-    
-    function hasAnyData() {
-      for (let i = 0; i < ROWS; i++) {
-        for (let c = 1; c < COLS; c++) {
-          if (sheetData[i][c] && sheetData[i][c].toString().trim() !== "") {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-    
-    function getChangedRowsOnly() {
-      const lastSnapshot = localStorage.getItem(SUBMIT_HASH_KEY + "_snapshot");
-      let oldData = null;
-      if (lastSnapshot) {
-        try { oldData = JSON.parse(lastSnapshot); } catch(e) {}
-      }
-      if (!oldData) {
-        let rows = [];
+    });
+  }
+  
+  function listenForReset() {
+    if (!firebaseDb || !currentUsername) return;
+    const cleanUser = currentUsername.replace('@', '').toLowerCase().trim();
+    if (!cleanUser) return;
+    if (resetListener) resetListener.off();
+    resetListener = firebaseDb.ref(`resetCommand/${cleanUser}`);
+    resetListener.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.reset === true) {
         for (let i = 0; i < ROWS; i++) {
-          let hasData = false;
           for (let c = 1; c < COLS; c++) {
-            if (sheetData[i][c] && sheetData[i][c].toString().trim() !== "") { hasData = true; break; }
+            sheetData[i][c] = '';
           }
-          if (hasData) rows.push(i);
         }
-        return rows;
+        fullRender();
+        saveToLocalStorage();
+        showToast("🔄 আপনার ডাটা রিসেট করা হয়েছে! এখন নতুন ডাটা দিন");
+        firebaseDb.ref(`resetCommand/${cleanUser}`).remove();
       }
-      let changed = [];
-      for (let i = 0; i < ROWS; i++) {
-        let changedFlag = false;
-        for (let c = 1; c < COLS; c++) {
-          let newVal = sheetData[i][c] || "";
-          let oldVal = (oldData[i] && oldData[i][c]) || "";
-          if (newVal !== oldVal) { changedFlag = true; break; }
+    });
+  }
+  
+  function isUserInfoValid() { return currentUsername && currentUsername.trim() !== "" && currentChatId && currentChatId.trim() !== ""; }
+  
+  function updateWarningAndSheet() {
+    const isValid = isUserInfoValid();
+    const warningDiv = document.getElementById('warningContainer');
+    const allCells = document.querySelectorAll('#sheetBody td .cell-content');
+    if (!isValid) {
+      warningDiv.classList.add('show');
+      allCells.forEach(cell => { cell.setAttribute('contenteditable', 'false'); cell.classList.add('disabled'); });
+    } else {
+      warningDiv.classList.remove('show');
+      if (isSystemOn) {
+        allCells.forEach(cell => { if (cell.parentElement && cell.parentElement.getAttribute('data-col') !== '0') { cell.setAttribute('contenteditable', 'true'); cell.classList.remove('disabled'); } });
+      }
+    }
+  }
+  
+  function saveUserInfo() {
+    const usernameInput = document.getElementById('tgUsername');
+    const chatIdInput = document.getElementById('tgChatId');
+    let username = usernameInput.value.trim();
+    let chatId = chatIdInput.value.trim();
+    if (!username.startsWith('@') && username !== "") username = '@' + username;
+    currentUsername = username;
+    currentChatId = chatId;
+    localStorage.setItem(USER_DATA_KEY, JSON.stringify({ username: currentUsername, chatId: currentChatId }));
+    if (firebaseDb && currentUsername && currentUsername !== "") {
+      const cleanUser = currentUsername.replace('@', '').toLowerCase().trim();
+      firebaseDb.ref(`userList/${cleanUser}`).set({ username: currentUsername, chatId: currentChatId, lastActive: firebase.database.ServerValue.TIMESTAMP });
+      if (currentChatId) firebaseDb.ref(`telegramUsers/${cleanUser}`).set({ chatId: currentChatId, username: currentUsername });
+    }
+    if (isUserInfoValid()) { 
+      loadFromFirebase(currentUsername);
+      listenForReset();
+      showToast(`✅ তথ্য সেভ হয়েছে!`);
+    }
+    else showToast(`⚠️ সঠিক চ্যাট আইডি দিন!`);
+    updateWarningAndSheet();
+  }
+  
+  function loadSavedUserInfo() {
+    const saved = localStorage.getItem(USER_DATA_KEY);
+    if (saved) { try { const data = JSON.parse(saved); if (data.username) { currentUsername = data.username; document.getElementById('tgUsername').value = data.username; } if (data.chatId) { currentChatId = data.chatId; document.getElementById('tgChatId').value = data.chatId; } } catch(e) {} }
+    updateWarningAndSheet();
+  }
+  
+  function saveToFirebase(username, row, col, value) {
+    if (!firebaseDb || !username) return;
+    const cleanUser = username.replace('@', '').toLowerCase().trim();
+    if (!cleanUser) return;
+    firebaseDb.ref(`permanentUserData/${cleanUser}/cells/${row}_${col}`).set(value);
+  }
+  
+  function loadFromFirebase(username) {
+    if (!firebaseDb || !username) return;
+    const cleanUser = username.replace('@', '').toLowerCase().trim();
+    if (!cleanUser) return;
+    if (realtimeListenerRef) realtimeListenerRef.off();
+    realtimeListenerRef = firebaseDb.ref(`permanentUserData/${cleanUser}/cells`);
+    realtimeListenerRef.on('value', (snapshot) => {
+      const cells = snapshot.val();
+      if (!cells) return;
+      let changed = false;
+      for (const [key, value] of Object.entries(cells)) {
+        const [rowStr, colStr] = key.split('_');
+        const row = parseInt(rowStr), col = parseInt(colStr);
+        if (!isNaN(row) && !isNaN(col) && row < ROWS && col < COLS && col > 0) {
+          if (sheetData[row][col] !== value) {
+            sheetData[row][col] = value;
+            changed = true;
+            const cellDiv = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='${col}'] .cell-content`);
+            if (cellDiv && cellDiv.innerText !== value) cellDiv.innerText = value;
+          }
         }
-        if (changedFlag) changed.push(i);
       }
-      return changed;
+      if (changed) { saveToLocalStorage(); checkDuplicateHighlight(); }
+    });
+  }
+  
+  function loadDataFromStorage() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) { try { const parsed = JSON.parse(saved); if (Array.isArray(parsed) && parsed.length === ROWS && parsed[0].length === COLS) { sheetData = parsed; return; } } catch(e) {} }
+    sheetData = Array(ROWS).fill().map(() => Array(COLS).fill(''));
+    for (let i = 0; i < ROWS; i++) sheetData[i][0] = (i+1).toString();
+    sheetData[0][2] = '';
+  }
+  
+  function saveToLocalStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(sheetData)); }
+  function saveScrollPosition() { if (tableWrapper) localStorage.setItem(SCROLL_POSITION_KEY, JSON.stringify({ scrollTop: tableWrapper.scrollTop, scrollLeft: tableWrapper.scrollLeft })); }
+  function restoreScrollPosition() { if (!tableWrapper) return; const saved = localStorage.getItem(SCROLL_POSITION_KEY); if (saved) try { const { scrollTop, scrollLeft } = JSON.parse(saved); setTimeout(() => { tableWrapper.scrollTop = scrollTop || 0; tableWrapper.scrollLeft = scrollLeft || 0; }, 80); } catch(e) {} }
+  function getMasterPassword() { return (sheetData[0] && sheetData[0][2]) ? sheetData[0][2] : ''; }
+  
+  function updateBFromARow(row, newAValue) {
+    sheetData[row][1] = newAValue;
+    if (newAValue && newAValue.toString().trim() !== "") {
+      const masterPass = getMasterPassword();
+      if (masterPass && masterPass.trim() !== "") {
+        sheetData[row][2] = masterPass;
+        const bContent = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='2'] .cell-content`);
+        if (bContent && bContent.innerText !== masterPass) bContent.innerText = masterPass;
+        if (currentUsername && isUserInfoValid()) saveToFirebase(currentUsername, row, 2, masterPass);
+      }
+    } else {
+      sheetData[row][2] = "";
+      const bContent = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='2'] .cell-content`);
+      if (bContent) bContent.innerText = "";
+      if (currentUsername && isUserInfoValid()) saveToFirebase(currentUsername, row, 2, "");
     }
-    
-    function showResultModal(username, rowCount, success, userNotified = false) {
-      const existing = document.querySelector('.modal-overlay');
-      if (existing) existing.remove();
-      
-      const modalDiv = document.createElement('div');
-      modalDiv.className = 'modal-overlay';
-      modalDiv.innerHTML = `
-        <div class="modal-content">
-          <div class="modal-icon">${success ? '✅' : '❌'}</div>
-          <div class="modal-title">${success ? 'সফল!' : 'ব্যর্থ!'}</div>
-          <div class="modal-details">
-            <p><strong>📌 টেলিগ্রাম ইউজার:</strong> <span>${escapeHtml(username)}</span></p>
-            <p><strong>📊 সাবমিটকৃত সারি:</strong> <span>${rowCount} টি</span></p>
-            <p><strong>⏱️ সময়:</strong> <span>${new Date().toLocaleString()}</span></p>
-            <p><strong>📎 ফাইল টাইপ:</strong> <span>Excel (.xlsx)</span></p>
-            ${userNotified ? `<p><strong>📨 টেলিগ্রাম:</strong> <span style="color:#22c55e;">✅ কনফারমেশন + ফাইল পাঠানো হয়েছে</span></p>` : `<p><strong>📨 টেলিগ্রাম:</strong> <span style="color:#f59e0b;">⚠️ বটে /start দিন (ফাইল আপনার চ্যাটে গেছে)</span></p>`}
-          </div>
-          <div class="modal-note">
-            📸 এই স্ক্রিনশটটি আপনার কাছে প্রমাণ হিসেবে রেখে দিন!
-          </div>
-          <button class="close-modal-btn">🔒 ক্লোজ করুন</button>
-        </div>
-      `;
-      document.body.appendChild(modalDiv);
-      const closeBtn = modalDiv.querySelector('.close-modal-btn');
-      closeBtn.addEventListener('click', () => modalDiv.remove());
+    saveToLocalStorage();
+    if (currentUsername && isUserInfoValid()) saveToFirebase(currentUsername, row, 1, newAValue);
+    checkDuplicateHighlight();
+  }
+  
+  function pushToUndo() { if (isUndoRedo) return; undoStack.push(JSON.parse(JSON.stringify(sheetData))); if (undoStack.length > 30) undoStack.shift(); redoStack = []; }
+  function undo() { if (undoStack.length===0) { showToast("❌ আর Undo নেই"); return; } isUndoRedo=true; redoStack.push(JSON.parse(JSON.stringify(sheetData))); sheetData=undoStack.pop(); fullRender(); saveToLocalStorage(); isUndoRedo=false; showToast("↩️ Undone"); }
+  function redo() { if (redoStack.length===0) { showToast("❌ আর Redo নেই"); return; } isUndoRedo=true; undoStack.push(JSON.parse(JSON.stringify(sheetData))); sheetData=redoStack.pop(); fullRender(); saveToLocalStorage(); isUndoRedo=false; showToast("🔁 Redone"); }
+  
+  function checkDuplicateHighlight() {
+    const cellsA = document.querySelectorAll('#sheetBody td[data-col="1"] .cell-content');
+    cellsA.forEach(cell => cell.parentElement?.classList.remove('duplicate-error'));
+    const valueMap = new Map();
+    for (let cell of cellsA) {
+      let val = cell.innerText.trim();
+      if (val) { if (!valueMap.has(val)) valueMap.set(val, []); valueMap.get(val).push(cell.parentElement); }
     }
-    
-    function showConfirmModal(callback) {
-      const existing = document.querySelector('.confirm-overlay');
-      if (existing) existing.remove();
-      
-      const confirmDiv = document.createElement('div');
-      confirmDiv.className = 'confirm-overlay';
-      confirmDiv.innerHTML = `
-        <div class="confirm-modal">
-          <p>⚠️ আপনি কি নিশ্চিত?<br>সব পরিবর্তিত ডাটা টেলিগ্রামে পাঠানো হবে।</p>
-          <div class="confirm-buttons">
-            <button class="confirm-btn confirm-ok">✅ হ্যাঁ, সাবমিট</button>
-            <button class="confirm-btn confirm-cancel">❌ না, বাতিল</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(confirmDiv);
-      
-      const okBtn = confirmDiv.querySelector('.confirm-ok');
-      const cancelBtn = confirmDiv.querySelector('.confirm-cancel');
-      
-      okBtn.addEventListener('click', () => {
-        confirmDiv.remove();
-        callback(true);
+    for (let cells of valueMap.values()) if (cells.length > 1) cells.forEach(c => c.classList.add('duplicate-error'));
+  }
+  
+  function makeEditable(contentDiv, row, col) {
+    if (col === 0) return;
+    if (col === 1) {
+      contentDiv.addEventListener('input', function() {
+        if (!isUserInfoValid()) { showToast("⚠️ আগে টেলিগ্রাম তথ্য সেট করুন!"); this.innerText = sheetData[row][col] || ''; return; }
+        let raw = this.innerText;
+        let onlyNumbers = raw.replace(/[^0-9]/g, '');
+        if (onlyNumbers !== raw) this.innerText = onlyNumbers;
+        if (!isUndoRedo) pushToUndo();
+        updateBFromARow(row, onlyNumbers);
+        checkDuplicateHighlight();
       });
-      cancelBtn.addEventListener('click', () => {
-        confirmDiv.remove();
-        callback(false);
-      });
-    }
-    
-    function escapeHtml(str) { 
-      return str.replace(/[&<>]/g, function(m){ 
-        if(m === '&') return '&amp;'; 
-        if(m === '<') return '&lt;'; 
-        if(m === '>') return '&gt;'; 
-        return m;
-      }); 
-    }
-    
-    // ========== সাবমিট ফাংশন ==========
-    async function sendToTelegram() {
-      if (!hasAnyData()) {
-        showToast("❌ শীট খালি! কোনো ডাটা সাবমিট হবে না।");
-        return;
-      }
-      
-      showConfirmModal(async (confirmed) => {
-        if (!confirmed) {
-          showToast("সাবমিট বাতিল করা হয়েছে");
-          return;
-        }
-        
-        const usernameInput = document.getElementById('tgUsername');
-        let username = usernameInput.value.trim();
-        if (!username) { showToast("❌ টেলিগ্রাম ইউজারনেম দিন"); return; }
-        if (!username.startsWith('@')) username = '@' + username;
-        saveTGUsername(username);
-        
-        const changedRows = getChangedRowsOnly();
-        if (changedRows.length === 0 && localStorage.getItem(SUBMIT_HASH_KEY)) {
-          showToast("ℹ️ কোনো নতুন বা পরিবর্তিত ডাটা নেই");
-          return;
-        }
-        
-        // Excel ফাইল তৈরি
-        const excelData = [];
-        for (let idx = 0; idx < changedRows.length; idx++) {
-          const r = changedRows[idx];
-          const rowData = [];
-          for (let c = 1; c < COLS; c++) {
-            let val = sheetData[r][c] || "";
-            rowData.push(val);
-          }
-          excelData.push(rowData);
-        }
-        
-        const ws = XLSX.utils.aoa_to_sheet(excelData);
-        ws['!cols'] = [{wch: 12}, {wch: 12}, {wch: 12}, {wch: 12}, {wch: 12}];
-        
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "EBH_Data");
-        
-        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const fileName = `ebh_data_${Date.now()}.xlsx`;
-        const file = new File([blob], fileName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        
-        const fileCaption = `📊 EBH ডাটা সাবমিট\n👤 ${username}\n📅 ${new Date().toLocaleString()}\n✅ মোট ${changedRows.length} টি সারি`;
-        
-        showToast(`⏳ ${changedRows.length} টি সারি পাঠানো হচ্ছে...`);
-        
-        let userNotified = false;
-        
-        try {
-          // 1. আপনার চ্যাটে ফাইল পাঠান
-          const yourSent = await sendTelegramFile(YOUR_CHAT_ID, file, fileCaption);
-          
-          if (yourSent) {
-            // 2. ইউজারের Chat ID খুঁজে ফাইল + কনফারমেশন পাঠান
-            const userChatId = await getUserChatId(username);
-            
-            if (userChatId) {
-              const confirmMsg = createConfirmationMessage(changedRows.length, Date.now());
-              const userSent = await sendTelegramFile(userChatId, file, confirmMsg);
-              if (userSent) {
-                userNotified = true;
-                showToast(`✅ ${changedRows.length} টি সারি + ফাইল ${username} কে পাঠানো হয়েছে`);
-              } else {
-                await sendTelegramMessage(userChatId, confirmMsg + "\n\n⚠️ ফাইল পাঠাতে সমস্যা হয়েছে");
-                showToast(`✅ ফাইল আপনার চ্যাটে গেছে, ইউজারকে মেসেজ গেছে`);
-              }
-            } else {
-              showToast(`✅ ফাইল আপনার চ্যাটে গেছে। ${username} এর Chat ID পাওয়া যায়নি (বটে /start দিন)`);
-            }
-            
-            localStorage.setItem(SUBMIT_HASH_KEY, "submitted");
-            localStorage.setItem(SUBMIT_HASH_KEY + "_snapshot", JSON.stringify(sheetData));
-            showResultModal(username, changedRows.length, true, userNotified);
-          } else {
-            showResultModal(username, changedRows.length, false, false);
-            showToast("❌ ব্যর্থ!");
-          }
-        } catch (err) {
-          console.error(err);
-          showResultModal(username, changedRows.length, false, false);
-          showToast("❌ নেটওয়ার্ক ত্রুটি");
-        }
-      });
-    }
-    
-    function makeEditable(contentDiv, row, col) {
-      if (col === 0) return;
-      
-      if (col === 1) {
-        contentDiv.addEventListener('input', function() {
-          let raw = this.innerText;
-          let onlyNumbers = raw.replace(/[^0-9]/g, '');
-          if (onlyNumbers !== raw) this.innerText = onlyNumbers;
-          if (!isUndoRedo) pushToUndo();
-          updateBFromARow(row, onlyNumbers);
-          checkDuplicateHighlight();
-        });
-      } 
-      else if (col === 2) {
-        contentDiv.addEventListener('blur', function() {
-          const master = getMasterPassword();
-          if (sheetData[row][1] && sheetData[row][1].toString().trim() !== "" && master && master.trim() !== "") {
-            if (this.innerText !== master) {
-              this.innerText = master;
-              sheetData[row][2] = master;
-              if (!isUndoRedo) pushToUndo();
-              saveToLocalStorage();
-            }
-          }
-        });
-        contentDiv.addEventListener('input', function() {
-          if (!isUndoRedo) pushToUndo();
-          sheetData[row][2] = this.innerText;
-          saveToLocalStorage();
-        });
-      }
-      else {
-        contentDiv.addEventListener('input', function() {
-          if (!isUndoRedo) pushToUndo();
-          sheetData[row][col] = this.innerText;
-          saveToLocalStorage();
-        });
-      }
-    }
-    
-    function fullRender() {
-      if (!sheetBody) sheetBody = document.getElementById('sheetBody');
-      sheetBody.innerHTML = '';
-      for (let row = 0; row < ROWS; row++) {
-        const tr = document.createElement('tr');
-        for (let col = 0; col < COLS; col++) {
-          const td = document.createElement('td');
-          td.setAttribute('data-row', row);
-          td.setAttribute('data-col', col);
-          
-          td.style.width = colWidths[col] + 'px';
-          td.style.minWidth = colWidths[col] + 'px';
-          td.style.maxWidth = colWidths[col] + 'px';
-          td.style.height = '35px';
-          td.style.minHeight = '35px';
-          td.style.maxHeight = '35px';
-          td.style.padding = '0';
-          td.style.verticalAlign = 'top';
-          
-          const contentDiv = document.createElement('div');
-          contentDiv.className = 'cell-content';
-          contentDiv.setAttribute('contenteditable', col !== 0 ? 'true' : 'false');
-          contentDiv.innerText = sheetData[row][col] || (col === 0 ? (row+1).toString() : '');
-          
-          if (col === 0) {
-            contentDiv.style.textAlign = 'center';
-            contentDiv.style.overflow = 'hidden';
-            contentDiv.style.whiteSpace = 'nowrap';
-          }
-          
-          td.appendChild(contentDiv);
-          
-          if (col !== 0) {
-            makeEditable(contentDiv, row, col);
-            
-            contentDiv.addEventListener('click', (e) => {
-              e.stopPropagation();
-              if (!e.ctrlKey && !e.metaKey) clearAllSelection();
-              td.classList.add('selected');
-              selectedCells.add(td);
-            });
-            
-            let ptimer = null;
-            td.addEventListener('touchstart', (e) => {
-              ptimer = setTimeout(() => {
-                if (selectedCells.has(td)) { td.classList.remove('selected'); selectedCells.delete(td); }
-                else { td.classList.add('selected'); selectedCells.add(td); }
-                if (navigator.vibrate) navigator.vibrate(20);
-                e.preventDefault();
-              }, 400);
-            });
-            td.addEventListener('touchend', () => { if (ptimer) clearTimeout(ptimer); });
-            td.addEventListener('touchmove', () => { if (ptimer) clearTimeout(ptimer); });
-          } else {
-            td.addEventListener('click', (e) => e.stopPropagation());
-          }
-          
-          tr.appendChild(td);
-        }
-        sheetBody.appendChild(tr);
-      }
-      checkDuplicateHighlight();
-      
-      const b1Content = document.querySelector('#sheetBody td[data-row="0"][data-col="2"] .cell-content');
-      if (b1Content) {
-        b1Content.addEventListener('blur', () => {
-          const newMaster = getMasterPassword();
-          if (newMaster && newMaster.trim() !== "") {
-            for (let r = 0; r < ROWS; r++) {
-              if (sheetData[r][1] && sheetData[r][1].toString().trim() !== "") {
-                sheetData[r][2] = newMaster;
-                const tBContent = document.querySelector(`#sheetBody td[data-row='${r}'][data-col='2'] .cell-content`);
-                if (tBContent) tBContent.innerText = newMaster;
-              }
-            }
+    } 
+    else if (col === 2) {
+      contentDiv.addEventListener('blur', function() {
+        const master = getMasterPassword();
+        if (sheetData[row][1] && sheetData[row][1].toString().trim() !== "" && master && master.trim() !== "") {
+          if (this.innerText !== master) {
+            this.innerText = master;
+            sheetData[row][2] = master;
+            if (!isUndoRedo) pushToUndo();
             saveToLocalStorage();
+            if (currentUsername && isUserInfoValid()) saveToFirebase(currentUsername, row, 2, master);
           }
-        });
-      }
-      
-      restoreScrollPosition();
-    }
-    
-    function clearAllSelection() {
-      for (let cell of selectedCells) cell.classList.remove('selected');
-      selectedCells.clear();
-    }
-    
-    function addResizeHandles() {
-      const ths = document.querySelectorAll('#headerRow th');
-      ths.forEach((th, idx) => {
-        if (idx === 0) return;
-        let handle = document.createElement('div');
-        handle.className = 'resize-handle';
-        let startX, startW, isResizing = false;
-        const onMove = (e) => {
-          if (!isResizing) return;
-          let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-          let diff = clientX - startX;
-          let newW = startW + diff;
-          if (newW < 60) newW = 60;
-          if (newW > 200) newW = 200;
-          colWidths[idx] = newW;
-          const allCells = document.querySelectorAll(`#sheetBody td[data-col='${idx}'], #headerRow th[data-col='${idx}']`);
-          allCells.forEach(cell => {
-            cell.style.width = newW + 'px';
-            cell.style.minWidth = newW + 'px';
-            cell.style.maxWidth = newW + 'px';
-          });
-        };
-        const onUp = () => {
-          isResizing = false;
-          window.removeEventListener('mousemove', onMove);
-          window.removeEventListener('mouseup', onUp);
-          window.removeEventListener('touchmove', onMove);
-          window.removeEventListener('touchend', onUp);
-        };
-        handle.addEventListener('touchstart', (e) => { e.preventDefault(); isResizing = true; startX = e.touches[0].clientX; startW = colWidths[idx]; window.addEventListener('touchmove', onMove, { passive: false }); window.addEventListener('touchend', onUp); });
-        handle.addEventListener('mousedown', (e) => { e.preventDefault(); isResizing = true; startX = e.clientX; startW = colWidths[idx]; window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp); });
-        th.appendChild(handle);
-        th.style.position = 'relative';
+        }
+      });
+      contentDiv.addEventListener('input', function() {
+        if (!isUserInfoValid()) { showToast("⚠️ আগে টেলিগ্রাম তথ্য সেট করুন!"); return; }
+        if (!isUndoRedo) pushToUndo();
+        sheetData[row][2] = this.innerText;
+        saveToLocalStorage();
+        if (currentUsername && isUserInfoValid()) saveToFirebase(currentUsername, row, 2, this.innerText);
       });
     }
-    
-    function bindColumnSelection() {
-      const headers = document.querySelectorAll('#headerRow th');
-      headers.forEach((th, colIdx) => {
-        if (colIdx === 0) return;
-        th.addEventListener('click', (e) => {
-          if (e.target.classList?.contains('resize-handle')) return;
-          clearAllSelection();
-          document.querySelectorAll(`#sheetBody td[data-col='${colIdx}']`).forEach(cell => { cell.classList.add('selected'); selectedCells.add(cell); });
-          showToast(`${th.innerText} সিলেক্টেড`);
-        });
+    else {
+      contentDiv.addEventListener('input', function() {
+        if (!isUserInfoValid()) { showToast("⚠️ আগে টেলিগ্রাম তথ্য সেট করুন!"); return; }
+        if (!isUndoRedo) pushToUndo();
+        sheetData[row][col] = this.innerText;
+        saveToLocalStorage();
+        if (currentUsername && isUserInfoValid()) saveToFirebase(currentUsername, row, col, this.innerText);
       });
     }
-    
-    function selectAllDataColumns() {
-      clearAllSelection();
-      for (let col = 1; col < COLS; col++) {
-        document.querySelectorAll(`#sheetBody td[data-col='${col}']`).forEach(cell => { cell.classList.add('selected'); selectedCells.add(cell); });
+  }
+  
+  function fullRender() {
+    if (!sheetBody) sheetBody = document.getElementById('sheetBody');
+    sheetBody.innerHTML = '';
+    for (let row = 0; row < ROWS; row++) {
+      const tr = document.createElement('tr');
+      for (let col = 0; col < COLS; col++) {
+        const td = document.createElement('td');
+        td.setAttribute('data-row', row);
+        td.setAttribute('data-col', col);
+        td.style.width = colWidths[col] + 'px';
+        td.style.minWidth = colWidths[col] + 'px';
+        td.style.height = '28px';
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'cell-content';
+        const canEdit = (col !== 0 && isUserInfoValid() && isSystemOn);
+        contentDiv.setAttribute('contenteditable', canEdit ? 'true' : 'false');
+        contentDiv.innerText = sheetData[row][col] || (col === 0 ? (row+1).toString() : '');
+        if (col === 0) { contentDiv.style.textAlign = 'center'; contentDiv.style.overflow = 'hidden'; }
+        if (!canEdit) contentDiv.classList.add('disabled');
+        td.appendChild(contentDiv);
+        if (col !== 0) {
+          makeEditable(contentDiv, row, col);
+          contentDiv.addEventListener('click', (e) => { e.stopPropagation(); if (!e.ctrlKey) clearAllSelection(); td.classList.add('selected'); selectedCells.add(td); });
+          let ptimer = null;
+          td.addEventListener('touchstart', (e) => { ptimer = setTimeout(() => { if(selectedCells.has(td)){ td.classList.remove('selected'); selectedCells.delete(td); } else { td.classList.add('selected'); selectedCells.add(td); } e.preventDefault(); }, 400); });
+          td.addEventListener('touchend', () => { if(ptimer) clearTimeout(ptimer); });
+          td.addEventListener('touchmove', () => { if(ptimer) clearTimeout(ptimer); });
+        } else td.addEventListener('click', (e) => e.stopPropagation());
+        tr.appendChild(td);
       }
-      showToast("📌 সব ডাটা কলাম সিলেক্ট হয়েছে");
+      sheetBody.appendChild(tr);
     }
-    
-    async function copySelected() {
-      if (selectedCells.size === 0) { showToast("কিছু সিলেক্ট করেনি"); return; }
-      let minR=Infinity, maxR=-Infinity, minC=Infinity, maxC=-Infinity;
-      for (let cell of selectedCells) {
-        let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col'));
-        if (!isNaN(r) && !isNaN(c)) {
-          minR = Math.min(minR, r); maxR = Math.max(maxR, r);
-          minC = Math.min(minC, c); maxC = Math.max(maxC, c);
-        }
-      }
-      const matrix = Array(maxR-minR+1).fill().map(() => Array(maxC-minC+1).fill(''));
-      for (let cell of selectedCells) {
-        let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col'));
-        const contentDiv = cell.querySelector('.cell-content');
-        matrix[r-minR][c-minC] = contentDiv ? contentDiv.innerText : '';
-      }
-      const tsv = matrix.map(row => row.join('\t')).join('\n');
-      try { await navigator.clipboard.writeText(tsv); showToast(`📋 ${selectedCells.size} সেল কপি`); } catch(e) { showToast("কপি ব্যর্থ"); }
-    }
-    
-    function deleteSelected() {
-      if (selectedCells.size === 0) { showToast("সিলেক্ট করুন"); return; }
-      pushToUndo();
-      for (let cell of selectedCells) {
-        let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col'));
-        const contentDiv = cell.querySelector('.cell-content');
-        if (contentDiv) {
-          contentDiv.innerText = '';
-          sheetData[r][c] = '';
-        }
+    checkDuplicateHighlight();
+    restoreScrollPosition();
+  }
+  
+  function clearAllSelection() { for (let cell of selectedCells) cell.classList.remove('selected'); selectedCells.clear(); }
+  function selectAllDataColumns() { clearAllSelection(); for (let col=1; col<COLS; col++) document.querySelectorAll(`#sheetBody td[data-col='${col}']`).forEach(cell => { cell.classList.add('selected'); selectedCells.add(cell); }); showToast("📌 সব কলাম সিলেক্ট হয়েছে"); }
+  async function copySelected() { if (selectedCells.size===0){ showToast("কিছু সিলেক্ট করেনি"); return; } let minR=Infinity,maxR=-Infinity,minC=Infinity,maxC=-Infinity; for(let cell of selectedCells){ let r=parseInt(cell.getAttribute('data-row')), c=parseInt(cell.getAttribute('data-col')); if(!isNaN(r)&&!isNaN(c)){ minR=Math.min(minR,r); maxR=Math.max(maxR,r); minC=Math.min(minC,c); maxC=Math.max(maxC,c); } } const matrix=Array(maxR-minR+1).fill().map(()=>Array(maxC-minC+1).fill('')); for(let cell of selectedCells){ let r=parseInt(cell.getAttribute('data-row')), c=parseInt(cell.getAttribute('data-col')); const div=cell.querySelector('.cell-content'); matrix[r-minR][c-minC]=div?div.innerText:''; } const tsv=matrix.map(row=>row.join('\t')).join('\n'); try{ await navigator.clipboard.writeText(tsv); showToast(`📋 ${selectedCells.size} সেল কপি`); } catch(e){ showToast("কপি ব্যর্থ"); } }
+  
+  function deleteSelected() {
+    if (selectedCells.size === 0) { showToast("সিলেক্ট করুন"); return; }
+    const cellsToDelete = Array.from(selectedCells);
+    for (let cell of cellsToDelete) {
+      let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col'));
+      const contentDiv = cell.querySelector('.cell-content');
+      if (contentDiv && c !== 0) {
+        contentDiv.innerText = '';
+        sheetData[r][c] = '';
         if (c === 1) updateBFromARow(r, '');
       }
-      saveToLocalStorage();
-      checkDuplicateHighlight();
-      showToast("🗑️ ডিলিট সম্পন্ন");
     }
-    
-    function showToast(msg) {
-      const toast = document.getElementById('liveToast');
-      toast.innerText = msg;
-      toast.style.opacity = '1';
-      setTimeout(() => toast.style.opacity = '0', 1800);
-    }
-    
-    function bindButtons() {
-      document.getElementById('undoBtn').addEventListener('click', undo);
-      document.getElementById('redoBtn').addEventListener('click', redo);
-      document.getElementById('copyBtn').addEventListener('click', copySelected);
-      document.getElementById('deleteBtn').addEventListener('click', deleteSelected);
-      document.getElementById('clearSelectionBtn').addEventListener('click', () => { clearAllSelection(); showToast("সিলেকশন ক্লিয়ার"); });
-      document.getElementById('selectAllColsBtn').addEventListener('click', selectAllDataColumns);
-      document.getElementById('submitToTelegram').addEventListener('click', sendToTelegram);
-    }
-    
-    function init() {
-      sheetBody = document.getElementById('sheetBody');
-      tableWrapper = document.querySelector('.table-wrapper');
-      
-      if (tableWrapper) {
-        tableWrapper.addEventListener('scroll', () => {
-          saveScrollPosition();
-        });
+    pushToUndo();
+    saveToLocalStorage();
+    checkDuplicateHighlight();
+    clearAllSelection();
+    showToast(`🗑️ ${cellsToDelete.length} টি সেল ডিলিট হয়েছে`);
+  }
+  
+  function checkSystemStatus() {
+    if (!firebaseDb) return;
+    if (systemStatusListener) systemStatusListener.off();
+    systemStatusListener = firebaseDb.ref('systemControl/status');
+    systemStatusListener.on('value', (snapshot) => {
+      const data = snapshot.val();
+      isSystemOn = data === null ? true : data.isOn !== false;
+      const reason = data && data.reason ? data.reason : '';
+      const existingOverlay = document.querySelector('.system-off-overlay');
+      if (existingOverlay) existingOverlay.remove();
+      if (!isSystemOn) {
+        const overlay = document.createElement('div');
+        overlay.className = 'system-off-overlay';
+        overlay.innerHTML = `<div class="system-off-card"><div class="icon">🔒</div><h3>সিস্টেম বন্ধ আছে</h3><div class="reason">${escapeHtml(reason) || 'অ্যাডমিন সিস্টেম বন্ধ রেখেছেন'}</div><p style="font-size:11px; margin-top:8px;">দয়া করে পরে আবার চেষ্টা করুন</p></div>`;
+        document.body.appendChild(overlay);
+        document.querySelectorAll('#sheetBody td .cell-content').forEach(cell => { cell.setAttribute('contenteditable', 'false'); cell.classList.add('disabled'); });
+      } else if (isUserInfoValid()) {
+        document.querySelectorAll('#sheetBody td .cell-content').forEach(cell => { if (cell.parentElement && cell.parentElement.getAttribute('data-col') !== '0') { cell.setAttribute('contenteditable', 'true'); cell.classList.remove('disabled'); } });
       }
-      
-      loadDataFromStorage();
-      loadTGUsername();
-      fullRender();
-      addResizeHandles();
-      bindColumnSelection();
-      bindButtons();
+    });
+  }
+  
+  function setupInputFocus() {
+    const tgInput = document.getElementById('tgUsername');
+    const chatInput = document.getElementById('tgChatId');
+    const saveBtn = document.getElementById('saveUserBtn');
+    const showBtn = () => { saveBtn.classList.add('show'); };
+    const hideBtn = () => { setTimeout(() => { saveBtn.classList.remove('show'); }, 200); };
+    tgInput.addEventListener('focus', showBtn);
+    tgInput.addEventListener('blur', hideBtn);
+    chatInput.addEventListener('focus', showBtn);
+    chatInput.addEventListener('blur', hideBtn);
+  }
+  
+  function bindButtons() {
+    document.getElementById('undoBtn').addEventListener('click', undo);
+    document.getElementById('redoBtn').addEventListener('click', redo);
+    document.getElementById('copyBtn').addEventListener('click', copySelected);
+    document.getElementById('deleteBtn').addEventListener('click', deleteSelected);
+    document.getElementById('clearSelectionBtn').addEventListener('click', () => { clearAllSelection(); showToast("সিলেকশন ক্লিয়ার"); });
+    document.getElementById('selectAllColsBtn').addEventListener('click', selectAllDataColumns);
+    document.getElementById('saveUserBtn').addEventListener('click', saveUserInfo);
+  }
+  
+  function init() {
+    sheetBody = document.getElementById('sheetBody');
+    tableWrapper = document.querySelector('.table-wrapper');
+    if (tableWrapper) tableWrapper.addEventListener('scroll', saveScrollPosition);
+    loadDataFromStorage();
+    loadSavedUserInfo();
+    fullRender();
+    setupInputFocus();
+    bindButtons();
+    checkSystemStatus();
+    if (isUserInfoValid() && currentUsername) {
+      loadFromFirebase(currentUsername);
+      listenForReset();
     }
-    
-    init();
-  })();
+    // 🔥 চ্যাট আইডি ইনপুটে শুধু নাম্বার অনুমোদন সেটআপ 🔥
+    setupChatIdInput();
+  }
+  init();
+})();
 </script>
 </body>
 </html>
