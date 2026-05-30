@@ -202,6 +202,89 @@
       visibility: visible;
     }
 
+    /* কনফারমেশন পপ-আপ এর স্টাইল */
+    .confirm-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10005;
+      backdrop-filter: blur(5px);
+    }
+    .confirm-modal {
+      background: white;
+      border-radius: 32px;
+      max-width: 420px;
+      width: 90%;
+      padding: 24px 22px;
+      text-align: center;
+      box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+      border-top: 6px solid #10b981;
+    }
+    .confirm-modal .icon { font-size: 52px; margin-bottom: 8px; }
+    .confirm-modal h3 { color: #065f46; font-size: 22px; margin-bottom: 16px; font-weight: 800; }
+    .confirm-modal .info-box {
+      background: #f0fdf4;
+      padding: 14px;
+      border-radius: 20px;
+      text-align: left;
+      font-size: 13px;
+      margin: 12px 0;
+      color: #14532d;
+      line-height: 1.6;
+    }
+    .confirm-modal .info-box strong { color: #166534; }
+    .account-input-area {
+      margin: 16px 0 12px;
+      text-align: left;
+    }
+    .account-input-area label {
+      display: block;
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #1e3a8a;
+    }
+    .account-input-area input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 28px;
+      font-size: 14px;
+      outline: none;
+      transition: 0.2s;
+      background: #f8fafc;
+    }
+    .account-input-area input:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
+      background: white;
+    }
+    .confirm-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .confirm-actions button {
+      flex: 1;
+      border: none;
+      padding: 12px 0;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .confirm-yes { background: #10b981; color: white; }
+    .confirm-no { background: #e2e8f0; color: #1e293b; }
+    .confirm-yes:active { transform: scale(0.96); background: #059669; }
+    .confirm-no:active { transform: scale(0.96); background: #cbd5e1; }
+
     .warning-modal-overlay {
       position: fixed;
       top: 0;
@@ -774,6 +857,54 @@
     `;
     document.body.appendChild(modalDiv);
   }
+
+  // নতুন কনফারমেশন ফাংশন (একাউন্ট টাইপ ইনপুট সহ)
+  function showSubmitConfirmation() {
+    return new Promise((resolve) => {
+      const existing = document.querySelector('.confirm-modal-overlay');
+      if (existing) existing.remove();
+      
+      const newDataCount = getNewUnsubmittedUIDs().length;
+      
+      const modalDiv = document.createElement('div');
+      modalDiv.className = 'confirm-modal-overlay';
+      modalDiv.innerHTML = `
+        <div class="confirm-modal">
+          <div class="icon">📋</div>
+          <h3>সাবমিট কনফার্মেশন</h3>
+          <div class="info-box">
+            <strong>👤 ইউজার:</strong> ${escapeHtml(currentUsername)}<br>
+            <strong>🆔 চ্যাট আইডি:</strong> ${escapeHtml(currentChatId)}<br>
+            <strong>📊 মোট আইডি:</strong> ${newDataCount} টি<br>
+            <strong>📅 তারিখ:</strong> ${new Date().toLocaleDateString('bn-BD')}
+          </div>
+          <div class="account-input-area">
+            <label>📁 আপনি এগুলা কিসের একাউন্ট সাবমিট দিতে চাইতেছেন দয়া করে সে একাউন্টের নামটি লিখুন :</label>
+            <input type="text" id="confirmAccountType" placeholder="যে একাউন্ট জমা দিচ্ছেন তার নাম লিখুন" autocomplete="off">
+          </div>
+          <div class="confirm-actions">
+            <button class="confirm-yes" id="confirmYesBtn">✅ হ্যাঁ, সাবমিট করুন</button>
+            <button class="confirm-no" id="confirmNoBtn">❌ বাতিল করুন</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modalDiv);
+      
+      const yesBtn = document.getElementById('confirmYesBtn');
+      const noBtn = document.getElementById('confirmNoBtn');
+      const accountInput = document.getElementById('confirmAccountType');
+      
+      const cleanup = () => modalDiv.remove();
+      
+      yesBtn.addEventListener('click', () => { 
+        const accountType = accountInput ? accountInput.value.trim() : "";
+        cleanup(); 
+        resolve({ confirmed: true, accountType: accountType });
+      });
+      noBtn.addEventListener('click', () => { cleanup(); resolve({ confirmed: false, accountType: "" }); });
+      modalDiv.addEventListener('click', (e) => { if (e.target === modalDiv) { cleanup(); resolve({ confirmed: false, accountType: "" }); } });
+    });
+  }
   
   async function sendToTelegram() {
     if (!isSubmitInfoValid()) {
@@ -783,6 +914,13 @@
     
     if (!hasAnyUnsubmittedData()) {
       showToast("ℹ️ কোনো নতুন UID সাবমিট করার নেই!");
+      return;
+    }
+    
+    // কনফারমেশন ডায়ালগ দেখানো এবং একাউন্ট টাইপ নেওয়া
+    const { confirmed, accountType } = await showSubmitConfirmation();
+    if (!confirmed) {
+      showToast("সাবমিশন বাতিল করা হয়েছে");
       return;
     }
     
@@ -805,9 +943,12 @@
     const today = new Date();
     const todayDate = today.getDate();
     
-    const userCaption = `✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📊 <b>মোট আইডি:</b> ${newData.length} টি\n📅 <b>সাবমিটের তারিখ:</b> ${todayDate}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🍀 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n📌 আপনি <b>${tomorrowDay}</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n❤️ <b>𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗕𝗬 𝗛𝗔𝗕𝗜𝗕 এর</b>\n🤝 সাথে থাকার জন্য আপনাকে ধন্যবাদ! 🙏`;
+    // একাউন্ট টাইপ ম্যাসেজ তৈরী
+    const accountTypeMsg = accountType ? `📂 <b>একাউন্ট ধরণ:</b> ${escapeHtml(accountType)}\n` : "";
     
-    const adminCaption = `📊 <b>EBH ডাটা সাবমিট</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n👤 ইউজার: ${currentUsername}\n📋 মোট নতুন UID: ${newData.length} টি\n📅 সময়: ${new Date().toLocaleString('bn-BD')}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n✅ সাবমিশন সফল হয়েছে!`;
+    const userCaption = `✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📊 <b>মোট আইডি:</b> ${newData.length} টি\n${accountTypeMsg}📅 <b>সাবমিটের তারিখ:</b> ${todayDate}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🍀 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n📌 আপনি <b>${tomorrowDay}</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n❤️ <b>𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗕𝗬 𝗛𝗔𝗕𝗜𝗕</b>\n🤝 সাথে থাকার জন্য আপনাকে ধন্যবাদ! 🙏`;
+    
+    const adminCaption = `📊 <b>EBH ডাটা সাবমিট</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n👤 ইউজার: ${currentUsername}\n${accountTypeMsg}📋 মোট নতুন UID: ${newData.length} টি\n📅 সময়: ${new Date().toLocaleString('bn-BD')}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n✅ সাবমিশন সফল হয়েছে!`;
     
     showToast(`⏳ ${newData.length} টি নতুন UID সাবমিট হচ্ছে...`);
     
@@ -824,7 +965,6 @@
         }
         saveSubmittedUIDs();
         
-        // স্ট্যাটাস মেসেজ সহ সফল মডাল
         let statusMessage = "";
         if (userSent) {
           statusMessage = "✅ আপনার টেলিগ্রাম ইনবক্সে ফাইল পাঠানো হয়েছে!";
@@ -840,8 +980,8 @@
             <div class="modal-title">সাবমিট সফল!</div>
             <div class="modal-details">
               <p><strong>👤 ইউজার:</strong> ${escapeHtml(currentUsername)}</p>
+              <p><strong>📁 একাউন্ট ধরণ:</strong> ${escapeHtml(accountType || "——")}</p>
               <p><strong>📊 নতুন সাবমিট:</strong> ${newData.length} টি UID</p>
-             
               <p><strong>📅 সময়:</strong> ${new Date().toLocaleString()}</p>
               <p style="margin-top:10px; padding-top:8px; border-top:1px solid #ddd;"><span class="status-success">${statusMessage}</span></p>
             </div>
