@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>EBH Sheets - Instant Load</title>
+  <title>EBH Sheets - Dual Sheet Mode</title>
   <style>
     * {
       box-sizing: border-box;
@@ -212,17 +212,17 @@
     .submit-main-btn {
       background: linear-gradient(95deg, #00a86b, #00c853);
       border: none;
-      padding: 5px 20px;
+      padding: 6px 18px;
       border-radius: 32px;
       color: white;
       font-weight: bold;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
       transition: 0.2s;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
       white-space: nowrap;
     }
     .submit-main-btn:active { transform: scale(0.96); }
@@ -486,7 +486,6 @@
       text-align: center;
       position: relative;
     }
-    /* Toggle Switch CSS */
     .uid-toggle-switch {
       position: absolute;
       right: 4px;
@@ -585,6 +584,37 @@
       z-index: 10000;
     }
     .system-off-card { background: white; border-radius: 24px; max-width: 300px; width: 85%; padding: 20px; text-align: center; }
+    
+    /* শীট সিলেক্ট বাটন স্টাইল */
+    .sheet-selector {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      padding: 6px 10px;
+      background: #f1f5f9;
+      border-top: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+    .sheet-btn {
+      flex: 1;
+      max-width: 120px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #e2e8f0;
+      color: #475569;
+      text-align: center;
+    }
+    .sheet-btn.active {
+      background: linear-gradient(95deg, #0b2b44, #1e5a88);
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .sheet-btn:active { transform: scale(0.96); }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -616,7 +646,7 @@
     <div class="logo-area">
       <div class="logo-wrapper">
         <span class="logo">EBH</span>
-        <span class="logo-sub">Smart Sheet</span>
+        <span class="logo-sub">Dual Sheet</span>
         <div class="undo-redo-group">
           <button id="undoBtn" class="icon-btn">↩️</button>
           <button id="redoBtn" class="icon-btn">🔁</button>
@@ -666,6 +696,10 @@
       <tbody id="sheetBody"></tbody>
     </table>
   </div>
+  <div class="sheet-selector">
+    <button id="sheet1Btn" class="sheet-btn active">📄 শীট ১</button>
+    <button id="sheet2Btn" class="sheet-btn">📄 শীট ২</button>
+  </div>
 </div>
 <div id="liveToast" class="toast-msg"></div>
 <script>
@@ -694,18 +728,29 @@
   const COLS = 6;
   let colWidths = [45, 90, 90, 90, 90, 90];
   let selectedCells = new Set();
-  let sheetData = [];
-  let currentLoginUsername = "";  // লগইন এর জন্য ইউজারনেম, প্রকাশ করা হবে না
-  let currentTelegramUsername = ""; // টেলিগ্রাম ইউজারনেম
+  
+  // শীট ১ - পুরোনো সিস্টেম (অপরিবর্তিত নামে)
+  let sheetData1 = [];   // স্টোরেজ কী: EBH_Sheet_Data_username
+  let submittedUIDs1 = new Set(); // স্টোরেজ কী: EBH_Submitted_UIDs_username
+  
+  // শীট ২ - নতুন সিস্টেম (আলাদা নামে)
+  let sheetData2 = [];   // স্টোরেজ কী: EBH_Sheet_Data_2_username
+  let submittedUIDs2 = new Set(); // স্টোরেজ কী: EBH_Submitted_UIDs_2_username
+  
+  let currentSheet = 1; // 1 or 2
+  let currentLoginUsername = "";
+  let currentTelegramUsername = "";
   let currentChatId = "";
   let systemStatusListener = null;
-  let submittedUIDs = new Set();
   
-  // নতুন টগল সুইচের স্টেট
-  let isUidValidationEnabled = true; // ডিফল্ট ON (শুধু সংখ্যা অনুমোদন)
+  // শীট ১ এর জন্য পুরোনো স্টোরেজ কী
+  const SHEET1_STORAGE_KEY = "EBH_Sheet_Data_";
+  const SHEET1_SUBMITTED_KEY = "EBH_Submitted_UIDs_";
   
-  const STORAGE_KEY_PREFIX = "EBH_Sheet_Data_";
-  const SUBMITTED_UID_KEY_PREFIX = "EBH_Submitted_UIDs_";
+  // শীট ২ এর জন্য নতুন স্টোরেজ কী
+  const SHEET2_STORAGE_KEY = "EBH_Sheet_Data_2_";
+  const SHEET2_SUBMITTED_KEY = "EBH_Submitted_UIDs_2_";
+  
   const AUTH_TOKEN_KEY = "EBH_Auth_Token";
   const SCROLL_POSITION_KEY = "EBH_Scroll_Position";
   const UID_VALIDATION_STATE_KEY = "EBH_UidValidationState";
@@ -730,6 +775,10 @@
   const tgUsernameInput = document.getElementById('tgUsername');
   const tgChatIdInput = document.getElementById('tgChatId');
   const uidToggle = document.getElementById('uidValidationToggle');
+  const sheet1Btn = document.getElementById('sheet1Btn');
+  const sheet2Btn = document.getElementById('sheet2Btn');
+
+  let isUidValidationEnabled = true;
 
   function showToast(msg) { 
     const toast = document.getElementById('liveToast'); 
@@ -744,14 +793,25 @@
     return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m] || m); 
   }
 
-  // UID ভ্যালিডেশন টগল ফাংশন
+  // বর্তমান শীটের ডাটা পাওয়া
+  function getCurrentSheetData() {
+    return currentSheet === 1 ? sheetData1 : sheetData2;
+  }
+  
+  function getCurrentSubmittedUIDs() {
+    return currentSheet === 1 ? submittedUIDs1 : submittedUIDs2;
+  }
+  
+  function updateCurrentSheetData(newData) {
+    if(currentSheet === 1) sheetData1 = newData;
+    else sheetData2 = newData;
+  }
+
+  // UID ভ্যালিডেশন টগল
   function loadUidValidationState() {
     const saved = localStorage.getItem(UID_VALIDATION_STATE_KEY);
-    if(saved !== null) {
-      isUidValidationEnabled = saved === 'true';
-    } else {
-      isUidValidationEnabled = true;
-    }
+    if(saved !== null) isUidValidationEnabled = saved === 'true';
+    else isUidValidationEnabled = true;
     if(uidToggle) {
       if(isUidValidationEnabled) uidToggle.classList.add('active');
       else uidToggle.classList.remove('active');
@@ -772,22 +832,23 @@
     showToast(isUidValidationEnabled ? "✅ UID ভ্যালিডেশন চালু (শুধু সংখ্যা)" : "⚪ UID ভ্যালিডেশন বন্ধ (যেকোনো লেখা)");
   }
 
-  function validateAndCleanUidCell(cellDiv, row) {
-    if(!isUidValidationEnabled) return;
-    let raw = cellDiv.innerText;
-    let onlyNumbers = raw.replace(/[^0-9]/g, '');
-    if(onlyNumbers !== raw) {
-      cellDiv.innerText = onlyNumbers;
-    }
-    // শীট ডাটা আপডেট করা
-    if(sheetData[row] && sheetData[row][1] !== onlyNumbers) {
-      if (!isUndoRedo) pushToUndo();
-      sheetData[row][1] = onlyNumbers;
-      saveToLocalStorageForUser(currentLoggedInUser);
-      saveUserDataToFirebase(currentLoggedInUser);
-      updateBFromARow(row, onlyNumbers);
-      checkDuplicateHighlight();
-    }
+  // শীট পরিবর্তন ফাংশন
+  function switchToSheet1() {
+    if(currentSheet === 1) return;
+    currentSheet = 1;
+    sheet1Btn.classList.add('active');
+    sheet2Btn.classList.remove('active');
+    fullRender();
+    showToast("📄 শীট ১ এ স্যুইচ করা হয়েছে");
+  }
+  
+  function switchToSheet2() {
+    if(currentSheet === 2) return;
+    currentSheet = 2;
+    sheet2Btn.classList.add('active');
+    sheet1Btn.classList.remove('active');
+    fullRender();
+    showToast("📄 শীট ২ এ স্যুইচ করা হয়েছে");
   }
 
   function saveAuthToken(username, password) {
@@ -804,19 +865,66 @@
     localStorage.removeItem(AUTH_TOKEN_KEY);
   }
 
+  // পুরোনো শীট ১ এর ডাটা লোকালস্টোরেজ থেকে লোড
+  function loadSheet1FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET1_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { sheetData1 = JSON.parse(savedSheet); } catch(e) {}
+    }
+    const savedSubmitted = localStorage.getItem(SHEET1_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs1 = new Set(JSON.parse(savedSubmitted)); } catch(e) {}
+    }
+  }
+  
+  // শীট ২ এর ডাটা লোকালস্টোরেজ থেকে লোড
+  function loadSheet2FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET2_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { sheetData2 = JSON.parse(savedSheet); } catch(e) {}
+    }
+    const savedSubmitted = localStorage.getItem(SHEET2_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs2 = new Set(JSON.parse(savedSubmitted)); } catch(e) {}
+    }
+  }
+  
+  // শীট ১ সেভ
+  function saveSheet1ToLocalStorage(username) {
+    localStorage.setItem(SHEET1_STORAGE_KEY + username, JSON.stringify(sheetData1));
+    localStorage.setItem(SHEET1_SUBMITTED_KEY + username, JSON.stringify([...submittedUIDs1]));
+  }
+  
+  // শীট ২ সেভ
+  function saveSheet2ToLocalStorage(username) {
+    localStorage.setItem(SHEET2_STORAGE_KEY + username, JSON.stringify(sheetData2));
+    localStorage.setItem(SHEET2_SUBMITTED_KEY + username, JSON.stringify([...submittedUIDs2]));
+  }
+  
+  function saveAllToLocalStorage(username) {
+    saveSheet1ToLocalStorage(username);
+    saveSheet2ToLocalStorage(username);
+  }
+
   async function loadUserDataFromFirebase(username) {
     if(!firebaseDb) return false;
     try {
       const snapshot = await firebaseDb.ref(`userSheets/${username}`).once('value');
       const data = snapshot.val();
-      if(data && data.sheetData) {
-        sheetData = data.sheetData;
-        if(data.submittedUIDs) submittedUIDs = new Set(data.submittedUIDs);
+      if(data) {
+        // শীট ১ - পুরোনো ফরম্যাটে সেভ করা আছে
+        if(data.sheetData) sheetData1 = data.sheetData;
+        if(data.submittedUIDs) submittedUIDs1 = new Set(data.submittedUIDs);
+        
+        // শীট ২ - নতুন ফরম্যাটে সেভ করা আছে
+        if(data.sheetData2) sheetData2 = data.sheetData2;
+        if(data.submittedUIDs2) submittedUIDs2 = new Set(data.submittedUIDs2);
+        
         if(data.chatId) currentChatId = data.chatId;
         if(data.telegramUsername) currentTelegramUsername = data.telegramUsername;
         if(tgUsernameInput) tgUsernameInput.value = currentTelegramUsername;
         if(currentChatId && tgChatIdInput) tgChatIdInput.value = currentChatId;
-        saveToLocalStorageForUser(username);
+        saveAllToLocalStorage(username);
         return true;
       }
     } catch(e) { console.warn(e); }
@@ -832,8 +940,10 @@
     currentChatId = chatIdRaw;
     
     const dataToSave = {
-      sheetData: sheetData,
-      submittedUIDs: [...submittedUIDs],
+      sheetData: sheetData1,           // শীট ১ - পুরোনো নামে
+      submittedUIDs: [...submittedUIDs1],
+      sheetData2: sheetData2,          // শীট ২ - নতুন নামে
+      submittedUIDs2: [...submittedUIDs2],
       chatId: currentChatId,
       telegramUsername: currentTelegramUsername,
       lastUpdated: Date.now()
@@ -849,38 +959,44 @@
     }
   }
 
-  function saveToLocalStorageForUser(username) {
-    localStorage.setItem(STORAGE_KEY_PREFIX + username, JSON.stringify(sheetData));
-    localStorage.setItem(SUBMITTED_UID_KEY_PREFIX + username, JSON.stringify([...submittedUIDs]));
-  }
-
-  function loadFromLocalStorageForUser(username) {
-    const savedSheet = localStorage.getItem(STORAGE_KEY_PREFIX + username);
-    if(savedSheet) {
-      try { sheetData = JSON.parse(savedSheet); } catch(e) {}
-    }
-    const savedSubmitted = localStorage.getItem(SUBMITTED_UID_KEY_PREFIX + username);
-    if(savedSubmitted) {
-      try { submittedUIDs = new Set(JSON.parse(savedSubmitted)); } catch(e) {}
-    }
+  // খালি শীট তৈরির ফাংশন
+  function createEmptySheet() {
+    const newSheet = Array(ROWS).fill().map(() => Array(COLS).fill(''));
+    for (let i = 0; i < ROWS; i++) newSheet[i][0] = (i+1).toString();
+    return newSheet;
   }
 
   async function initUserSession(username, password, isNew = false) {
     currentLoggedInUser = username;
     currentLoginUsername = username;
+    
+    // ডিফল্ট খালি শীট
+    sheetData1 = createEmptySheet();
+    sheetData2 = createEmptySheet();
+    submittedUIDs1 = new Set();
+    submittedUIDs2 = new Set();
+    
     const loaded = await loadUserDataFromFirebase(username);
     if(!loaded) {
-      loadFromLocalStorageForUser(username);
-      if(!sheetData || sheetData.length !== ROWS) {
-        sheetData = Array(ROWS).fill().map(() => Array(COLS).fill(''));
-        for (let i = 0; i < ROWS; i++) sheetData[i][0] = (i+1).toString();
+      // ফায়ারবেজে না থাকলে লোকালস্টোরেজ থেকে লোড
+      loadSheet1FromLocalStorage(username);
+      loadSheet2FromLocalStorage(username);
+      
+      if(!sheetData1 || sheetData1.length !== ROWS) {
+        sheetData1 = createEmptySheet();
       }
-      if(!submittedUIDs) submittedUIDs = new Set();
+      if(!sheetData2 || sheetData2.length !== ROWS) {
+        sheetData2 = createEmptySheet();
+      }
     }
+    
     if(tgUsernameInput && tgUsernameInput.value) currentTelegramUsername = tgUsernameInput.value;
     if(tgChatIdInput && tgChatIdInput.value) currentChatId = tgChatIdInput.value;
     
     displayUsernameSpan.innerText = username;
+    currentSheet = 1;
+    sheet1Btn.classList.add('active');
+    sheet2Btn.classList.remove('active');
     fullRender();
     saveUserDataToFirebase(username);
     
@@ -898,8 +1014,10 @@
     currentLoggedInUser = null;
     currentLoginUsername = "";
     currentTelegramUsername = "";
-    sheetData = [];
-    submittedUIDs.clear();
+    sheetData1 = [];
+    sheetData2 = [];
+    submittedUIDs1.clear();
+    submittedUIDs2.clear();
     
     loadingScreen.classList.add('hide');
     loginOverlay.classList.add('visible');
@@ -969,31 +1087,69 @@
     return false;
   }
 
-  // ==================== স্প্রেডশীট ফাংশন (অপরিবর্তিত) ====================
-  function getMasterPassword() { return (sheetData[0] && sheetData[0][2]) ? sheetData[0][2] : ''; }
+  // ==================== স্প্রেডশীট ফাংশন ====================
+  function getMasterPassword() { 
+    const data = getCurrentSheetData();
+    return (data[0] && data[0][2]) ? data[0][2] : ''; 
+  }
   
   function updateBFromARow(row, newAValue) {
-    sheetData[row][1] = newAValue;
+    const data = getCurrentSheetData();
+    data[row][1] = newAValue;
     if (newAValue && newAValue.toString().trim() !== "") {
       const masterPass = getMasterPassword();
       if (masterPass && masterPass.trim() !== "") {
-        sheetData[row][2] = masterPass;
+        data[row][2] = masterPass;
         const bContent = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='2'] .cell-content`);
         if (bContent && bContent.innerText !== masterPass) bContent.innerText = masterPass;
       }
     } else {
-      sheetData[row][2] = "";
+      data[row][2] = "";
       const bContent = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='2'] .cell-content`);
       if (bContent) bContent.innerText = "";
     }
-    saveToLocalStorageForUser(currentLoggedInUser);
+    saveAllToLocalStorage(currentLoggedInUser);
     saveUserDataToFirebase(currentLoggedInUser);
     checkDuplicateHighlight();
   }
   
-  function pushToUndo() { if (!isUndoRedo) { const copy = JSON.parse(JSON.stringify(sheetData)); undoStack.push(copy); if (undoStack.length > MAX_HISTORY) undoStack.shift(); redoStack = []; } }
-  function undo() { if (undoStack.length === 0) { showToast("❌ আর Undo নেই"); return; } isUndoRedo = true; redoStack.push(JSON.parse(JSON.stringify(sheetData))); sheetData = undoStack.pop(); fullRender(); saveToLocalStorageForUser(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); isUndoRedo = false; showToast("↩️ Undone"); }
-  function redo() { if (redoStack.length === 0) { showToast("❌ আর Redo নেই"); return; } isUndoRedo = true; undoStack.push(JSON.parse(JSON.stringify(sheetData))); sheetData = redoStack.pop(); fullRender(); saveToLocalStorageForUser(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); isUndoRedo = false; showToast("🔁 Redone"); }
+  function pushToUndo() { 
+    if (!isUndoRedo) { 
+      const currentData = getCurrentSheetData();
+      const copy = JSON.parse(JSON.stringify(currentData)); 
+      undoStack.push(copy); 
+      if (undoStack.length > MAX_HISTORY) undoStack.shift(); 
+      redoStack = []; 
+    } 
+  }
+  
+  function undo() { 
+    if (undoStack.length === 0) { showToast("❌ আর Undo নেই"); return; } 
+    isUndoRedo = true; 
+    const currentData = getCurrentSheetData();
+    redoStack.push(JSON.parse(JSON.stringify(currentData))); 
+    const newData = undoStack.pop();
+    updateCurrentSheetData(newData);
+    fullRender(); 
+    saveAllToLocalStorage(currentLoggedInUser); 
+    saveUserDataToFirebase(currentLoggedInUser); 
+    isUndoRedo = false; 
+    showToast("↩️ Undone"); 
+  }
+  
+  function redo() { 
+    if (redoStack.length === 0) { showToast("❌ আর Redo নেই"); return; } 
+    isUndoRedo = true; 
+    const currentData = getCurrentSheetData();
+    undoStack.push(JSON.parse(JSON.stringify(currentData))); 
+    const newData = redoStack.pop();
+    updateCurrentSheetData(newData);
+    fullRender(); 
+    saveAllToLocalStorage(currentLoggedInUser); 
+    saveUserDataToFirebase(currentLoggedInUser); 
+    isUndoRedo = false; 
+    showToast("🔁 Redone"); 
+  }
   
   function checkDuplicateHighlight() {
     const cellsA = document.querySelectorAll('#sheetBody td[data-col="1"] .cell-content');
@@ -1008,57 +1164,99 @@
   function makeEditable(contentDiv, row, col) {
     if (col === 0) return;
     if (col === 1) {
-      // UID কলাম - টগলের উপর নির্ভরশীল
       contentDiv.addEventListener('input', function() { 
         if (!isUndoRedo) pushToUndo();
+        let newVal = this.innerText;
         if(isUidValidationEnabled) {
-          let raw = this.innerText;
-          let onlyNumbers = raw.replace(/[^0-9]/g, '');
-          if (onlyNumbers !== raw) this.innerText = onlyNumbers;
-          let newVal = onlyNumbers;
-          if(sheetData[row][1] !== newVal) {
-            sheetData[row][1] = newVal;
-            updateBFromARow(row, newVal);
-          }
-        } else {
-          let newVal = this.innerText;
-          if(sheetData[row][1] !== newVal) {
-            sheetData[row][1] = newVal;
-            updateBFromARow(row, newVal);
-          }
+          let onlyNumbers = newVal.replace(/[^0-9]/g, '');
+          if (onlyNumbers !== newVal) this.innerText = onlyNumbers;
+          newVal = onlyNumbers;
         }
-        saveToLocalStorageForUser(currentLoggedInUser);
+        const data = getCurrentSheetData();
+        if(data[row][1] !== newVal) {
+          data[row][1] = newVal;
+          updateBFromARow(row, newVal);
+        }
+        saveAllToLocalStorage(currentLoggedInUser);
         saveUserDataToFirebase(currentLoggedInUser);
         checkDuplicateHighlight();
       });
     } else if (col === 2) {
-      contentDiv.addEventListener('blur', function() { const master = getMasterPassword(); if (sheetData[row][1] && sheetData[row][1].toString().trim() !== "" && master && master.trim() !== "") { if (this.innerText !== master) { this.innerText = master; sheetData[row][2] = master; if (!isUndoRedo) pushToUndo(); saveToLocalStorageForUser(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); } } });
-      contentDiv.addEventListener('input', function() { if (!isUndoRedo) pushToUndo(); sheetData[row][2] = this.innerText; saveToLocalStorageForUser(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); });
+      contentDiv.addEventListener('blur', function() { const master = getMasterPassword(); const data = getCurrentSheetData(); if (data[row][1] && data[row][1].toString().trim() !== "" && master && master.trim() !== "") { if (this.innerText !== master) { this.innerText = master; data[row][2] = master; if (!isUndoRedo) pushToUndo(); saveAllToLocalStorage(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); } } });
+      contentDiv.addEventListener('input', function() { if (!isUndoRedo) pushToUndo(); const data = getCurrentSheetData(); data[row][2] = this.innerText; saveAllToLocalStorage(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); });
     } else {
-      contentDiv.addEventListener('input', function() { if (!isUndoRedo) pushToUndo(); sheetData[row][col] = this.innerText; saveToLocalStorageForUser(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); });
+      contentDiv.addEventListener('input', function() { if (!isUndoRedo) pushToUndo(); const data = getCurrentSheetData(); data[row][col] = this.innerText; saveAllToLocalStorage(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); });
     }
   }
   
   function fullRender() {
-    if (!sheetBody) sheetBody = document.getElementById('sheetBody'); if (!sheetBody) return;
+    if (!sheetBody) sheetBody = document.getElementById('sheetBody'); 
+    if (!sheetBody) return;
     sheetBody.innerHTML = '';
+    const currentData = getCurrentSheetData();
+    
+    if(!currentData || currentData.length !== ROWS) {
+      console.error("Invalid sheet data, recreating...");
+      if(currentSheet === 1) sheetData1 = createEmptySheet();
+      else sheetData2 = createEmptySheet();
+      fullRender();
+      return;
+    }
+    
     for (let row = 0; row < ROWS; row++) {
       const tr = document.createElement('tr');
       for (let col = 0; col < COLS; col++) {
-        const td = document.createElement('td'); td.setAttribute('data-row', row); td.setAttribute('data-col', col); td.style.width = colWidths[col] + 'px'; td.style.minWidth = colWidths[col] + 'px';
-        const contentDiv = document.createElement('div'); contentDiv.className = 'cell-content'; contentDiv.setAttribute('contenteditable', col !== 0 ? 'true' : 'false');
-        let cellValue = sheetData[row][col]; if (col === 0 && (!cellValue || cellValue === "")) cellValue = (row+1).toString();
+        const td = document.createElement('td'); 
+        td.setAttribute('data-row', row); 
+        td.setAttribute('data-col', col); 
+        td.style.width = colWidths[col] + 'px'; 
+        td.style.minWidth = colWidths[col] + 'px';
+        const contentDiv = document.createElement('div'); 
+        contentDiv.className = 'cell-content'; 
+        contentDiv.setAttribute('contenteditable', col !== 0 ? 'true' : 'false');
+        let cellValue = currentData[row][col]; 
+        if (col === 0 && (!cellValue || cellValue === "")) cellValue = (row+1).toString();
         contentDiv.innerText = cellValue || '';
-        if (col === 0) { contentDiv.style.textAlign = 'center'; contentDiv.style.overflow = 'hidden'; contentDiv.style.whiteSpace = 'nowrap'; }
+        if (col === 0) { 
+          contentDiv.style.textAlign = 'center'; 
+          contentDiv.style.overflow = 'hidden'; 
+          contentDiv.style.whiteSpace = 'nowrap'; 
+        }
         td.appendChild(contentDiv);
-        if (col !== 0) { makeEditable(contentDiv, row, col); contentDiv.addEventListener('click', (e) => { e.stopPropagation(); if (!e.ctrlKey && !e.metaKey) clearAllSelection(); td.classList.add('selected'); selectedCells.add(td); }); } else { td.addEventListener('click', (e) => e.stopPropagation()); }
+        if (col !== 0) { 
+          makeEditable(contentDiv, row, col); 
+          contentDiv.addEventListener('click', (e) => { 
+            e.stopPropagation(); 
+            if (!e.ctrlKey && !e.metaKey) clearAllSelection(); 
+            td.classList.add('selected'); 
+            selectedCells.add(td); 
+          }); 
+        } else { 
+          td.addEventListener('click', (e) => e.stopPropagation()); 
+        }
         tr.appendChild(td);
       }
       sheetBody.appendChild(tr);
     }
     checkDuplicateHighlight();
     const b1Content = document.querySelector('#sheetBody td[data-row="0"][data-col="2"] .cell-content');
-    if (b1Content) { b1Content.addEventListener('blur', () => { const newMaster = getMasterPassword(); if (newMaster && newMaster.trim() !== "") { for (let r = 0; r < ROWS; r++) { if (sheetData[r][1] && sheetData[r][1].toString().trim() !== "") { sheetData[r][2] = newMaster; const tBContent = document.querySelector(`#sheetBody td[data-row='${r}'][data-col='2'] .cell-content`); if (tBContent) tBContent.innerText = newMaster; } } saveToLocalStorageForUser(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); } }); }
+    if (b1Content) { 
+      b1Content.addEventListener('blur', () => { 
+        const newMaster = getMasterPassword(); 
+        if (newMaster && newMaster.trim() !== "") { 
+          const data = getCurrentSheetData();
+          for (let r = 0; r < ROWS; r++) { 
+            if (data[r][1] && data[r][1].toString().trim() !== "") { 
+              data[r][2] = newMaster; 
+              const tBContent = document.querySelector(`#sheetBody td[data-row='${r}'][data-col='2'] .cell-content`); 
+              if (tBContent) tBContent.innerText = newMaster; 
+            } 
+          } 
+          saveAllToLocalStorage(currentLoggedInUser); 
+          saveUserDataToFirebase(currentLoggedInUser); 
+        } 
+      }); 
+    }
     restoreScrollPosition();
     addResizeHandles(); 
     bindColumnSelection();
@@ -1101,8 +1299,9 @@
   function deleteSelected() {
     if (selectedCells.size === 0) { showToast("সিলেক্ট করুন"); return; }
     pushToUndo(); const cellsToDelete = Array.from(selectedCells);
-    for (let cell of cellsToDelete) { let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col')); const contentDiv = cell.querySelector('.cell-content'); if (contentDiv && c !== 0) { contentDiv.innerText = ''; sheetData[r][c] = ''; } if (c === 1) updateBFromARow(r, ''); }
-    saveToLocalStorageForUser(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); checkDuplicateHighlight(); clearAllSelection(); showToast(`🗑️ ${cellsToDelete.length} টি সেল ডিলিট হয়েছে`);
+    const data = getCurrentSheetData();
+    for (let cell of cellsToDelete) { let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col')); const contentDiv = cell.querySelector('.cell-content'); if (contentDiv && c !== 0) { contentDiv.innerText = ''; data[r][c] = ''; } if (c === 1) updateBFromARow(r, ''); }
+    saveAllToLocalStorage(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); checkDuplicateHighlight(); clearAllSelection(); showToast(`🗑️ ${cellsToDelete.length} টি সেল ডিলিট হয়েছে`);
   }
   
   function saveUserInfo() {
@@ -1115,9 +1314,28 @@
     showToast(`💾 সেভ হয়েছে (টেলিগ্রাম: ${currentTelegramUsername || "ফাঁকা"})`);
   }
 
-  // ==================== টেলিগ্রাম ফাংশন (সংশোধিত) ====================
-  function getNewUnsubmittedUIDs() { let arr = []; for (let i=0;i<ROWS;i++) { let uid = sheetData[i][1]?.toString().trim(); if(uid && !submittedUIDs.has(uid)) arr.push({ row:i, uid, password: sheetData[i][2]||"", cookies: sheetData[i][3]||"", colD: sheetData[i][4]||"", colE: sheetData[i][5]||"" }); } return arr; }
-  function hasAnyUnsubmittedData() { for (let i=0;i<ROWS;i++) { let uid = sheetData[i][1]?.toString().trim(); if(uid && !submittedUIDs.has(uid)) return true; } return false; }
+  // ==================== টেলিগ্রাম ফাংশন ====================
+  function getNewUnsubmittedUIDs() { 
+    let arr = []; 
+    const data = getCurrentSheetData();
+    const submitted = getCurrentSubmittedUIDs();
+    for (let i=0;i<ROWS;i++) { 
+      let uid = data[i][1]?.toString().trim(); 
+      if(uid && !submitted.has(uid)) arr.push({ row:i, uid, password: data[i][2]||"", cookies: data[i][3]||"", colD: data[i][4]||"", colE: data[i][5]||"" }); 
+    } 
+    return arr; 
+  }
+  
+  function hasAnyUnsubmittedData() { 
+    const data = getCurrentSheetData();
+    const submitted = getCurrentSubmittedUIDs();
+    for (let i=0;i<ROWS;i++) { 
+      let uid = data[i][1]?.toString().trim(); 
+      if(uid && !submitted.has(uid)) return true; 
+    } 
+    return false; 
+  }
+  
   async function sendTelegramFile(chatId, file, caption) { if (!chatId) return false; try { const formData = new FormData(); formData.append("chat_id", chatId); formData.append("document", file); formData.append("caption", caption); formData.append("parse_mode", "HTML"); const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, { method: "POST", body: formData }); const result = await response.json(); return result.ok; } catch(e) { return false; } }
   function getTomorrowDay() { const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1); return tomorrow.getDate(); }
   
@@ -1144,6 +1362,7 @@
       const existing = document.querySelector('.confirm-modal-overlay'); 
       if(existing) existing.remove(); 
       const newDataCount = getNewUnsubmittedUIDs().length; 
+      const sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
       const modalDiv = document.createElement('div'); 
       modalDiv.className = 'confirm-modal-overlay'; 
       modalDiv.innerHTML = `
@@ -1151,6 +1370,7 @@
           <div class="icon">📋</div>
           <h3>সাবমিট কনফার্মেশন</h3>
           <div class="info-box">
+            <strong>📄 শীট:</strong> ${sheetName}<br>
             <strong>👤 টেলিগ্রাম ইউজার:</strong> ${escapeHtml(currentTelegramUsername || "সেট করা হয়নি")}<br>
             <strong>🆔 চ্যাট আইডি:</strong> ${escapeHtml(currentChatId || "সেট করা হয়নি")}<br>
             <strong>📊 মোট আইডি:</strong> ${newDataCount} টি<br>
@@ -1195,7 +1415,7 @@
       return; 
     } 
     if(!hasAnyUnsubmittedData()) { 
-      showToast("ℹ️ কোনো নতুন UID নেই!"); 
+      showToast("ℹ️ এই শীটে কোনো নতুন UID নেই!"); 
       return; 
     } 
     const { confirmed, accountType } = await showSubmitConfirmation(); 
@@ -1212,14 +1432,15 @@
     XLSX.utils.book_append_sheet(wb, ws, "EBH_Data"); 
     const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }); 
     const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
-    const file = new File([blob], `ebh_data_${Date.now()}.xlsx`, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
+    const file = new File([blob], `ebh_data_sheet${currentSheet}_${Date.now()}.xlsx`, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
     const tomorrowDay = getTomorrowDay(); 
     const todayDate = new Date().getDate(); 
     const accountTypeMsg = accountType ? `📂 <b>একাউন্ট ধরণ:</b> ${escapeHtml(accountType)}\n` : ""; 
+    const sheetInfo = currentSheet === 1 ? "📄 শীট ১" : "📄 শীট ২";
     
-    const userCaption = `✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n👤 <b>আপনার টেলিগ্রাম ইউজার:</b> ${escapeHtml(currentTelegramUsername)}\n📊 <b>মোট আইডি:</b> ${newData.length} টি\n${accountTypeMsg}📅 <b>সাবমিটের তারিখ:</b> ${todayDate}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🍀 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n📌 আপনি <b>${tomorrowDay}</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n❤️ <b>𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗕𝗬 𝗛𝗔𝗕𝗜𝗕</b>\n🤝 সাথে থাকার জন্য আপনাকে ধন্যবাদ! 🙏`; 
+    const userCaption = `✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n${sheetInfo}\n👤 <b>আপনার টেলিগ্রাম ইউজার:</b> ${escapeHtml(currentTelegramUsername)}\n📊 <b>মোট আইডি:</b> ${newData.length} টি\n${accountTypeMsg}📅 <b>সাবমিটের তারিখ:</b> ${todayDate}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🍀 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n📌 আপনি <b>${tomorrowDay}</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n❤️ <b>𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗕𝗬 𝗛𝗔𝗕𝗜𝗕</b>\n🤝 সাথে থাকার জন্য আপনাকে ধন্যবাদ! 🙏`; 
     
-    const adminCaption = `📊 <b>EBH ডাটা সাবমিট</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n👤 টেলিগ্রাম ইউজার: ${escapeHtml(currentTelegramUsername)}\n🆔 চ্যাট আইডি: ${escapeHtml(currentChatId)}\n${accountTypeMsg}📋 মোট নতুন UID: ${newData.length} টি\n📅 সময়: ${new Date().toLocaleString('bn-BD')}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n✅ সাবমিশন সফল হয়েছে!`; 
+    const adminCaption = `📊 <b>EBH ডাটা সাবমিট</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n${sheetInfo}\n👤 টেলিগ্রাম ইউজার: ${escapeHtml(currentTelegramUsername)}\n🆔 চ্যাট আইডি: ${escapeHtml(currentChatId)}\n${accountTypeMsg}📋 মোট নতুন UID: ${newData.length} টি\n📅 সময়: ${new Date().toLocaleString('bn-BD')}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n✅ সাবমিশন সফল হয়েছে!`; 
     
     showToast(`⏳ ${newData.length} টি নতুন UID সাবমিট হচ্ছে...`); 
     try { 
@@ -1227,8 +1448,9 @@
       let userSent = false; 
       if(currentChatId) userSent = await sendTelegramFile(currentChatId, file, userCaption); 
       if(adminSent || userSent) { 
-        for(const item of newData) submittedUIDs.add(item.uid); 
-        saveToLocalStorageForUser(currentLoggedInUser); 
+        const submitted = getCurrentSubmittedUIDs();
+        for(const item of newData) submitted.add(item.uid); 
+        saveAllToLocalStorage(currentLoggedInUser); 
         saveUserDataToFirebase(currentLoggedInUser); 
         let statusMessage = userSent ? "✅ আপনার টেলিগ্রাম ইনবক্সে ফাইল পাঠানো হয়েছে!" : "✅ ফাইল অ্যাডমিনের চ্যাটে পাঠানো হয়েছে!"; 
         const modalDiv = document.createElement('div'); 
@@ -1238,6 +1460,7 @@
             <div style="font-size:40px;">✅</div>
             <div style="font-size:20px; font-weight:bold; margin:10px 0;">সাবমিট সফল!</div>
             <div style="background:#f1f5f9; padding:12px; border-radius:16px; margin:12px 0; text-align:left;">
+              <p><strong>📄 শীট:</strong> ${sheetInfo}</p>
               <p><strong>👤 টেলিগ্রাম ইউজার:</strong> ${escapeHtml(currentTelegramUsername)}</p>
               <p><strong>🆔 চ্যাট আইডি:</strong> ${escapeHtml(currentChatId)}</p>
               <p><strong>📁 একাউন্ট ধরণ:</strong> ${escapeHtml(accountType)}</p>
@@ -1272,6 +1495,8 @@
     document.getElementById('submitMainBtn').addEventListener('click', sendToTelegram);
     document.getElementById('logoutHeaderBtn').addEventListener('click', logout);
     if(uidToggle) uidToggle.addEventListener('click', toggleUidValidation);
+    if(sheet1Btn) sheet1Btn.addEventListener('click', switchToSheet1);
+    if(sheet2Btn) sheet2Btn.addEventListener('click', switchToSheet2);
   }
 
   function setupInputFocus() { 
