@@ -486,6 +486,7 @@
       text-align: center;
       position: relative;
     }
+    /* UID টগল সুইচ */
     .uid-toggle-switch {
       position: absolute;
       right: 4px;
@@ -517,7 +518,44 @@
     .uid-toggle-switch.active::after {
       transform: translateX(16px);
     }
+    /* পাসওয়ার্ড টগল সুইচ */
+    .password-toggle-switch {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 16px;
+      background-color: #ccc;
+      border-radius: 32px;
+      display: inline-block;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .password-toggle-switch::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background-color: white;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: 0.2s;
+    }
+    .password-toggle-switch.active {
+      background-color: #10b981;
+    }
+    .password-toggle-switch.active::after {
+      transform: translateX(16px);
+    }
     th[data-col="1"] {
+      padding-left: 5px;
+      padding-right: 35px;
+      text-align: left;
+    }
+    th[data-col="2"] {
       padding-left: 5px;
       padding-right: 35px;
       text-align: left;
@@ -585,7 +623,6 @@
     }
     .system-off-card { background: white; border-radius: 24px; max-width: 300px; width: 85%; padding: 20px; text-align: center; }
     
-    /* শীট সিলেক্ট বাটন স্টাইল */
     .sheet-selector {
       display: flex;
       gap: 8px;
@@ -615,6 +652,64 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
     .sheet-btn:active { transform: scale(0.96); }
+    
+    .bulk-delete-confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10006;
+      backdrop-filter: blur(5px);
+    }
+    .bulk-delete-confirm {
+      background: white;
+      border-radius: 40px;
+      max-width: 440px;
+      width: 90%;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+      border-top: 6px solid #dc2626;
+      animation: fadeInScale 0.2s ease;
+    }
+    .bulk-delete-confirm .icon { font-size: 56px; margin-bottom: 8px; }
+    .bulk-delete-confirm h3 { color: #991b1b; font-size: 24px; margin-bottom: 16px; font-weight: 800; }
+    .bulk-delete-confirm .delete-info-box {
+      background: #fef2f2;
+      padding: 14px;
+      border-radius: 24px;
+      text-align: left;
+      font-size: 13px;
+      margin: 12px 0;
+      color: #7f1d1d;
+      line-height: 1.6;
+    }
+    .bulk-delete-confirm .warning-text {
+      color: #b91c1c;
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 12px;
+    }
+    .bulk-delete-actions { display: flex; gap: 14px; margin-top: 20px; }
+    .bulk-delete-actions button {
+      flex: 1;
+      border: none;
+      padding: 14px 0;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .delete-confirm-yes { background: #dc2626; color: white; }
+    .delete-confirm-no { background: #e2e8f0; color: #1e293b; }
+    .delete-confirm-yes:active { transform: scale(0.96); }
+    .delete-confirm-no:active { transform: scale(0.96); }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -687,7 +782,10 @@
             UID
             <div class="uid-toggle-switch" id="uidValidationToggle" title="শুধুমাত্র সংখ্যা অনুমোদন অন/অফ"></div>
           </th>
-          <th data-col="2">পাসওয়ার্ড</th>
+          <th data-col="2">
+            পাসওয়ার্ড
+            <div class="password-toggle-switch" id="passwordAutoToggle" title="অটো পাসওয়ার্ড অন/অফ"></div>
+          </th>
           <th data-col="3">কুকিজ/2FA</th>
           <th data-col="4">D</th>
           <th data-col="5">E</th>
@@ -704,6 +802,7 @@
 <div id="liveToast" class="toast-msg"></div>
 <script>
 (function() {
+  // Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyCHqx6dAHeGFdtvY8682b_iQkdnk2ie0ug",
     authDomain: "saprahik-kaj.firebaseapp.com",
@@ -718,7 +817,7 @@
   try {
     firebase.initializeApp(firebaseConfig);
     firebaseDb = firebase.database();
-    console.log("✅ Firebase connected");
+    console.log("Firebase connected");
   } catch(e) { console.warn(e); }
 
   const BOT_TOKEN = "8675351739:AAHGiFLJvQM4cmoDtwnBsXEsK4A2D_SsGs4";
@@ -729,31 +828,25 @@
   let colWidths = [45, 90, 90, 90, 90, 90];
   let selectedCells = new Set();
   
-  // শীট ১ - পুরোনো সিস্টেম (অপরিবর্তিত নামে)
-  let sheetData1 = [];   // স্টোরেজ কী: EBH_Sheet_Data_username
-  let submittedUIDs1 = new Set(); // স্টোরেজ কী: EBH_Submitted_UIDs_username
+  let sheetData1 = [];
+  let submittedUIDs1 = new Set();
+  let sheetData2 = [];
+  let submittedUIDs2 = new Set();
   
-  // শীট ২ - নতুন সিস্টেম (আলাদা নামে)
-  let sheetData2 = [];   // স্টোরেজ কী: EBH_Sheet_Data_2_username
-  let submittedUIDs2 = new Set(); // স্টোরেজ কী: EBH_Submitted_UIDs_2_username
-  
-  let currentSheet = 1; // 1 or 2
-  let currentLoginUsername = "";
+  let currentSheet = 1;
   let currentTelegramUsername = "";
   let currentChatId = "";
   let systemStatusListener = null;
   
-  // শীট ১ এর জন্য পুরোনো স্টোরেজ কী
   const SHEET1_STORAGE_KEY = "EBH_Sheet_Data_";
   const SHEET1_SUBMITTED_KEY = "EBH_Submitted_UIDs_";
-  
-  // শীট ২ এর জন্য নতুন স্টোরেজ কী
   const SHEET2_STORAGE_KEY = "EBH_Sheet_Data_2_";
   const SHEET2_SUBMITTED_KEY = "EBH_Submitted_UIDs_2_";
   
   const AUTH_TOKEN_KEY = "EBH_Auth_Token";
   const SCROLL_POSITION_KEY = "EBH_Scroll_Position";
   const UID_VALIDATION_STATE_KEY = "EBH_UidValidationState";
+  const PASSWORD_AUTO_STATE_KEY = "EBH_PasswordAutoState";
   
   let undoStack = [];
   let redoStack = [];
@@ -767,33 +860,39 @@
   const loginOverlay = document.getElementById('loginOverlay');
   const appContainer = document.getElementById('appContainer');
   const loginBtn = document.getElementById('loginSubmitBtn');
-  const loginUsername = document.getElementById('loginUsername');
-  const loginPassword = document.getElementById('loginPassword');
+  const loginUsernameInput = document.getElementById('loginUsername');
+  const loginPasswordInput = document.getElementById('loginPassword');
   const loginError = document.getElementById('loginError');
   const displayUsernameSpan = document.getElementById('displayUsername');
   const logoutHeaderBtn = document.getElementById('logoutHeaderBtn');
   const tgUsernameInput = document.getElementById('tgUsername');
   const tgChatIdInput = document.getElementById('tgChatId');
   const uidToggle = document.getElementById('uidValidationToggle');
+  const passwordAutoToggle = document.getElementById('passwordAutoToggle');
   const sheet1Btn = document.getElementById('sheet1Btn');
   const sheet2Btn = document.getElementById('sheet2Btn');
 
   let isUidValidationEnabled = true;
+  let isPasswordAutoEnabled = true; // পাসওয়ার্ড অটো ফিচার ডিফল্ট অন
 
   function showToast(msg) { 
     const toast = document.getElementById('liveToast'); 
     if(!toast) return;
     toast.innerText = msg; 
     toast.style.opacity = '1'; 
-    setTimeout(() => toast.style.opacity = '0', 1800); 
+    setTimeout(function() { toast.style.opacity = '0'; }, 1800); 
   }
   
   function escapeHtml(str) { 
     if(!str) return '';
-    return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m] || m); 
+    return String(str).replace(/[&<>]/g, function(m) {
+      if(m === '&') return '&amp;';
+      if(m === '<') return '&lt;';
+      if(m === '>') return '&gt;';
+      return m;
+    });
   }
 
-  // বর্তমান শীটের ডাটা পাওয়া
   function getCurrentSheetData() {
     return currentSheet === 1 ? sheetData1 : sheetData2;
   }
@@ -807,7 +906,6 @@
     else sheetData2 = newData;
   }
 
-  // UID ভ্যালিডেশন টগল
   function loadUidValidationState() {
     const saved = localStorage.getItem(UID_VALIDATION_STATE_KEY);
     if(saved !== null) isUidValidationEnabled = saved === 'true';
@@ -822,6 +920,20 @@
     localStorage.setItem(UID_VALIDATION_STATE_KEY, isUidValidationEnabled);
   }
 
+  function loadPasswordAutoState() {
+    const saved = localStorage.getItem(PASSWORD_AUTO_STATE_KEY);
+    if(saved !== null) isPasswordAutoEnabled = saved === 'true';
+    else isPasswordAutoEnabled = true;
+    if(passwordAutoToggle) {
+      if(isPasswordAutoEnabled) passwordAutoToggle.classList.add('active');
+      else passwordAutoToggle.classList.remove('active');
+    }
+  }
+  
+  function savePasswordAutoState() {
+    localStorage.setItem(PASSWORD_AUTO_STATE_KEY, isPasswordAutoEnabled);
+  }
+
   function toggleUidValidation() {
     isUidValidationEnabled = !isUidValidationEnabled;
     if(uidToggle) {
@@ -829,17 +941,28 @@
       else uidToggle.classList.remove('active');
     }
     saveUidValidationState();
-    showToast(isUidValidationEnabled ? "✅ UID ভ্যালিডেশন চালু (শুধু সংখ্যা)" : "⚪ UID ভ্যালিডেশন বন্ধ (যেকোনো লেখা)");
+    showToast(isUidValidationEnabled ? "UID ভ্যালিডেশন চালু (শুধু সংখ্যা)" : "UID ভ্যালিডেশন বন্ধ (যেকোনো লেখা)");
   }
 
-  // শীট পরিবর্তন ফাংশন
+  function togglePasswordAuto() {
+    isPasswordAutoEnabled = !isPasswordAutoEnabled;
+    if(passwordAutoToggle) {
+      if(isPasswordAutoEnabled) passwordAutoToggle.classList.add('active');
+      else passwordAutoToggle.classList.remove('active');
+    }
+    savePasswordAutoState();
+    showToast(isPasswordAutoEnabled ? "পাসওয়ার্ড অটো অন (মাস্টার পাসওয়ার্ড অটো সেট হবে)" : "পাসওয়ার্ড অটো অফ (ম্যানুয়ালি লিখুন)");
+    // স্টেট চেঞ্জের পর পুরো রিন্ডার করে দিন
+    fullRender();
+  }
+
   function switchToSheet1() {
     if(currentSheet === 1) return;
     currentSheet = 1;
     sheet1Btn.classList.add('active');
     sheet2Btn.classList.remove('active');
     fullRender();
-    showToast("📄 শীট ১ এ স্যুইচ করা হয়েছে");
+    showToast("শীট ১ এ স্যুইচ করা হয়েছে");
   }
   
   function switchToSheet2() {
@@ -848,12 +971,13 @@
     sheet2Btn.classList.add('active');
     sheet1Btn.classList.remove('active');
     fullRender();
-    showToast("📄 শীট ২ এ স্যুইচ করা হয়েছে");
+    showToast("শীট ২ এ স্যুইচ করা হয়েছে");
   }
 
   function saveAuthToken(username, password) {
-    localStorage.setItem(AUTH_TOKEN_KEY, JSON.stringify({ username, password, timestamp: Date.now() }));
+    localStorage.setItem(AUTH_TOKEN_KEY, JSON.stringify({ username: username, password: password, timestamp: Date.now() }));
   }
+  
   function getAuthToken() {
     try {
       const data = localStorage.getItem(AUTH_TOKEN_KEY);
@@ -861,44 +985,41 @@
     } catch(e) {}
     return null;
   }
+  
   function clearAuthToken() {
     localStorage.removeItem(AUTH_TOKEN_KEY);
   }
 
-  // পুরোনো শীট ১ এর ডাটা লোকালস্টোরেজ থেকে লোড
   function loadSheet1FromLocalStorage(username) {
     const savedSheet = localStorage.getItem(SHEET1_STORAGE_KEY + username);
     if(savedSheet) {
-      try { sheetData1 = JSON.parse(savedSheet); } catch(e) {}
+      try { sheetData1 = JSON.parse(savedSheet); } catch(e) { console.warn(e); }
     }
     const savedSubmitted = localStorage.getItem(SHEET1_SUBMITTED_KEY + username);
     if(savedSubmitted) {
-      try { submittedUIDs1 = new Set(JSON.parse(savedSubmitted)); } catch(e) {}
+      try { submittedUIDs1 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
     }
   }
   
-  // শীট ২ এর ডাটা লোকালস্টোরেজ থেকে লোড
   function loadSheet2FromLocalStorage(username) {
     const savedSheet = localStorage.getItem(SHEET2_STORAGE_KEY + username);
     if(savedSheet) {
-      try { sheetData2 = JSON.parse(savedSheet); } catch(e) {}
+      try { sheetData2 = JSON.parse(savedSheet); } catch(e) { console.warn(e); }
     }
     const savedSubmitted = localStorage.getItem(SHEET2_SUBMITTED_KEY + username);
     if(savedSubmitted) {
-      try { submittedUIDs2 = new Set(JSON.parse(savedSubmitted)); } catch(e) {}
+      try { submittedUIDs2 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
     }
   }
   
-  // শীট ১ সেভ
   function saveSheet1ToLocalStorage(username) {
     localStorage.setItem(SHEET1_STORAGE_KEY + username, JSON.stringify(sheetData1));
-    localStorage.setItem(SHEET1_SUBMITTED_KEY + username, JSON.stringify([...submittedUIDs1]));
+    localStorage.setItem(SHEET1_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs1)));
   }
   
-  // শীট ২ সেভ
   function saveSheet2ToLocalStorage(username) {
     localStorage.setItem(SHEET2_STORAGE_KEY + username, JSON.stringify(sheetData2));
-    localStorage.setItem(SHEET2_SUBMITTED_KEY + username, JSON.stringify([...submittedUIDs2]));
+    localStorage.setItem(SHEET2_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs2)));
   }
   
   function saveAllToLocalStorage(username) {
@@ -909,21 +1030,17 @@
   async function loadUserDataFromFirebase(username) {
     if(!firebaseDb) return false;
     try {
-      const snapshot = await firebaseDb.ref(`userSheets/${username}`).once('value');
+      const snapshot = await firebaseDb.ref('userSheets/' + username).once('value');
       const data = snapshot.val();
       if(data) {
-        // শীট ১ - পুরোনো ফরম্যাটে সেভ করা আছে
         if(data.sheetData) sheetData1 = data.sheetData;
         if(data.submittedUIDs) submittedUIDs1 = new Set(data.submittedUIDs);
-        
-        // শীট ২ - নতুন ফরম্যাটে সেভ করা আছে
         if(data.sheetData2) sheetData2 = data.sheetData2;
         if(data.submittedUIDs2) submittedUIDs2 = new Set(data.submittedUIDs2);
-        
         if(data.chatId) currentChatId = data.chatId;
         if(data.telegramUsername) currentTelegramUsername = data.telegramUsername;
-        if(tgUsernameInput) tgUsernameInput.value = currentTelegramUsername;
-        if(currentChatId && tgChatIdInput) tgChatIdInput.value = currentChatId;
+        if(tgUsernameInput) tgUsernameInput.value = currentTelegramUsername || '';
+        if(tgChatIdInput && currentChatId) tgChatIdInput.value = currentChatId;
         saveAllToLocalStorage(username);
         return true;
       }
@@ -933,52 +1050,58 @@
 
   function saveUserDataToFirebase(username) {
     if(!firebaseDb || !username) return;
-    const tgUsernameRaw = tgUsernameInput?.value.trim() || "";
-    const chatIdRaw = tgChatIdInput?.value.trim() || "";
+    const tgUsernameRaw = tgUsernameInput ? tgUsernameInput.value.trim() : "";
+    const chatIdRaw = tgChatIdInput ? tgChatIdInput.value.trim() : "";
     if (tgUsernameRaw && !tgUsernameRaw.startsWith('@')) currentTelegramUsername = '@' + tgUsernameRaw;
     else currentTelegramUsername = tgUsernameRaw;
     currentChatId = chatIdRaw;
     
     const dataToSave = {
-      sheetData: sheetData1,           // শীট ১ - পুরোনো নামে
-      submittedUIDs: [...submittedUIDs1],
-      sheetData2: sheetData2,          // শীট ২ - নতুন নামে
-      submittedUIDs2: [...submittedUIDs2],
+      sheetData: sheetData1,
+      submittedUIDs: Array.from(submittedUIDs1),
+      sheetData2: sheetData2,
+      submittedUIDs2: Array.from(submittedUIDs2),
       chatId: currentChatId,
       telegramUsername: currentTelegramUsername,
       lastUpdated: Date.now()
     };
-    firebaseDb.ref(`userSheets/${username}`).set(dataToSave).catch(e=>console.warn(e));
+    firebaseDb.ref('userSheets/' + username).set(dataToSave).catch(function(e){ console.warn(e); });
+    
     if(currentTelegramUsername && currentTelegramUsername !== "") {
-      const cleanUser = currentTelegramUsername.replace('@', '').toLowerCase();
-      firebaseDb.ref(`telegramUsers/${cleanUser}`).set({
+      var cleanUser = currentTelegramUsername.replace('@', '').toLowerCase();
+      firebaseDb.ref('telegramUsers/' + cleanUser).set({
         chatId: parseInt(currentChatId) || 0,
         username: currentTelegramUsername,
         linkedAccount: username
-      }).catch(e=>console.warn(e));
+      }).catch(function(e){ console.warn(e); });
     }
   }
 
-  // খালি শীট তৈরির ফাংশন
   function createEmptySheet() {
-    const newSheet = Array(ROWS).fill().map(() => Array(COLS).fill(''));
-    for (let i = 0; i < ROWS; i++) newSheet[i][0] = (i+1).toString();
+    var newSheet = [];
+    for (var i = 0; i < ROWS; i++) {
+      newSheet[i] = [];
+      for (var j = 0; j < COLS; j++) {
+        newSheet[i][j] = '';
+      }
+      newSheet[i][0] = (i+1).toString();
+    }
     return newSheet;
   }
 
-  async function initUserSession(username, password, isNew = false) {
-    currentLoggedInUser = username;
-    currentLoginUsername = username;
+  async function initUserSession(username, password, isNew) {
+    undoStack = [];
+    redoStack = [];
     
-    // ডিফল্ট খালি শীট
+    currentLoggedInUser = username;
+    
     sheetData1 = createEmptySheet();
     sheetData2 = createEmptySheet();
     submittedUIDs1 = new Set();
     submittedUIDs2 = new Set();
     
-    const loaded = await loadUserDataFromFirebase(username);
+    var loaded = await loadUserDataFromFirebase(username);
     if(!loaded) {
-      // ফায়ারবেজে না থাকলে লোকালস্টোরেজ থেকে লোড
       loadSheet1FromLocalStorage(username);
       loadSheet2FromLocalStorage(username);
       
@@ -993,16 +1116,16 @@
     if(tgUsernameInput && tgUsernameInput.value) currentTelegramUsername = tgUsernameInput.value;
     if(tgChatIdInput && tgChatIdInput.value) currentChatId = tgChatIdInput.value;
     
-    displayUsernameSpan.innerText = username;
+    if(displayUsernameSpan) displayUsernameSpan.innerText = username;
     currentSheet = 1;
-    sheet1Btn.classList.add('active');
-    sheet2Btn.classList.remove('active');
+    if(sheet1Btn) sheet1Btn.classList.add('active');
+    if(sheet2Btn) sheet2Btn.classList.remove('active');
     fullRender();
     saveUserDataToFirebase(username);
     
-    loadingScreen.classList.add('hide');
-    loginOverlay.classList.remove('visible');
-    appContainer.classList.add('visible');
+    if(loadingScreen) loadingScreen.classList.add('hide');
+    if(loginOverlay) loginOverlay.classList.remove('visible');
+    if(appContainer) appContainer.classList.add('visible');
     saveAuthToken(username, password);
   }
 
@@ -1012,70 +1135,77 @@
     }
     clearAuthToken();
     currentLoggedInUser = null;
-    currentLoginUsername = "";
     currentTelegramUsername = "";
     sheetData1 = [];
     sheetData2 = [];
-    submittedUIDs1.clear();
-    submittedUIDs2.clear();
+    if(submittedUIDs1) submittedUIDs1.clear();
+    if(submittedUIDs2) submittedUIDs2.clear();
     
-    loadingScreen.classList.add('hide');
-    loginOverlay.classList.add('visible');
-    appContainer.classList.remove('visible');
-    loginUsername.value = '';
-    loginPassword.value = '';
-    loginError.style.display = 'none';
+    if(loadingScreen) loadingScreen.classList.add('hide');
+    if(loginOverlay) loginOverlay.classList.add('visible');
+    if(appContainer) appContainer.classList.remove('visible');
+    if(loginUsernameInput) loginUsernameInput.value = '';
+    if(loginPasswordInput) loginPasswordInput.value = '';
+    if(loginError) loginError.style.display = 'none';
   }
 
   async function handleLoginOrRegister() {
-    const username = loginUsername.value.trim();
-    const password = loginPassword.value.trim();
+    var username = loginUsernameInput.value.trim();
+    var password = loginPasswordInput.value.trim();
     if(!username || !password) {
-      loginError.innerText = "ইউজারনেম ও পাসওয়ার্ড দিন";
-      loginError.style.display = 'block';
+      if(loginError) {
+        loginError.innerText = "ইউজারনেম ও পাসওয়ার্ড দিন";
+        loginError.style.display = 'block';
+      }
       return;
     }
-    loginError.style.display = 'none';
+    if(loginError) loginError.style.display = 'none';
     if(!firebaseDb) {
-      loginError.innerText = "Firebase সংযোগ নেই!";
-      loginError.style.display = 'block';
+      if(loginError) {
+        loginError.innerText = "Firebase সংযোগ নেই!";
+        loginError.style.display = 'block';
+      }
       return;
     }
     
-    loadingScreen.classList.remove('hide');
+    if(loadingScreen) loadingScreen.classList.remove('hide');
     
     try {
-      const userRef = firebaseDb.ref(`users/${username}`);
-      const snapshot = await userRef.once('value');
-      const userData = snapshot.val();
+      var userRef = firebaseDb.ref('users/' + username);
+      var snapshot = await userRef.once('value');
+      var userData = snapshot.val();
       
       if(userData) {
         if(userData.password === password) {
           await initUserSession(username, password, false);
         } else {
-          loadingScreen.classList.add('hide');
-          loginError.innerText = "ভুল পাসওয়ার্ড!";
-          loginError.style.display = 'block';
+          if(loadingScreen) loadingScreen.classList.add('hide');
+          if(loginError) {
+            loginError.innerText = "ভুল পাসওয়ার্ড!";
+            loginError.style.display = 'block';
+          }
         }
       } else {
         await userRef.set({ password: password, createdAt: Date.now() });
         await initUserSession(username, password, true);
-        showToast("✅ রেজিস্ট্রেশন সফল! স্বাগতম!");
+        showToast("রেজিস্ট্রেশন সফল! স্বাগতম!");
       }
     } catch(err) {
       console.error(err);
-      loadingScreen.classList.add('hide');
-      loginError.innerText = "সার্ভার ত্রুটি, আবার চেষ্টা করুন";
-      loginError.style.display = 'block';
+      if(loadingScreen) loadingScreen.classList.add('hide');
+      if(loginError) {
+        loginError.innerText = "সার্ভার ত্রুটি, আবার চেষ্টা করুন";
+        loginError.style.display = 'block';
+      }
     }
   }
 
   async function checkAutoLogin() {
-    const token = getAuthToken();
+    var token = getAuthToken();
     if(token && token.username && token.password && firebaseDb) {
       try {
-        const ref = firebaseDb.ref(`users/${token.username}`);
-        const snap = await ref.once('value');
+        var ref = firebaseDb.ref('users/' + token.username);
+        var snap = await ref.once('value');
         if(snap.exists() && snap.val().password === token.password) {
           await initUserSession(token.username, token.password, false);
           return true;
@@ -1087,26 +1217,27 @@
     return false;
   }
 
-  // ==================== স্প্রেডশীট ফাংশন ====================
   function getMasterPassword() { 
-    const data = getCurrentSheetData();
+    var data = getCurrentSheetData();
     return (data[0] && data[0][2]) ? data[0][2] : ''; 
   }
   
   function updateBFromARow(row, newAValue) {
-    const data = getCurrentSheetData();
+    var data = getCurrentSheetData();
     data[row][1] = newAValue;
     if (newAValue && newAValue.toString().trim() !== "") {
-      const masterPass = getMasterPassword();
-      if (masterPass && masterPass.trim() !== "") {
+      var masterPass = getMasterPassword();
+      if (isPasswordAutoEnabled && masterPass && masterPass.trim() !== "") {
         data[row][2] = masterPass;
-        const bContent = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='2'] .cell-content`);
+        var bContent = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
         if (bContent && bContent.innerText !== masterPass) bContent.innerText = masterPass;
       }
     } else {
-      data[row][2] = "";
-      const bContent = document.querySelector(`#sheetBody td[data-row='${row}'][data-col='2'] .cell-content`);
-      if (bContent) bContent.innerText = "";
+      if (isPasswordAutoEnabled) {
+        data[row][2] = "";
+        var bContent2 = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
+        if (bContent2) bContent2.innerText = "";
+      }
     }
     saveAllToLocalStorage(currentLoggedInUser);
     saveUserDataToFirebase(currentLoggedInUser);
@@ -1115,8 +1246,8 @@
   
   function pushToUndo() { 
     if (!isUndoRedo) { 
-      const currentData = getCurrentSheetData();
-      const copy = JSON.parse(JSON.stringify(currentData)); 
+      var currentData = getCurrentSheetData();
+      var copy = JSON.parse(JSON.stringify(currentData)); 
       undoStack.push(copy); 
       if (undoStack.length > MAX_HISTORY) undoStack.shift(); 
       redoStack = []; 
@@ -1124,56 +1255,210 @@
   }
   
   function undo() { 
-    if (undoStack.length === 0) { showToast("❌ আর Undo নেই"); return; } 
+    if (undoStack.length === 0) { showToast("আর Undo নেই"); return; } 
     isUndoRedo = true; 
-    const currentData = getCurrentSheetData();
+    var currentData = getCurrentSheetData();
     redoStack.push(JSON.parse(JSON.stringify(currentData))); 
-    const newData = undoStack.pop();
+    var newData = undoStack.pop();
     updateCurrentSheetData(newData);
     fullRender(); 
     saveAllToLocalStorage(currentLoggedInUser); 
     saveUserDataToFirebase(currentLoggedInUser); 
     isUndoRedo = false; 
-    showToast("↩️ Undone"); 
+    showToast("Undone"); 
   }
   
   function redo() { 
-    if (redoStack.length === 0) { showToast("❌ আর Redo নেই"); return; } 
+    if (redoStack.length === 0) { showToast("আর Redo নেই"); return; } 
     isUndoRedo = true; 
-    const currentData = getCurrentSheetData();
+    var currentData = getCurrentSheetData();
     undoStack.push(JSON.parse(JSON.stringify(currentData))); 
-    const newData = redoStack.pop();
+    var newData = redoStack.pop();
     updateCurrentSheetData(newData);
     fullRender(); 
     saveAllToLocalStorage(currentLoggedInUser); 
     saveUserDataToFirebase(currentLoggedInUser); 
     isUndoRedo = false; 
-    showToast("🔁 Redone"); 
+    showToast("Redone"); 
   }
   
   function checkDuplicateHighlight() {
-    const cellsA = document.querySelectorAll('#sheetBody td[data-col="1"] .cell-content');
-    cellsA.forEach(cell => { if (cell.parentElement) cell.parentElement.classList.remove('duplicate-error'); });
-    const valueMap = new Map();
-    for (let content of cellsA) { let val = content.innerText.trim(); if (val !== "") { if (!valueMap.has(val)) valueMap.set(val, []); valueMap.get(val).push(content.parentElement); } }
-    for (let [val, cells] of valueMap.entries()) { if (cells.length > 1) cells.forEach(c => c.classList.add('duplicate-error')); }
+    var cellsA = document.querySelectorAll('#sheetBody td[data-col="1"] .cell-content');
+    cellsA.forEach(function(cell) { 
+      if(cell.parentElement) cell.parentElement.classList.remove('duplicate-error'); 
+    });
+    var valueMap = new Map();
+    for (var i = 0; i < cellsA.length; i++) { 
+      var val = cellsA[i].innerText.trim(); 
+      if (val !== "") { 
+        if (!valueMap.has(val)) valueMap.set(val, []); 
+        valueMap.get(val).push(cellsA[i].parentElement); 
+      } 
+    }
+    for (var pair of valueMap.entries()) { 
+      if (pair[1].length > 1) {
+        for(var k=0; k<pair[1].length; k++) {
+          pair[1][k].classList.add('duplicate-error');
+        }
+      }
+    }
   }
   
-  function clearAllSelection() { for (let cell of selectedCells) cell.classList.remove('selected'); selectedCells.clear(); }
+  function clearAllSelection() { 
+    for (var cell of selectedCells) {
+      if(cell) cell.classList.remove('selected');
+    }
+    selectedCells.clear(); 
+  }
+  
+  function isAllDataColumnsSelected() {
+    if (selectedCells.size === 0) return false;
+    
+    var selectedRowsSet = new Set();
+    var selectedColsSet = new Set();
+    
+    for (var cell of selectedCells) {
+      var row = parseInt(cell.getAttribute('data-row'));
+      var col = parseInt(cell.getAttribute('data-col'));
+      if (!isNaN(row) && !isNaN(col) && col >= 1 && col <= 5) {
+        selectedRowsSet.add(row);
+        selectedColsSet.add(col);
+      }
+    }
+    
+    if (selectedColsSet.size !== 5) return false;
+    if (selectedRowsSet.size !== ROWS) return false;
+    
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 1; c <= 5; c++) {
+        var found = false;
+        for (var cell2 of selectedCells) {
+          var rr = parseInt(cell2.getAttribute('data-row'));
+          var cc = parseInt(cell2.getAttribute('data-col'));
+          if (rr === r && cc === c) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  function showBulkDeleteConfirmation(count) {
+    return new Promise(function(resolve) {
+      var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+      var modalDiv = document.createElement('div');
+      modalDiv.className = 'bulk-delete-confirm-overlay';
+      modalDiv.innerHTML = '<div class="bulk-delete-confirm">' +
+        '<div class="icon">⚠️🗑️</div>' +
+        '<h3>সমস্ত ডাটা ডিলিট!</h3>' +
+        '<div class="delete-info-box">' +
+        '<strong>শীট:</strong> ' + sheetName + '<br>' +
+        '<strong>মোট সেল:</strong> ' + count + ' টি সেল<br>' +
+        '<strong>মোট রো:</strong> ' + ROWS + ' টি<br>' +
+        '<strong>কলাম:</strong> UID, পাসওয়ার্ড, কুকিজ/2FA, D, E' +
+        '</div>' +
+        '<div class="warning-text">' +
+        'সতর্কতা: এই অপারেশনটি স্থায়ীভাবে সব ডাটা মুছে ফেলবে!<br>' +
+        'একবার ডিলিট করলে আর Undo করা যাবে না!' +
+        '</div>' +
+        '<div class="bulk-delete-actions">' +
+        '<button class="delete-confirm-yes" id="bulkDeleteYesBtn">হ্যাঁ, সম্পূর্ণ ডিলিট করুন</button>' +
+        '<button class="delete-confirm-no" id="bulkDeleteNoBtn">বাতিল করুন</button>' +
+        '</div></div>';
+      document.body.appendChild(modalDiv);
+      
+      var yesBtn = document.getElementById('bulkDeleteYesBtn');
+      var noBtn = document.getElementById('bulkDeleteNoBtn');
+      
+      var cleanup = function() { if(modalDiv) modalDiv.remove(); };
+      
+      if(yesBtn) {
+        yesBtn.addEventListener('click', function() {
+          cleanup();
+          resolve(true);
+        });
+      }
+      if(noBtn) {
+        noBtn.addEventListener('click', function() {
+          cleanup();
+          resolve(false);
+        });
+      }
+      modalDiv.addEventListener('click', function(e) {
+        if(e.target === modalDiv) {
+          cleanup();
+          resolve(false);
+        }
+      });
+    });
+  }
+  
+  async function deleteSelected() {
+    if (selectedCells.size === 0) { 
+      showToast("কিছু সিলেক্ট করেনি"); 
+      return; 
+    }
+    
+    var isBulkDelete = isAllDataColumnsSelected();
+    
+    if (isBulkDelete) {
+      var confirmed = await showBulkDeleteConfirmation(selectedCells.size);
+      if (!confirmed) {
+        showToast("ডিলিট বাতিল করা হয়েছে");
+        return;
+      }
+    }
+    
+    if (isBulkDelete) {
+      undoStack = [];
+      redoStack = [];
+      showToast("বাল্ক ডিলিট: Undo স্ট্যাক ক্লিয়ার করা হয়েছে");
+    }
+    
+    var cellsToDelete = Array.from(selectedCells);
+    var data = getCurrentSheetData();
+    
+    for (var i = 0; i < cellsToDelete.length; i++) {
+      var cell = cellsToDelete[i];
+      var r = parseInt(cell.getAttribute('data-row')); 
+      var c = parseInt(cell.getAttribute('data-col')); 
+      var contentDiv = cell.querySelector('.cell-content'); 
+      if (contentDiv && c !== 0) { 
+        contentDiv.innerText = ''; 
+        if(data[r]) data[r][c] = ''; 
+      } 
+      if (c === 1) updateBFromARow(r, ''); 
+    }
+    
+    saveAllToLocalStorage(currentLoggedInUser);
+    saveUserDataToFirebase(currentLoggedInUser);
+    checkDuplicateHighlight(); 
+    clearAllSelection(); 
+    
+    if (isBulkDelete) {
+      showToast("সম্পূর্ণ শীটের " + cellsToDelete.length + " টি সেল স্থায়ীভাবে ডিলিট হয়েছে!");
+    } else {
+      showToast(cellsToDelete.length + " টি সেল ডিলিট হয়েছে");
+    }
+  }
   
   function makeEditable(contentDiv, row, col) {
     if (col === 0) return;
     if (col === 1) {
       contentDiv.addEventListener('input', function() { 
         if (!isUndoRedo) pushToUndo();
-        let newVal = this.innerText;
+        var newVal = this.innerText;
         if(isUidValidationEnabled) {
-          let onlyNumbers = newVal.replace(/[^0-9]/g, '');
+          var onlyNumbers = newVal.replace(/[^0-9]/g, '');
           if (onlyNumbers !== newVal) this.innerText = onlyNumbers;
           newVal = onlyNumbers;
         }
-        const data = getCurrentSheetData();
-        if(data[row][1] !== newVal) {
+        var data = getCurrentSheetData();
+        if(data[row] && data[row][1] !== newVal) {
           data[row][1] = newVal;
           updateBFromARow(row, newVal);
         }
@@ -1182,10 +1467,34 @@
         checkDuplicateHighlight();
       });
     } else if (col === 2) {
-      contentDiv.addEventListener('blur', function() { const master = getMasterPassword(); const data = getCurrentSheetData(); if (data[row][1] && data[row][1].toString().trim() !== "" && master && master.trim() !== "") { if (this.innerText !== master) { this.innerText = master; data[row][2] = master; if (!isUndoRedo) pushToUndo(); saveAllToLocalStorage(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); } } });
-      contentDiv.addEventListener('input', function() { if (!isUndoRedo) pushToUndo(); const data = getCurrentSheetData(); data[row][2] = this.innerText; saveAllToLocalStorage(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); });
+      contentDiv.addEventListener('blur', function() { 
+        var master = getMasterPassword(); 
+        var data = getCurrentSheetData(); 
+        if (isPasswordAutoEnabled && data[row] && data[row][1] && data[row][1].toString().trim() !== "" && master && master.trim() !== "") { 
+          if (this.innerText !== master) { 
+            this.innerText = master; 
+            data[row][2] = master; 
+            if (!isUndoRedo) pushToUndo(); 
+            saveAllToLocalStorage(currentLoggedInUser); 
+            saveUserDataToFirebase(currentLoggedInUser); 
+          } 
+        } 
+      });
+      contentDiv.addEventListener('input', function() { 
+        if (!isUndoRedo) pushToUndo(); 
+        var data = getCurrentSheetData(); 
+        if(data[row]) data[row][2] = this.innerText; 
+        saveAllToLocalStorage(currentLoggedInUser); 
+        saveUserDataToFirebase(currentLoggedInUser); 
+      });
     } else {
-      contentDiv.addEventListener('input', function() { if (!isUndoRedo) pushToUndo(); const data = getCurrentSheetData(); data[row][col] = this.innerText; saveAllToLocalStorage(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); });
+      contentDiv.addEventListener('input', function() { 
+        if (!isUndoRedo) pushToUndo(); 
+        var data = getCurrentSheetData(); 
+        if(data[row]) data[row][col] = this.innerText; 
+        saveAllToLocalStorage(currentLoggedInUser); 
+        saveUserDataToFirebase(currentLoggedInUser); 
+      });
     }
   }
   
@@ -1193,29 +1502,37 @@
     if (!sheetBody) sheetBody = document.getElementById('sheetBody'); 
     if (!sheetBody) return;
     sheetBody.innerHTML = '';
-    const currentData = getCurrentSheetData();
+    var currentData = getCurrentSheetData();
     
     if(!currentData || currentData.length !== ROWS) {
-      console.error("Invalid sheet data, recreating...");
       if(currentSheet === 1) sheetData1 = createEmptySheet();
       else sheetData2 = createEmptySheet();
-      fullRender();
-      return;
+      currentData = getCurrentSheetData();
     }
     
-    for (let row = 0; row < ROWS; row++) {
-      const tr = document.createElement('tr');
-      for (let col = 0; col < COLS; col++) {
-        const td = document.createElement('td'); 
+    for (var row = 0; row < ROWS; row++) {
+      var tr = document.createElement('tr');
+      for (var col = 0; col < COLS; col++) {
+        var td = document.createElement('td'); 
         td.setAttribute('data-row', row); 
         td.setAttribute('data-col', col); 
         td.style.width = colWidths[col] + 'px'; 
         td.style.minWidth = colWidths[col] + 'px';
-        const contentDiv = document.createElement('div'); 
+        var contentDiv = document.createElement('div'); 
         contentDiv.className = 'cell-content'; 
         contentDiv.setAttribute('contenteditable', col !== 0 ? 'true' : 'false');
-        let cellValue = currentData[row][col]; 
+        var cellValue = (currentData[row] && currentData[row][col]) ? currentData[row][col] : ''; 
         if (col === 0 && (!cellValue || cellValue === "")) cellValue = (row+1).toString();
+        
+        // পাসওয়ার্ড অটো ফিচার এখানে প্রয়োগ করা হবে
+        if (col === 2 && isPasswordAutoEnabled && currentData[row] && currentData[row][1] && currentData[row][1].toString().trim() !== "") {
+          var masterPass = getMasterPassword();
+          if (masterPass && masterPass.trim() !== "") {
+            cellValue = masterPass;
+            currentData[row][2] = masterPass;
+          }
+        }
+        
         contentDiv.innerText = cellValue || '';
         if (col === 0) { 
           contentDiv.style.textAlign = 'center'; 
@@ -1225,30 +1542,32 @@
         td.appendChild(contentDiv);
         if (col !== 0) { 
           makeEditable(contentDiv, row, col); 
-          contentDiv.addEventListener('click', (e) => { 
-            e.stopPropagation(); 
-            if (!e.ctrlKey && !e.metaKey) clearAllSelection(); 
-            td.classList.add('selected'); 
-            selectedCells.add(td); 
-          }); 
+          (function(tdElement) {
+            contentDiv.addEventListener('click', function(e) { 
+              e.stopPropagation(); 
+              if (!e.ctrlKey && !e.metaKey) clearAllSelection(); 
+              tdElement.classList.add('selected'); 
+              selectedCells.add(tdElement); 
+            });
+          })(td);
         } else { 
-          td.addEventListener('click', (e) => e.stopPropagation()); 
+          td.addEventListener('click', function(e) { e.stopPropagation(); }); 
         }
         tr.appendChild(td);
       }
       sheetBody.appendChild(tr);
     }
     checkDuplicateHighlight();
-    const b1Content = document.querySelector('#sheetBody td[data-row="0"][data-col="2"] .cell-content');
+    var b1Content = document.querySelector('#sheetBody td[data-row="0"][data-col="2"] .cell-content');
     if (b1Content) { 
-      b1Content.addEventListener('blur', () => { 
-        const newMaster = getMasterPassword(); 
+      b1Content.addEventListener('blur', function() { 
+        var newMaster = getMasterPassword(); 
         if (newMaster && newMaster.trim() !== "") { 
-          const data = getCurrentSheetData();
-          for (let r = 0; r < ROWS; r++) { 
-            if (data[r][1] && data[r][1].toString().trim() !== "") { 
+          var data = getCurrentSheetData();
+          for (var r = 0; r < ROWS; r++) { 
+            if (isPasswordAutoEnabled && data[r] && data[r][1] && data[r][1].toString().trim() !== "") { 
               data[r][2] = newMaster; 
-              const tBContent = document.querySelector(`#sheetBody td[data-row='${r}'][data-col='2'] .cell-content`); 
+              var tBContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content'); 
               if (tBContent) tBContent.innerText = newMaster; 
             } 
           } 
@@ -1263,148 +1582,246 @@
   }
   
   function addResizeHandles() {
-    const ths = document.querySelectorAll('#headerRow th');
-    ths.forEach((th, idx) => {
-      if (idx === 0) return;
-      let existingHandle = th.querySelector('.resize-handle');
+    var ths = document.querySelectorAll('#headerRow th');
+    for(var idx=0; idx<ths.length; idx++) {
+      var th = ths[idx];
+      if (idx === 0) continue;
+      var existingHandle = th.querySelector('.resize-handle');
       if(existingHandle) existingHandle.remove();
-      let handle = document.createElement('div'); handle.className = 'resize-handle';
-      let startX, startW, isResizing = false;
-      const onMove = (e) => { if (!isResizing) return; let clientX = e.touches ? e.touches[0].clientX : e.clientX; let diff = clientX - startX; let newW = startW + diff; if (newW < 60) newW = 60; if (newW > 180) newW = 180; colWidths[idx] = newW; const allCells = document.querySelectorAll(`#sheetBody td[data-col='${idx}'], #headerRow th[data-col='${idx}']`); allCells.forEach(cell => { cell.style.width = newW + 'px'; cell.style.minWidth = newW + 'px'; }); };
-      const onUp = () => { isResizing = false; window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); window.removeEventListener('touchmove', onMove); window.removeEventListener('touchend', onUp); };
-      handle.addEventListener('touchstart', (e) => { e.preventDefault(); isResizing = true; startX = e.touches[0].clientX; startW = colWidths[idx]; window.addEventListener('touchmove', onMove, { passive: false }); window.addEventListener('touchend', onUp); });
-      handle.addEventListener('mousedown', (e) => { e.preventDefault(); isResizing = true; startX = e.clientX; startW = colWidths[idx]; window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp); });
-      th.appendChild(handle); th.style.position = 'relative';
-    });
+      var handle = document.createElement('div'); 
+      handle.className = 'resize-handle';
+      var startX, startW, isResizing = false;
+      var onMove = function(e, colIdx) { 
+        if (!isResizing) return; 
+        var clientX = e.touches ? e.touches[0].clientX : e.clientX; 
+        var diff = clientX - startX; 
+        var newW = startW + diff; 
+        if (newW < 60) newW = 60; 
+        if (newW > 180) newW = 180; 
+        colWidths[colIdx] = newW; 
+        var allCells = document.querySelectorAll('#sheetBody td[data-col="' + colIdx + '"], #headerRow th[data-col="' + colIdx + '"]'); 
+        for(var i=0; i<allCells.length; i++) {
+          allCells[i].style.width = newW + 'px'; 
+          allCells[i].style.minWidth = newW + 'px';
+        }
+      };
+      var onUp = function() { 
+        isResizing = false; 
+        window.removeEventListener('mousemove', onMove); 
+        window.removeEventListener('mouseup', onUp); 
+        window.removeEventListener('touchmove', onMove); 
+        window.removeEventListener('touchend', onUp); 
+      };
+      (function(colIdx) {
+        handle.addEventListener('touchstart', function(e) { 
+          e.preventDefault(); 
+          isResizing = true; 
+          startX = e.touches[0].clientX; 
+          startW = colWidths[colIdx]; 
+          window.addEventListener('touchmove', function(ev) { onMove(ev, colIdx); }, { passive: false }); 
+          window.addEventListener('touchend', onUp); 
+        });
+        handle.addEventListener('mousedown', function(e) { 
+          e.preventDefault(); 
+          isResizing = true; 
+          startX = e.clientX; 
+          startW = colWidths[colIdx]; 
+          window.addEventListener('mousemove', function(ev) { onMove(ev, colIdx); }); 
+          window.addEventListener('mouseup', onUp); 
+        });
+      })(idx);
+      th.appendChild(handle); 
+      th.style.position = 'relative';
+    }
   }
   
   function bindColumnSelection() {
-    const headers = document.querySelectorAll('#headerRow th');
-    headers.forEach((th, colIdx) => { if (colIdx === 0) return; th.addEventListener('click', (e) => { if (e.target.classList?.contains('resize-handle') || e.target.classList?.contains('uid-toggle-switch')) return; clearAllSelection(); document.querySelectorAll(`#sheetBody td[data-col='${colIdx}']`).forEach(cell => { cell.classList.add('selected'); selectedCells.add(cell); }); showToast(`${th.innerText} সিলেক্টেড`); }); });
+    var headers = document.querySelectorAll('#headerRow th');
+    for(var colIdx=0; colIdx<headers.length; colIdx++) {
+      var th = headers[colIdx];
+      if (colIdx === 0) continue;
+      (function(cIdx) {
+        th.addEventListener('click', function(e) { 
+          if (e.target.classList && (e.target.classList.contains('resize-handle') || e.target.classList.contains('uid-toggle-switch') || e.target.classList.contains('password-toggle-switch'))) return; 
+          clearAllSelection(); 
+          var cells = document.querySelectorAll('#sheetBody td[data-col="' + cIdx + '"]');
+          for(var i=0; i<cells.length; i++) {
+            cells[i].classList.add('selected'); 
+            selectedCells.add(cells[i]);
+          }
+          showToast(th.innerText + " সিলেক্টেড"); 
+        });
+      })(colIdx);
+    }
   }
   
-  function selectAllDataColumns() { clearAllSelection(); for (let col = 1; col < COLS; col++) { document.querySelectorAll(`#sheetBody td[data-col='${col}']`).forEach(cell => { cell.classList.add('selected'); selectedCells.add(cell); }); } showToast("📌 সব ডাটা কলাম সিলেক্ট হয়েছে"); }
+  function selectAllDataColumns() { 
+    clearAllSelection(); 
+    for (var col = 1; col < COLS; col++) { 
+      var cells = document.querySelectorAll('#sheetBody td[data-col="' + col + '"]');
+      for(var i=0; i<cells.length; i++) {
+        cells[i].classList.add('selected'); 
+        selectedCells.add(cells[i]);
+      }
+    } 
+    showToast("সব ডাটা কলাম সিলেক্ট হয়েছে"); 
+  }
   
   async function copySelected() {
     if (selectedCells.size === 0) { showToast("কিছু সিলেক্ট করেনি"); return; }
-    let minR=Infinity, maxR=-Infinity, minC=Infinity, maxC=-Infinity;
-    for (let cell of selectedCells) { let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col')); if (!isNaN(r) && !isNaN(c)) { minR = Math.min(minR, r); maxR = Math.max(maxR, r); minC = Math.min(minC, c); maxC = Math.max(maxC, c); } }
+    var minR=Infinity, maxR=-Infinity, minC=Infinity, maxC=-Infinity;
+    for (var cell of selectedCells) { 
+      var r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col')); 
+      if (!isNaN(r) && !isNaN(c)) { 
+        minR = Math.min(minR, r); maxR = Math.max(maxR, r); 
+        minC = Math.min(minC, c); maxC = Math.max(maxC, c); 
+      } 
+    }
     if (minR === Infinity) { showToast("সিলেক্ট ভ্যালিড না"); return; }
-    const matrix = Array(maxR-minR+1).fill().map(() => Array(maxC-minC+1).fill(''));
-    for (let cell of selectedCells) { let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col')); const contentDiv = cell.querySelector('.cell-content'); matrix[r-minR][c-minC] = contentDiv ? contentDiv.innerText : ''; }
-    const tsv = matrix.map(row => row.join('\t')).join('\n');
-    try { await navigator.clipboard.writeText(tsv); showToast(`📋 ${selectedCells.size} সেল কপি`); } catch(e) { showToast("কপি ব্যর্থ"); }
-  }
-  
-  function deleteSelected() {
-    if (selectedCells.size === 0) { showToast("সিলেক্ট করুন"); return; }
-    pushToUndo(); const cellsToDelete = Array.from(selectedCells);
-    const data = getCurrentSheetData();
-    for (let cell of cellsToDelete) { let r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col')); const contentDiv = cell.querySelector('.cell-content'); if (contentDiv && c !== 0) { contentDiv.innerText = ''; data[r][c] = ''; } if (c === 1) updateBFromARow(r, ''); }
-    saveAllToLocalStorage(currentLoggedInUser); saveUserDataToFirebase(currentLoggedInUser); checkDuplicateHighlight(); clearAllSelection(); showToast(`🗑️ ${cellsToDelete.length} টি সেল ডিলিট হয়েছে`);
+    var matrix = [];
+    for (var i = 0; i <= maxR-minR; i++) {
+      matrix[i] = [];
+      for (var j = 0; j <= maxC-minC; j++) {
+        matrix[i][j] = '';
+      }
+    }
+    for (var cell of selectedCells) { 
+      var rr = parseInt(cell.getAttribute('data-row')), cc = parseInt(cell.getAttribute('data-col')); 
+      var contentDiv = cell.querySelector('.cell-content'); 
+      matrix[rr-minR][cc-minC] = contentDiv ? contentDiv.innerText : ''; 
+    }
+    var tsv = '';
+    for(var i=0; i<matrix.length; i++) {
+      tsv += matrix[i].join('\t');
+      if(i < matrix.length-1) tsv += '\n';
+    }
+    try { await navigator.clipboard.writeText(tsv); showToast(selectedCells.size + " সেল কপি"); } catch(e) { showToast("কপি ব্যর্থ"); }
   }
   
   function saveUserInfo() {
-    let username = tgUsernameInput.value.trim();
-    let chatId = tgChatIdInput.value.trim();
+    var username = tgUsernameInput ? tgUsernameInput.value.trim() : "";
+    var chatId = tgChatIdInput ? tgChatIdInput.value.trim() : "";
     if (username && !username.startsWith('@')) username = '@' + username;
     currentTelegramUsername = username;
     currentChatId = chatId || "";
     if(firebaseDb && currentLoggedInUser) { saveUserDataToFirebase(currentLoggedInUser); }
-    showToast(`💾 সেভ হয়েছে (টেলিগ্রাম: ${currentTelegramUsername || "ফাঁকা"})`);
+    showToast("সেভ হয়েছে (টেলিগ্রাম: " + (currentTelegramUsername || "ফাঁকা") + ")");
   }
 
-  // ==================== টেলিগ্রাম ফাংশন ====================
   function getNewUnsubmittedUIDs() { 
-    let arr = []; 
-    const data = getCurrentSheetData();
-    const submitted = getCurrentSubmittedUIDs();
-    for (let i=0;i<ROWS;i++) { 
-      let uid = data[i][1]?.toString().trim(); 
-      if(uid && !submitted.has(uid)) arr.push({ row:i, uid, password: data[i][2]||"", cookies: data[i][3]||"", colD: data[i][4]||"", colE: data[i][5]||"" }); 
+    var arr = []; 
+    var data = getCurrentSheetData();
+    var submitted = getCurrentSubmittedUIDs();
+    for (var i=0;i<ROWS;i++) { 
+      if(!data[i]) continue;
+      var uid = data[i][1] ? data[i][1].toString().trim() : ""; 
+      if(uid && !submitted.has(uid)) arr.push({ row:i, uid: uid, password: data[i][2] || "", cookies: data[i][3] || "", colD: data[i][4] || "", colE: data[i][5] || "" }); 
     } 
     return arr; 
   }
   
   function hasAnyUnsubmittedData() { 
-    const data = getCurrentSheetData();
-    const submitted = getCurrentSubmittedUIDs();
-    for (let i=0;i<ROWS;i++) { 
-      let uid = data[i][1]?.toString().trim(); 
+    var data = getCurrentSheetData();
+    var submitted = getCurrentSubmittedUIDs();
+    for (var i=0;i<ROWS;i++) { 
+      if(!data[i]) continue;
+      var uid = data[i][1] ? data[i][1].toString().trim() : ""; 
       if(uid && !submitted.has(uid)) return true; 
     } 
     return false; 
   }
   
-  async function sendTelegramFile(chatId, file, caption) { if (!chatId) return false; try { const formData = new FormData(); formData.append("chat_id", chatId); formData.append("document", file); formData.append("caption", caption); formData.append("parse_mode", "HTML"); const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, { method: "POST", body: formData }); const result = await response.json(); return result.ok; } catch(e) { return false; } }
-  function getTomorrowDay() { const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1); return tomorrow.getDate(); }
+  async function sendTelegramFile(chatId, file, caption) { 
+    if (!chatId) return false; 
+    try { 
+      var formData = new FormData(); 
+      formData.append("chat_id", chatId); 
+      formData.append("document", file); 
+      formData.append("caption", caption); 
+      formData.append("parse_mode", "HTML"); 
+      var response = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendDocument", { method: "POST", body: formData }); 
+      var result = await response.json(); 
+      return result.ok; 
+    } catch(e) { return false; } 
+  }
+  
+  function getTomorrowDay() { 
+    var tomorrow = new Date(); 
+    tomorrow.setDate(tomorrow.getDate()+1); 
+    return tomorrow.getDate(); 
+  }
   
   function showSubmitWarning() { 
-    const modalDiv = document.createElement('div'); 
+    var modalDiv = document.createElement('div'); 
     modalDiv.className = 'warning-modal-overlay'; 
-    modalDiv.innerHTML = `
-      <div class="warning-modal">
-        <div class="icon">⚠️</div>
-        <h3>টেলিগ্রাম তথ্য আবশ্যক!</h3>
-        <div class="message">
-          📌 ফাইল সাবমিট করতে আপনার টেলিগ্রাম ইউজারনেম এবং চ্যাট আইডি প্রয়োজন।<br><br>
-          👤 উপরের <strong>"টেলিগ্রাম ইউজার"</strong> বক্সে আপনার ইউজারনেম দিন<br>
-          🆔 <strong>"চ্যাট আইডি"</strong> বক্সে আপনার চ্যাট আইডি দিন<br>
-          💾 সবশেষে <strong>"তথ্য সেভ করুন"</strong> বাটনে ক্লিক করুন।
-        </div>
-        <button onclick="this.closest('.warning-modal-overlay').remove()">✅ বুঝেছি, সেট করব</button>
-      </div>`; 
+    modalDiv.innerHTML = '<div class="warning-modal">' +
+      '<div class="icon">⚠️</div>' +
+      '<h3>টেলিগ্রাম তথ্য আবশ্যক!</h3>' +
+      '<div class="message">' +
+      'ফাইল সাবমিট করতে আপনার টেলিগ্রাম ইউজারনেম এবং চ্যাট আইডি প্রয়োজন।<br><br>' +
+      'উপরের "টেলিগ্রাম ইউজার" বক্সে আপনার ইউজারনেম দিন<br>' +
+      '"চ্যাট আইডি" বক্সে আপনার চ্যাট আইডি দিন<br>' +
+      'সবশেষে "তথ্য সেভ করুন" বাটনে ক্লিক করুন।' +
+      '</div>' +
+      '<button onclick="this.closest(\'.warning-modal-overlay\').remove()">বুঝেছি, সেট করব</button>' +
+      '</div>'; 
     document.body.appendChild(modalDiv); 
   }
   
   function showSubmitConfirmation() { 
-    return new Promise((resolve) => { 
-      const existing = document.querySelector('.confirm-modal-overlay'); 
+    return new Promise(function(resolve) { 
+      var existing = document.querySelector('.confirm-modal-overlay'); 
       if(existing) existing.remove(); 
-      const newDataCount = getNewUnsubmittedUIDs().length; 
-      const sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
-      const modalDiv = document.createElement('div'); 
+      var newDataCount = getNewUnsubmittedUIDs().length; 
+      var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+      var modalDiv = document.createElement('div'); 
       modalDiv.className = 'confirm-modal-overlay'; 
-      modalDiv.innerHTML = `
-        <div class="confirm-modal">
-          <div class="icon">📋</div>
-          <h3>সাবমিট কনফার্মেশন</h3>
-          <div class="info-box">
-            <strong>📄 শীট:</strong> ${sheetName}<br>
-            <strong>👤 টেলিগ্রাম ইউজার:</strong> ${escapeHtml(currentTelegramUsername || "সেট করা হয়নি")}<br>
-            <strong>🆔 চ্যাট আইডি:</strong> ${escapeHtml(currentChatId || "সেট করা হয়নি")}<br>
-            <strong>📊 মোট আইডি:</strong> ${newDataCount} টি<br>
-            <strong>📅 তারিখ:</strong> ${new Date().toLocaleDateString('bn-BD')}
-          </div>
-          <div class="account-input-area">
-            <label>📁 কি একাউন্ট জমা দিবেন সেটার নাম লিখুন 👇 <span class="required-star">*</span></label>
-            <input type="text" id="confirmAccountType" placeholder="যেমন: 0FND COOKIES , 2FA+COOKIES" autocomplete="off">
-            <div class="input-hint">⚠️ একাউন্টের নাম লেখা বাধ্যতামূলক</div>
-          </div>
-          <div class="confirm-actions">
-            <button class="confirm-yes" id="confirmYesBtn">✅ হ্যাঁ, সাবমিট করুন</button>
-            <button class="confirm-no" id="confirmNoBtn">❌ বাতিল করুন</button>
-          </div>
-        </div>`; 
+      modalDiv.innerHTML = '<div class="confirm-modal">' +
+        '<div class="icon">📋</div>' +
+        '<h3>সাবমিট কনফার্মেশন</h3>' +
+        '<div class="info-box">' +
+        '<strong>শীট:</strong> ' + sheetName + '<br>' +
+        '<strong>টেলিগ্রাম ইউজার:</strong> ' + escapeHtml(currentTelegramUsername || "সেট করা হয়নি") + '<br>' +
+        '<strong>চ্যাট আইডি:</strong> ' + escapeHtml(currentChatId || "সেট করা হয়নি") + '<br>' +
+        '<strong>মোট আইডি:</strong> ' + newDataCount + ' টি<br>' +
+        '<strong>তারিখ:</strong> ' + new Date().toLocaleDateString('bn-BD') +
+        '</div>' +
+        '<div class="account-input-area">' +
+        '<label>কি একাউন্ট জমা দিবেন সেটার নাম লিখুন <span class="required-star">*</span></label>' +
+        '<input type="text" id="confirmAccountType" placeholder="যেমন: 0FND COOKIES , 2FA+COOKIES" autocomplete="off">' +
+        '<div class="input-hint">একাউন্টের নাম লেখা বাধ্যতামূলক</div>' +
+        '</div>' +
+        '<div class="confirm-actions">' +
+        '<button class="confirm-yes" id="confirmYesBtn">হ্যাঁ, সাবমিট করুন</button>' +
+        '<button class="confirm-no" id="confirmNoBtn">বাতিল করুন</button>' +
+        '</div></div>'; 
       document.body.appendChild(modalDiv); 
-      const yesBtn = document.getElementById('confirmYesBtn'); 
-      const noBtn = document.getElementById('confirmNoBtn'); 
-      const accountInput = document.getElementById('confirmAccountType'); 
-      const cleanup = () => modalDiv.remove(); 
-      yesBtn.addEventListener('click', () => { 
-        const accountType = accountInput ? accountInput.value.trim() : ""; 
-        if(accountType === "") { 
-          showToast("⚠️ দয়া করে একাউন্টের নাম লিখুন"); 
-          accountInput.style.borderColor = "#dc2626"; 
-          accountInput.focus(); 
-          return; 
-        } 
-        cleanup(); 
-        resolve({ confirmed: true, accountType }); 
-      }); 
-      noBtn.addEventListener('click', () => { cleanup(); resolve({ confirmed: false, accountType: "" }); }); 
-      modalDiv.addEventListener('click', (e) => { if(e.target === modalDiv) { cleanup(); resolve({ confirmed: false, accountType: "" }); } }); 
-      if(accountInput) { accountInput.addEventListener('input', () => { accountInput.style.borderColor = "#cbd5e1"; }); } 
+      var yesBtn = document.getElementById('confirmYesBtn'); 
+      var noBtn = document.getElementById('confirmNoBtn'); 
+      var accountInput = document.getElementById('confirmAccountType'); 
+      var cleanup = function() { if(modalDiv) modalDiv.remove(); }; 
+      if(yesBtn) {
+        yesBtn.addEventListener('click', function() { 
+          var accountType = accountInput ? accountInput.value.trim() : ""; 
+          if(accountType === "") { 
+            showToast("দয়া করে একাউন্টের নাম লিখুন"); 
+            if(accountInput) accountInput.style.borderColor = "#dc2626"; 
+            if(accountInput) accountInput.focus(); 
+            return; 
+          } 
+          cleanup(); 
+          resolve({ confirmed: true, accountType: accountType }); 
+        });
+      }
+      if(noBtn) {
+        noBtn.addEventListener('click', function() { cleanup(); resolve({ confirmed: false, accountType: "" }); });
+      }
+      if(modalDiv) {
+        modalDiv.addEventListener('click', function(e) { if(e.target === modalDiv) { cleanup(); resolve({ confirmed: false, accountType: "" }); } });
+      }
+      if(accountInput) { 
+        accountInput.addEventListener('input', function() { accountInput.style.borderColor = "#cbd5e1"; }); 
+      } 
     }); 
   }
   
@@ -1415,96 +1832,186 @@
       return; 
     } 
     if(!hasAnyUnsubmittedData()) { 
-      showToast("ℹ️ এই শীটে কোনো নতুন UID নেই!"); 
+      showToast("এই শীটে কোনো নতুন UID নেই!"); 
       return; 
     } 
-    const { confirmed, accountType } = await showSubmitConfirmation(); 
-    if(!confirmed) { 
+    var conf = await showSubmitConfirmation(); 
+    if(!conf.confirmed) { 
       showToast("সাবমিশন বাতিল"); 
       return; 
     } 
-    const newData = getNewUnsubmittedUIDs(); 
+    var accountType = conf.accountType;
+    var newData = getNewUnsubmittedUIDs(); 
     if(newData.length===0) return; 
-    const excelRows = newData.map(r => [r.uid, r.password, r.cookies, r.colD, r.colE]); 
-    const ws = XLSX.utils.aoa_to_sheet(excelRows); 
+    var excelRows = [];
+    for(var idx=0; idx<newData.length; idx++) {
+      excelRows.push([newData[idx].uid, newData[idx].password, newData[idx].cookies, newData[idx].colD, newData[idx].colE]);
+    }
+    var ws = XLSX.utils.aoa_to_sheet(excelRows); 
     ws['!cols'] = [{wch:12},{wch:12},{wch:12},{wch:12},{wch:12}]; 
-    const wb = XLSX.utils.book_new(); 
+    var wb = XLSX.utils.book_new(); 
     XLSX.utils.book_append_sheet(wb, ws, "EBH_Data"); 
-    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }); 
-    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
-    const file = new File([blob], `ebh_data_sheet${currentSheet}_${Date.now()}.xlsx`, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
-    const tomorrowDay = getTomorrowDay(); 
-    const todayDate = new Date().getDate(); 
-    const accountTypeMsg = accountType ? `📂 <b>একাউন্ট ধরণ:</b> ${escapeHtml(accountType)}\n` : ""; 
-    const sheetInfo = currentSheet === 1 ? "📄 শীট ১" : "📄 শীট ২";
+    var excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }); 
+    var blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
+    var file = new File([blob], "ebh_data_sheet" + currentSheet + "_" + Date.now() + ".xlsx", { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
+    var tomorrowDay = getTomorrowDay(); 
+    var todayDate = new Date().getDate(); 
+    var todayBangla = new Date().toLocaleDateString('bn-BD');
+    var timeBangla = new Date().toLocaleTimeString('bn-BD');
     
-    const userCaption = `✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n${sheetInfo}\n👤 <b>আপনার টেলিগ্রাম ইউজার:</b> ${escapeHtml(currentTelegramUsername)}\n📊 <b>মোট আইডি:</b> ${newData.length} টি\n${accountTypeMsg}📅 <b>সাবমিটের তারিখ:</b> ${todayDate}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🍀 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n📌 আপনি <b>${tomorrowDay}</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n❤️ <b>𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗕𝗬 𝗛𝗔𝗕𝗜𝗕</b>\n🤝 সাথে থাকার জন্য আপনাকে ধন্যবাদ! 🙏`; 
+    var accountTypeMsg = accountType ? "📂 <b>একাউন্ট ধরণ:</b> " + escapeHtml(accountType) + "\n" : ""; 
+    var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : "📄 <b>শীট ২</b>";
     
-    const adminCaption = `📊 <b>EBH ডাটা সাবমিট</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n${sheetInfo}\n👤 টেলিগ্রাম ইউজার: ${escapeHtml(currentTelegramUsername)}\n🆔 চ্যাট আইডি: ${escapeHtml(currentChatId)}\n${accountTypeMsg}📋 মোট নতুন UID: ${newData.length} টি\n📅 সময়: ${new Date().toLocaleString('bn-BD')}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n✅ সাবমিশন সফল হয়েছে!`; 
+    // ইউজারের জন্য সুন্দর ফরম্যাট করা মেসেজ (অপরিবর্তিত)
+    var userCaption = "✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n" +
+      "┌─────────────────────┐\n" +
+      "│   📊 সাবমিট তথ্য   │\n" +
+      "└─────────────────────┘\n\n" +
+      "📌 " + sheetInfo + "\n" +
+      "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
+      "📊 <b>মোট আইডি:</b> " + newData.length + " টি\n" +
+      accountTypeMsg +
+      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
+      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
+      "┌─────────────────────┐\n" +
+      "│    🍀 নতুন আইডি    │\n" +
+      "└─────────────────────┘\n\n" +
+      "🎯 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n" +
+      "📌 আপনি <b>" + tomorrowDay + "</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n" +
+      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️\n" +
+      "      <b>𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗕𝗬 𝗛𝗔𝗕𝗜𝗕</b>\n" +
+      "   🤝 সাথে থাকার জন্য ধন্যবাদ! 🙏\n" +
+      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️";
     
-    showToast(`⏳ ${newData.length} টি নতুন UID সাবমিট হচ্ছে...`); 
+    // অ্যাডমিনের জন্য সিম্পল মেসেজ (আগের মতোই ছোট, শুধু স্টিকার সহ)
+    var adminCaption = "✅ <b>EBH ডাটা সাবমিট সফল হয়েছে!</b> ✅\n\n" +
+      "📌 " + sheetInfo + "\n" +
+      "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
+      "🆔 <b>চ্যাট আইডি:</b> " + escapeHtml(currentChatId) + "\n" +
+      accountTypeMsg +
+      "📋 <b>মোট নতুন UID:</b> " + newData.length + " টি\n" +
+      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
+      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
+      "📎 ফাইলটি সংযুক্ত আছে।\n" +
+      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️";
+    
+    showToast(newData.length + " টি নতুন UID সাবমিট হচ্ছে..."); 
     try { 
-      const adminSent = await sendTelegramFile(YOUR_CHAT_ID, file, adminCaption); 
-      let userSent = false; 
+      var adminSent = await sendTelegramFile(YOUR_CHAT_ID, file, adminCaption); 
+      var userSent = false; 
       if(currentChatId) userSent = await sendTelegramFile(currentChatId, file, userCaption); 
       if(adminSent || userSent) { 
-        const submitted = getCurrentSubmittedUIDs();
-        for(const item of newData) submitted.add(item.uid); 
+        var submitted = getCurrentSubmittedUIDs();
+        for(var ix=0; ix<newData.length; ix++) submitted.add(newData[ix].uid); 
         saveAllToLocalStorage(currentLoggedInUser); 
         saveUserDataToFirebase(currentLoggedInUser); 
-        let statusMessage = userSent ? "✅ আপনার টেলিগ্রাম ইনবক্সে ফাইল পাঠানো হয়েছে!" : "✅ ফাইল অ্যাডমিনের চ্যাটে পাঠানো হয়েছে!"; 
-        const modalDiv = document.createElement('div'); 
+        var statusMessage = userSent ? "✅ আপনার টেলিগ্রাম ইনবক্সে ফাইল পাঠানো হয়েছে!" : "✅ ফাইল অ্যাডমিনের চ্যাটে পাঠানো হয়েছে!"; 
+        var modalDiv = document.createElement('div'); 
         modalDiv.className = 'modal-overlay'; 
-        modalDiv.innerHTML = `
-          <div class="modal-content">
-            <div style="font-size:40px;">✅</div>
-            <div style="font-size:20px; font-weight:bold; margin:10px 0;">সাবমিট সফল!</div>
-            <div style="background:#f1f5f9; padding:12px; border-radius:16px; margin:12px 0; text-align:left;">
-              <p><strong>📄 শীট:</strong> ${sheetInfo}</p>
-              <p><strong>👤 টেলিগ্রাম ইউজার:</strong> ${escapeHtml(currentTelegramUsername)}</p>
-              <p><strong>🆔 চ্যাট আইডি:</strong> ${escapeHtml(currentChatId)}</p>
-              <p><strong>📁 একাউন্ট ধরণ:</strong> ${escapeHtml(accountType)}</p>
-              <p><strong>📊 নতুন সাবমিট:</strong> ${newData.length} টি UID</p>
-              <p style="margin-top:10px;"><span style="color:#137333;">${statusMessage}</span></p>
-            </div>
-            <button class="close-modal-btn" onclick="this.parentElement.parentElement.remove()">🔒 ক্লোজ</button>
-          </div>`; 
+        modalDiv.innerHTML = '<div class="modal-content">' +
+          '<div style="font-size:40px;">✅</div>' +
+          '<div style="font-size:20px; font-weight:bold; margin:10px 0;">সাবমিট সফল!</div>' +
+          '<div style="background:#f1f5f9; padding:12px; border-radius:16px; margin:12px 0; text-align:left;">' +
+          '<p><strong>📄 শীট:</strong> ' + (currentSheet === 1 ? "শীট ১" : "শীট ২") + '</p>' +
+          '<p><strong>👤 টেলিগ্রাম ইউজার:</strong> ' + escapeHtml(currentTelegramUsername) + '</p>' +
+          '<p><strong>🆔 চ্যাট আইডি:</strong> ' + escapeHtml(currentChatId) + '</p>' +
+          '<p><strong>📁 একাউন্ট ধরণ:</strong> ' + escapeHtml(accountType) + '</p>' +
+          '<p><strong>📊 নতুন সাবমিট:</strong> ' + newData.length + ' টি UID</p>' +
+          '<p style="margin-top:10px;"><span style="color:#137333;">' + statusMessage + '</span></p>' +
+          '</div>' +
+          '<button class="close-modal-btn" onclick="this.parentElement.parentElement.remove()">🔒 ক্লোজ</button>' +
+          '</div>'; 
         document.body.appendChild(modalDiv); 
-        showToast(`✅ ${newData.length} টি নতুন UID সাবমিট হয়েছে!`); 
+        showToast(newData.length + " টি নতুন UID সাবমিট হয়েছে!"); 
       } else { 
         showToast("❌ ফাইল পাঠাতে ব্যর্থ!"); 
       } 
     } catch(err) { 
+      console.error(err);
       showToast("❌ নেটওয়ার্ক ত্রুটি"); 
     } 
   }
 
-  function checkSystemStatus() { if(!firebaseDb) return; if(systemStatusListener) systemStatusListener.off(); systemStatusListener = firebaseDb.ref('systemControl/status'); systemStatusListener.on('value', (snapshot) => { const data = snapshot.val(); const isOn = data === null ? true : data.isOn !== false; const existing = document.querySelector('.system-off-overlay'); if(existing) existing.remove(); if(!isOn) { const overlay = document.createElement('div'); overlay.className = 'system-off-overlay'; overlay.innerHTML = `<div class="system-off-card"><div style="font-size:40px;">🔒</div><h3>সিস্টেম বন্ধ আছে</h3></div>`; document.body.appendChild(overlay); document.querySelectorAll('#sheetBody td .cell-content').forEach(cell => cell.setAttribute('contenteditable', 'false')); } else { document.querySelectorAll('#sheetBody td .cell-content').forEach(cell => { if(cell.parentElement && cell.parentElement.getAttribute('data-col') !== '0') cell.setAttribute('contenteditable', 'true'); }); } }); }
+  function checkSystemStatus() { 
+    if(!firebaseDb) return; 
+    if(systemStatusListener) systemStatusListener.off(); 
+    systemStatusListener = firebaseDb.ref('systemControl/status'); 
+    systemStatusListener.on('value', function(snapshot) { 
+      var data = snapshot.val(); 
+      var isOn = data === null ? true : data.isOn !== false; 
+      var existing = document.querySelector('.system-off-overlay'); 
+      if(existing) existing.remove(); 
+      if(!isOn) { 
+        var overlay = document.createElement('div'); 
+        overlay.className = 'system-off-overlay'; 
+        overlay.innerHTML = '<div class="system-off-card"><div style="font-size:40px;">🔒</div><h3>সিস্টেম বন্ধ আছে</h3></div>'; 
+        document.body.appendChild(overlay); 
+        var cells = document.querySelectorAll('#sheetBody td .cell-content');
+        for(var i=0; i<cells.length; i++) cells[i].setAttribute('contenteditable', 'false'); 
+      } else { 
+        var cells2 = document.querySelectorAll('#sheetBody td .cell-content');
+        for(var j=0; j<cells2.length; j++) { 
+          var parentTd = cells2[j].parentElement;
+          if(parentTd && parentTd.getAttribute('data-col') !== '0') cells2[j].setAttribute('contenteditable', 'true'); 
+        } 
+      } 
+    }); 
+  }
   
-  function saveScrollPosition() { if(tableWrapper) localStorage.setItem(SCROLL_POSITION_KEY, JSON.stringify({ scrollTop: tableWrapper.scrollTop, scrollLeft: tableWrapper.scrollLeft })); }
-  function restoreScrollPosition() { if(!tableWrapper) return; try { const saved = localStorage.getItem(SCROLL_POSITION_KEY); if(saved) { const {scrollTop, scrollLeft} = JSON.parse(saved); setTimeout(() => { tableWrapper.scrollTop = scrollTop||0; tableWrapper.scrollLeft = scrollLeft||0; }, 50); } } catch(e){} }
+  function saveScrollPosition() { 
+    if(tableWrapper) localStorage.setItem(SCROLL_POSITION_KEY, JSON.stringify({ scrollTop: tableWrapper.scrollTop, scrollLeft: tableWrapper.scrollLeft })); 
+  }
+  
+  function restoreScrollPosition() { 
+    if(!tableWrapper) return; 
+    try { 
+      var saved = localStorage.getItem(SCROLL_POSITION_KEY); 
+      if(saved) { 
+        var pos = JSON.parse(saved); 
+        setTimeout(function() { 
+          if(tableWrapper) {
+            tableWrapper.scrollTop = pos.scrollTop || 0; 
+            tableWrapper.scrollLeft = pos.scrollLeft || 0;
+          }
+        }, 50); 
+      } 
+    } catch(e){} 
+  }
 
   function bindButtons() { 
-    document.getElementById('undoBtn').addEventListener('click', undo);
-    document.getElementById('redoBtn').addEventListener('click', redo);
-    document.getElementById('copyBtn').addEventListener('click', copySelected);
-    document.getElementById('deleteBtn').addEventListener('click', deleteSelected);
-    document.getElementById('clearSelectionBtn').addEventListener('click', () => { clearAllSelection(); showToast("সিলেকশন ক্লিয়ার"); });
-    document.getElementById('selectAllColsBtn').addEventListener('click', selectAllDataColumns);
-    document.getElementById('saveUserBtn').addEventListener('click', saveUserInfo);
-    document.getElementById('submitMainBtn').addEventListener('click', sendToTelegram);
-    document.getElementById('logoutHeaderBtn').addEventListener('click', logout);
+    var undoBtn = document.getElementById('undoBtn');
+    if(undoBtn) undoBtn.addEventListener('click', undo);
+    var redoBtn = document.getElementById('redoBtn');
+    if(redoBtn) redoBtn.addEventListener('click', redo);
+    var copyBtn = document.getElementById('copyBtn');
+    if(copyBtn) copyBtn.addEventListener('click', copySelected);
+    var deleteBtn = document.getElementById('deleteBtn');
+    if(deleteBtn) deleteBtn.addEventListener('click', deleteSelected);
+    var clearBtn = document.getElementById('clearSelectionBtn');
+    if(clearBtn) clearBtn.addEventListener('click', function() { clearAllSelection(); showToast("সিলেকশন ক্লিয়ার"); });
+    var selectAllBtn = document.getElementById('selectAllColsBtn');
+    if(selectAllBtn) selectAllBtn.addEventListener('click', selectAllDataColumns);
+    var saveBtn = document.getElementById('saveUserBtn');
+    if(saveBtn) saveBtn.addEventListener('click', saveUserInfo);
+    var submitBtn = document.getElementById('submitMainBtn');
+    if(submitBtn) submitBtn.addEventListener('click', sendToTelegram);
+    var logoutBtn = document.getElementById('logoutHeaderBtn');
+    if(logoutBtn) logoutBtn.addEventListener('click', logout);
     if(uidToggle) uidToggle.addEventListener('click', toggleUidValidation);
+    if(passwordAutoToggle) passwordAutoToggle.addEventListener('click', togglePasswordAuto);
     if(sheet1Btn) sheet1Btn.addEventListener('click', switchToSheet1);
     if(sheet2Btn) sheet2Btn.addEventListener('click', switchToSheet2);
   }
 
   function setupInputFocus() { 
-    const save = document.getElementById('saveUserBtn');
+    var save = document.getElementById('saveUserBtn');
     if(tgUsernameInput && tgChatIdInput && save) { 
-      const show = () => save.classList.add('show'); const hide = () => save.classList.remove('show');
-      tgUsernameInput.addEventListener('focus', show); tgUsernameInput.addEventListener('blur', hide);
-      tgChatIdInput.addEventListener('focus', show); tgChatIdInput.addEventListener('blur', hide);
+      var show = function() { save.classList.add('show'); }; 
+      var hide = function() { save.classList.remove('show'); };
+      tgUsernameInput.addEventListener('focus', show); 
+      tgUsernameInput.addEventListener('blur', hide);
+      tgChatIdInput.addEventListener('focus', show); 
+      tgChatIdInput.addEventListener('blur', hide);
     }
   }
 
@@ -1513,24 +2020,33 @@
     tableWrapper = document.getElementById('tableWrapper');
     if(tableWrapper) tableWrapper.addEventListener('scroll', saveScrollPosition);
     loadUidValidationState();
+    loadPasswordAutoState();
     bindButtons();
     setupInputFocus();
     checkSystemStatus();
-    if(tgChatIdInput) tgChatIdInput.addEventListener('input', function(e) { this.value = this.value.replace(/[^0-9]/g, ''); });
-    loginBtn.addEventListener('click', handleLoginOrRegister);
-    loginUsername.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLoginOrRegister(); });
-    loginPassword.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLoginOrRegister(); });
+    if(tgChatIdInput) {
+      tgChatIdInput.addEventListener('input', function(e) { 
+        this.value = this.value.replace(/[^0-9]/g, ''); 
+      });
+    }
+    if(loginBtn) loginBtn.addEventListener('click', handleLoginOrRegister);
+    if(loginUsernameInput) {
+      loginUsernameInput.addEventListener('keypress', function(e) { if(e.key === 'Enter') handleLoginOrRegister(); });
+    }
+    if(loginPasswordInput) {
+      loginPasswordInput.addEventListener('keypress', function(e) { if(e.key === 'Enter') handleLoginOrRegister(); });
+    }
     
-    loadingScreen.classList.remove('hide');
-    const autoLogged = await checkAutoLogin();
+    if(loadingScreen) loadingScreen.classList.remove('hide');
+    var autoLogged = await checkAutoLogin();
     if(!autoLogged) {
-      loadingScreen.classList.add('hide');
-      loginOverlay.classList.add('visible');
-      appContainer.classList.remove('visible');
+      if(loadingScreen) loadingScreen.classList.add('hide');
+      if(loginOverlay) loginOverlay.classList.add('visible');
+      if(appContainer) appContainer.classList.remove('visible');
     } else {
-      loadingScreen.classList.add('hide');
-      loginOverlay.classList.remove('visible');
-      appContainer.classList.add('visible');
+      if(loadingScreen) loadingScreen.classList.add('hide');
+      if(loginOverlay) loginOverlay.classList.remove('visible');
+      if(appContainer) appContainer.classList.add('visible');
     }
   }
   
