@@ -486,7 +486,6 @@
       text-align: center;
       position: relative;
     }
-    /* UID টগল সুইচ */
     .uid-toggle-switch {
       position: absolute;
       right: 4px;
@@ -518,7 +517,6 @@
     .uid-toggle-switch.active::after {
       transform: translateX(16px);
     }
-    /* পাসওয়ার্ড টগল সুইচ */
     .password-toggle-switch {
       position: absolute;
       right: 4px;
@@ -873,7 +871,7 @@
   const sheet2Btn = document.getElementById('sheet2Btn');
 
   let isUidValidationEnabled = true;
-  let isPasswordAutoEnabled = true; // পাসওয়ার্ড অটো ফিচার ডিফল্ট অন
+  let isPasswordAutoEnabled = true;
 
   function showToast(msg) { 
     const toast = document.getElementById('liveToast'); 
@@ -951,8 +949,7 @@
       else passwordAutoToggle.classList.remove('active');
     }
     savePasswordAutoState();
-    showToast(isPasswordAutoEnabled ? "পাসওয়ার্ড অটো অন (মাস্টার পাসওয়ার্ড অটো সেট হবে)" : "পাসওয়ার্ড অটো অফ (ম্যানুয়ালি লিখুন)");
-    // স্টেট চেঞ্জের পর পুরো রিন্ডার করে দিন
+    showToast(isPasswordAutoEnabled ? "পাসওয়ার্ড অটো অন (নতুন UID-তে অটো সেট হবে)" : "পাসওয়ার্ড অটো অফ (ম্যানুয়ালি লিখুন)");
     fullRender();
   }
 
@@ -993,7 +990,13 @@
   function loadSheet1FromLocalStorage(username) {
     const savedSheet = localStorage.getItem(SHEET1_STORAGE_KEY + username);
     if(savedSheet) {
-      try { sheetData1 = JSON.parse(savedSheet); } catch(e) { console.warn(e); }
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData1 = parsed;
+        else sheetData1 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData1 = createEmptySheet(); }
+    } else {
+      sheetData1 = createEmptySheet();
     }
     const savedSubmitted = localStorage.getItem(SHEET1_SUBMITTED_KEY + username);
     if(savedSubmitted) {
@@ -1004,7 +1007,13 @@
   function loadSheet2FromLocalStorage(username) {
     const savedSheet = localStorage.getItem(SHEET2_STORAGE_KEY + username);
     if(savedSheet) {
-      try { sheetData2 = JSON.parse(savedSheet); } catch(e) { console.warn(e); }
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData2 = parsed;
+        else sheetData2 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData2 = createEmptySheet(); }
+    } else {
+      sheetData2 = createEmptySheet();
     }
     const savedSubmitted = localStorage.getItem(SHEET2_SUBMITTED_KEY + username);
     if(savedSubmitted) {
@@ -1023,6 +1032,7 @@
   }
   
   function saveAllToLocalStorage(username) {
+    if(!username) return;
     saveSheet1ToLocalStorage(username);
     saveSheet2ToLocalStorage(username);
   }
@@ -1033,9 +1043,9 @@
       const snapshot = await firebaseDb.ref('userSheets/' + username).once('value');
       const data = snapshot.val();
       if(data) {
-        if(data.sheetData) sheetData1 = data.sheetData;
+        if(data.sheetData && data.sheetData.length === ROWS) sheetData1 = data.sheetData;
         if(data.submittedUIDs) submittedUIDs1 = new Set(data.submittedUIDs);
-        if(data.sheetData2) sheetData2 = data.sheetData2;
+        if(data.sheetData2 && data.sheetData2.length === ROWS) sheetData2 = data.sheetData2;
         if(data.submittedUIDs2) submittedUIDs2 = new Set(data.submittedUIDs2);
         if(data.chatId) currentChatId = data.chatId;
         if(data.telegramUsername) currentTelegramUsername = data.telegramUsername;
@@ -1104,14 +1114,10 @@
     if(!loaded) {
       loadSheet1FromLocalStorage(username);
       loadSheet2FromLocalStorage(username);
-      
-      if(!sheetData1 || sheetData1.length !== ROWS) {
-        sheetData1 = createEmptySheet();
-      }
-      if(!sheetData2 || sheetData2.length !== ROWS) {
-        sheetData2 = createEmptySheet();
-      }
     }
+    
+    if(!sheetData1 || sheetData1.length !== ROWS) sheetData1 = createEmptySheet();
+    if(!sheetData2 || sheetData2.length !== ROWS) sheetData2 = createEmptySheet();
     
     if(tgUsernameInput && tgUsernameInput.value) currentTelegramUsername = tgUsernameInput.value;
     if(tgChatIdInput && tgChatIdInput.value) currentChatId = tgChatIdInput.value;
@@ -1222,23 +1228,49 @@
     return (data[0] && data[0][2]) ? data[0][2] : ''; 
   }
   
+  // Only auto-fill password when UID is newly added and password field is empty
+  function autoFillPasswordIfNeeded(row) {
+    var data = getCurrentSheetData();
+    if(!data[row]) return;
+    
+    var uid = data[row][1] ? data[row][1].toString().trim() : "";
+    var currentPass = data[row][2] ? data[row][2].toString().trim() : "";
+    var masterPass = getMasterPassword();
+    
+    // Auto-fill only if:
+    // 1. Auto password is enabled
+    // 2. UID is not empty
+    // 3. Password field is currently empty
+    // 4. Master password exists
+    // 5. Not the master password row (row 0)
+    if (isPasswordAutoEnabled && uid !== "" && currentPass === "" && masterPass && masterPass.trim() !== "" && row !== 0) {
+      data[row][2] = masterPass;
+      var passCell = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
+      if(passCell && passCell.innerText !== masterPass) {
+        passCell.innerText = masterPass;
+      }
+      return true;
+    }
+    return false;
+  }
+  
   function updateBFromARow(row, newAValue) {
     var data = getCurrentSheetData();
+    if(!data[row]) return;
+    
+    var oldValue = data[row][1];
     data[row][1] = newAValue;
+    
+    // Auto-fill password if this is a new UID entry
     if (newAValue && newAValue.toString().trim() !== "") {
-      var masterPass = getMasterPassword();
-      if (isPasswordAutoEnabled && masterPass && masterPass.trim() !== "") {
-        data[row][2] = masterPass;
-        var bContent = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
-        if (bContent && bContent.innerText !== masterPass) bContent.innerText = masterPass;
-      }
-    } else {
-      if (isPasswordAutoEnabled) {
-        data[row][2] = "";
-        var bContent2 = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
-        if (bContent2) bContent2.innerText = "";
-      }
+      autoFillPasswordIfNeeded(row);
+    } else if (!newAValue || newAValue.toString().trim() === "") {
+      // If UID is cleared, also clear the password
+      data[row][2] = "";
+      var passCell2 = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
+      if(passCell2) passCell2.innerText = "";
     }
+    
     saveAllToLocalStorage(currentLoggedInUser);
     saveUserDataToFirebase(currentLoggedInUser);
     checkDuplicateHighlight();
@@ -1411,12 +1443,13 @@
         showToast("ডিলিট বাতিল করা হয়েছে");
         return;
       }
-    }
-    
-    if (isBulkDelete) {
+      // Clear undo/redo stacks for bulk delete
       undoStack = [];
       redoStack = [];
       showToast("বাল্ক ডিলিট: Undo স্ট্যাক ক্লিয়ার করা হয়েছে");
+    } else {
+      // For normal delete, push to undo
+      if (!isUndoRedo) pushToUndo();
     }
     
     var cellsToDelete = Array.from(selectedCells);
@@ -1427,20 +1460,26 @@
       var r = parseInt(cell.getAttribute('data-row')); 
       var c = parseInt(cell.getAttribute('data-col')); 
       var contentDiv = cell.querySelector('.cell-content'); 
-      if (contentDiv && c !== 0) { 
+      if (contentDiv && c !== 0 && data[r]) { 
         contentDiv.innerText = ''; 
-        if(data[r]) data[r][c] = ''; 
+        data[r][c] = ''; 
       } 
-      if (c === 1) updateBFromARow(r, ''); 
+      if (c === 1 && data[r]) {
+        // Also clear password if UID is deleted
+        data[r][2] = '';
+        var passContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content');
+        if(passContent) passContent.innerText = '';
+      }
     }
     
+    // Save immediately after deletion to localStorage and Firebase
     saveAllToLocalStorage(currentLoggedInUser);
     saveUserDataToFirebase(currentLoggedInUser);
     checkDuplicateHighlight(); 
     clearAllSelection(); 
     
     if (isBulkDelete) {
-      showToast("সম্পূর্ণ শীটের " + cellsToDelete.length + " টি সেল স্থায়ীভাবে ডিলিট হয়েছে!");
+      showToast("সম্পূর্ণ শীটের সমস্ত ডাটা স্থায়ীভাবে ডিলিট হয়েছে!");
     } else {
       showToast(cellsToDelete.length + " টি সেল ডিলিট হয়েছে");
     }
@@ -1467,19 +1506,6 @@
         checkDuplicateHighlight();
       });
     } else if (col === 2) {
-      contentDiv.addEventListener('blur', function() { 
-        var master = getMasterPassword(); 
-        var data = getCurrentSheetData(); 
-        if (isPasswordAutoEnabled && data[row] && data[row][1] && data[row][1].toString().trim() !== "" && master && master.trim() !== "") { 
-          if (this.innerText !== master) { 
-            this.innerText = master; 
-            data[row][2] = master; 
-            if (!isUndoRedo) pushToUndo(); 
-            saveAllToLocalStorage(currentLoggedInUser); 
-            saveUserDataToFirebase(currentLoggedInUser); 
-          } 
-        } 
-      });
       contentDiv.addEventListener('input', function() { 
         if (!isUndoRedo) pushToUndo(); 
         var data = getCurrentSheetData(); 
@@ -1510,6 +1536,8 @@
       currentData = getCurrentSheetData();
     }
     
+    var masterPass = getMasterPassword();
+    
     for (var row = 0; row < ROWS; row++) {
       var tr = document.createElement('tr');
       for (var col = 0; col < COLS; col++) {
@@ -1524,12 +1552,13 @@
         var cellValue = (currentData[row] && currentData[row][col]) ? currentData[row][col] : ''; 
         if (col === 0 && (!cellValue || cellValue === "")) cellValue = (row+1).toString();
         
-        // পাসওয়ার্ড অটো ফিচার এখানে প্রয়োগ করা হবে
-        if (col === 2 && isPasswordAutoEnabled && currentData[row] && currentData[row][1] && currentData[row][1].toString().trim() !== "") {
-          var masterPass = getMasterPassword();
-          if (masterPass && masterPass.trim() !== "") {
-            cellValue = masterPass;
-            currentData[row][2] = masterPass;
+        // Only auto-fill password on render if the cell is empty and has UID (but not for row 0)
+        if (col === 2 && row !== 0 && isPasswordAutoEnabled && currentData[row] && currentData[row][1] && currentData[row][1].toString().trim() !== "") {
+          if (!cellValue || cellValue === "") {
+            if (masterPass && masterPass.trim() !== "") {
+              cellValue = masterPass;
+              currentData[row][2] = masterPass;
+            }
           }
         }
         
@@ -1558,17 +1587,22 @@
       sheetBody.appendChild(tr);
     }
     checkDuplicateHighlight();
-    var b1Content = document.querySelector('#sheetBody td[data-row="0"][data-col="2"] .cell-content');
-    if (b1Content) { 
-      b1Content.addEventListener('blur', function() { 
+    
+    // Master password change listener - only update empty password fields
+    var masterCell = document.querySelector('#sheetBody td[data-row="0"][data-col="2"] .cell-content');
+    if (masterCell) { 
+      masterCell.addEventListener('blur', function() { 
         var newMaster = getMasterPassword(); 
-        if (newMaster && newMaster.trim() !== "") { 
+        if (newMaster && newMaster.trim() !== "" && isPasswordAutoEnabled) { 
           var data = getCurrentSheetData();
-          for (var r = 0; r < ROWS; r++) { 
-            if (isPasswordAutoEnabled && data[r] && data[r][1] && data[r][1].toString().trim() !== "") { 
-              data[r][2] = newMaster; 
-              var tBContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content'); 
-              if (tBContent) tBContent.innerText = newMaster; 
+          for (var r = 1; r < ROWS; r++) { 
+            if (data[r] && data[r][1] && data[r][1].toString().trim() !== "") {
+              // Only update if password field is empty
+              if (!data[r][2] || data[r][2] === "") {
+                data[r][2] = newMaster; 
+                var tBContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content'); 
+                if (tBContent) tBContent.innerText = newMaster;
+              }
             } 
           } 
           saveAllToLocalStorage(currentLoggedInUser); 
@@ -1855,14 +1889,12 @@
     var blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
     var file = new File([blob], "ebh_data_sheet" + currentSheet + "_" + Date.now() + ".xlsx", { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
     var tomorrowDay = getTomorrowDay(); 
-    var todayDate = new Date().getDate(); 
     var todayBangla = new Date().toLocaleDateString('bn-BD');
     var timeBangla = new Date().toLocaleTimeString('bn-BD');
     
     var accountTypeMsg = accountType ? "📂 <b>একাউন্ট ধরণ:</b> " + escapeHtml(accountType) + "\n" : ""; 
     var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : "📄 <b>শীট ২</b>";
     
-    // ইউজারের জন্য সুন্দর ফরম্যাট করা মেসেজ (অপরিবর্তিত)
     var userCaption = "✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n" +
       "┌─────────────────────┐\n" +
       "│   📊 সাবমিট তথ্য   │\n" +
@@ -1883,7 +1915,6 @@
       "   🤝 সাথে থাকার জন্য ধন্যবাদ! 🙏\n" +
       "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️";
     
-    // অ্যাডমিনের জন্য সিম্পল মেসেজ (আগের মতোই ছোট, শুধু স্টিকার সহ)
     var adminCaption = "✅ <b>EBH ডাটা সাবমিট সফল হয়েছে!</b> ✅\n\n" +
       "📌 " + sheetInfo + "\n" +
       "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
