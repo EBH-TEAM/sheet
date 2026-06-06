@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>EBH Sheets - Dual Sheet Mode</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #eef2f7;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #0b2b44 0%, #1a4a6e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 30000;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .loading-screen.hide { display: none; }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid #FFD700;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loading-text { color: white; font-size: 16px; font-weight: 500; letter-spacing: 1px; }
+
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #0b2b44 0%, #1a4a6e 100%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20000;
+    }
+    .login-overlay.visible { display: flex; }
+    .login-card {
+      background: rgba(255,255,255,0.98);
+      border-radius: 48px;
+      max-width: 420px;
+      width: 90%;
+      padding: 36px 28px;
+      box-shadow: 0 30px 50px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .login-logo {
+      font-size: 42px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #0b2b44, #1e5a88);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 8px;
+    }
+    .login-sub { color: #4b5563; font-size: 13px; margin-bottom: 28px; }
+    .input-group-login { margin-bottom: 20px; text-align: left; }
+    .input-group-login label { font-weight: 600; font-size: 13px; color: #1f2937; display: block; margin-bottom: 6px; }
+    .input-group-login input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 60px;
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+      background: #f9fafb;
+    }
+    .input-group-login input:focus {
+      border-color: #1e5a88;
+      box-shadow: 0 0 0 3px rgba(30,90,136,0.2);
+      background: white;
+    }
+    .login-btn {
+      background: linear-gradient(95deg, #0b2b44, #1e5a88);
+      width: 100%;
+      border: none;
+      padding: 14px;
+      border-radius: 60px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: 0.2s;
+    }
+    .login-btn:active { transform: scale(0.97); }
+    .error-msg {
+      color: #dc2626;
+      font-size: 12px;
+      margin-top: 8px;
+      background: #fee2e2;
+      padding: 6px 12px;
+      border-radius: 40px;
+      display: inline-block;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .app-container.visible { opacity: 1; }
+
+    .header {
+      background: linear-gradient(135deg, #0b2b44 0%, #1e5a88 100%);
+      padding: 8px 12px;
+      flex-shrink: 0;
+    }
+    .logo-area {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .logo-wrapper { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 1px;
+    }
+    .logo-sub { font-size: 9px; font-weight: 400; color: #FFE4B5; font-style: italic; }
+    .user-info-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.15);
+      padding: 4px 14px;
+      border-radius: 40px;
+    }
+    .username-badge {
+      color: white;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(0,0,0,0.3);
+      padding: 4px 10px;
+      border-radius: 30px;
+    }
+    .logout-btn {
+      background: rgba(220,38,38,0.8);
+      border: none;
+      color: white;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    .logout-btn:active { transform: scale(0.95); background: #dc2626; }
+    .undo-redo-group { display: flex; gap: 16px; align-items: center; background: rgba(255,255,255,0.15); padding: 2px 12px; border-radius: 35px; }
+    .icon-btn {
+      background: transparent;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      touch-action: manipulation;
+      padding: 4px 6px;
+      border-radius: 25px;
+      transition: 0.2s;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+    .submit-main-btn {
+      background: linear-gradient(95deg, #00a86b, #00c853);
+      border: none;
+      padding: 6px 18px;
+      border-radius: 32px;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      white-space: nowrap;
+    }
+    .submit-main-btn:active { transform: scale(0.96); }
+    .button-group { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      flex: 1;
+      min-width: 60px;
+      border: none;
+      padding: 6px 8px;
+      border-radius: 35px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: 0.2s;
+      text-align: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-select { background: #137333; color: white; }
+    .btn-copy { background: #1a73e8; color: white; }
+    .btn-delete { background: #dc2626; color: white; }
+    .btn-clear { background: #ea580c; color: white; }
+    .reg-section {
+      background: #f1f5f9;
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .tg-input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: white;
+      padding: 6px 12px;
+      border-radius: 40px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      flex: 1;
+      min-width: 100px;
+      max-width: 150px;
+    }
+    .tg-input-group label { font-weight: 600; font-size: 8px; color: #1e293b; }
+    .tg-input-group input {
+      border: none;
+      padding: 6px 0;
+      font-size: 12px;
+      flex: 1;
+      outline: none;
+      background: transparent;
+    }
+    .save-user-btn {
+      background: #137333;
+      border: none;
+      padding: 10px 50px;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      opacity: 0;
+      visibility: hidden;
+      width: auto;
+      position: absolute;
+      bottom: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+      z-index: 100;
+    }
+    .save-user-btn.show { opacity: 1; visibility: visible; }
+    .confirm-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10005;
+      backdrop-filter: blur(5px);
+    }
+    .confirm-modal {
+      background: white;
+      border-radius: 40px;
+      max-width: 440px;
+      width: 90%;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+      border-top: 6px solid #10b981;
+      animation: fadeInScale 0.2s ease;
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .confirm-modal .icon { font-size: 56px; margin-bottom: 8px; }
+    .confirm-modal h3 { color: #065f46; font-size: 24px; margin-bottom: 16px; font-weight: 800; }
+    .info-box {
+      background: #f0fdf4;
+      padding: 14px;
+      border-radius: 24px;
+      text-align: left;
+      font-size: 13px;
+      margin: 12px 0;
+      color: #14532d;
+      line-height: 1.6;
+    }
+    .account-input-area {
+      margin: 20px 0 16px;
+      text-align: left;
+    }
+    .account-input-area label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: #1e3a8a;
+      background: #eef2ff;
+      padding: 8px 12px;
+      border-radius: 60px;
+    }
+    .required-star { color: #dc2626; margin-left: 4px; font-size: 16px; }
+    .account-input-area input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #cbd5e1;
+      border-radius: 48px;
+      font-size: 15px;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s;
+      background: #ffffff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .account-input-area input:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.2);
+    }
+    .input-hint { font-size: 11px; color: #6c757d; margin-top: 8px; margin-left: 12px; display: flex; align-items: center; gap: 4px; }
+    .confirm-actions { display: flex; gap: 14px; margin-top: 20px; }
+    .confirm-actions button {
+      flex: 1;
+      border: none;
+      padding: 14px 0;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .confirm-yes { background: #10b981; color: white; }
+    .confirm-no { background: #e2e8f0; color: #1e293b; }
+    .confirm-yes:active { transform: scale(0.96); }
+    .confirm-no:active { transform: scale(0.96); }
+    .warning-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10002;
+      backdrop-filter: blur(4px);
+    }
+    .warning-modal {
+      background: white;
+      border-radius: 32px;
+      max-width: 400px;
+      width: 90%;
+      padding: 28px 24px;
+      text-align: center;
+      border-top: 5px solid #f59e0b;
+      animation: fadeInScale 0.2s ease;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+    }
+    .warning-modal .icon { font-size: 48px; margin-bottom: 8px; }
+    .warning-modal h3 { font-size: 22px; color: #b45309; margin-bottom: 16px; }
+    .warning-modal .message { background: #fffbeb; padding: 16px; border-radius: 24px; margin: 16px 0; font-size: 14px; color: #78350f; line-height: 1.5; text-align: left; }
+    .warning-modal button {
+      background: linear-gradient(95deg, #ea580c, #c2410c);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 60px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.2s;
+    }
+    .warning-modal button:active { transform: scale(0.97); }
+    .table-wrapper {
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: white;
+      position: relative;
+    }
+    table { border-collapse: collapse; table-layout: fixed; min-width: max-content; }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 0;
+      background-color: white;
+      width: 90px;
+      min-width: 90px;
+      max-width: 90px;
+      height: 32px;
+      min-height: 32px;
+    }
+    td .cell-content {
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 6px 5px;
+      font-size: 11px;
+      line-height: 1.3;
+      white-space: nowrap;
+      outline: none;
+      cursor: text;
+    }
+    th:first-child, td:first-child {
+      background-color: #f2f4f8;
+      text-align: center;
+      font-weight: 500;
+      color: #2c3e66;
+      width: 45px !important;
+      min-width: 45px !important;
+      max-width: 45px !important;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+    td:first-child {
+      background-color: #fafbfd;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+    }
+    th {
+      background-color: #f7f9fd;
+      font-weight: 600;
+      padding: 5px 3px;
+      font-size: 10px;
+      text-align: center;
+      position: relative;
+    }
+    .uid-toggle-switch {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 16px;
+      background-color: #ccc;
+      border-radius: 32px;
+      display: inline-block;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .uid-toggle-switch::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background-color: white;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: 0.2s;
+    }
+    .uid-toggle-switch.active {
+      background-color: #10b981;
+    }
+    .uid-toggle-switch.active::after {
+      transform: translateX(16px);
+    }
+    .password-toggle-switch {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 16px;
+      background-color: #ccc;
+      border-radius: 32px;
+      display: inline-block;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .password-toggle-switch::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background-color: white;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: 0.2s;
+    }
+    .password-toggle-switch.active {
+      background-color: #10b981;
+    }
+    .password-toggle-switch.active::after {
+      transform: translateX(16px);
+    }
+    th[data-col="1"] {
+      padding-left: 5px;
+      padding-right: 35px;
+      text-align: left;
+    }
+    th[data-col="2"] {
+      padding-left: 5px;
+      padding-right: 35px;
+      text-align: left;
+    }
+    .resize-handle {
+      position: absolute;
+      top: 0;
+      right: -5px;
+      width: 10px;
+      height: 100%;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 10;
+    }
+    td.selected { background-color: #cce5ff !important; outline: 1px solid #1366d0; }
+    td.duplicate-error { background-color: #ffdddd !important; }
+    .toast-msg {
+      position: fixed;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e2f3f;
+      color: white;
+      padding: 5px 14px;
+      border-radius: 30px;
+      font-size: 11px;
+      z-index: 2000;
+      opacity: 0;
+      transition: 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      max-width: 350px;
+      width: 90%;
+      padding: 20px;
+      text-align: center;
+    }
+    .close-modal-btn { background: #1e5a88; border: none; color: white; font-weight: bold; padding: 10px 18px; border-radius: 45px; width: 100%; cursor: pointer; }
+    .system-off-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    .system-off-card { background: white; border-radius: 24px; max-width: 300px; width: 85%; padding: 20px; text-align: center; }
+    
+    .sheet-selector {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      padding: 6px 10px;
+      background: #f1f5f9;
+      border-top: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+    .sheet-btn {
+      flex: 1;
+      max-width: 120px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #e2e8f0;
+      color: #475569;
+      text-align: center;
+    }
+    .sheet-btn.active {
+      background: linear-gradient(95deg, #0b2b44, #1e5a88);
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .sheet-btn:active { transform: scale(0.96); }
+    
+    .bulk-delete-confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10006;
+      backdrop-filter: blur(5px);
+    }
+    .bulk-delete-confirm {
+      background: white;
+      border-radius: 40px;
+      max-width: 440px;
+      width: 90%;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+      border-top: 6px solid #dc2626;
+      animation: fadeInScale 0.2s ease;
+    }
+    .bulk-delete-confirm .icon { font-size: 56px; margin-bottom: 8px; }
+    .bulk-delete-confirm h3 { color: #991b1b; font-size: 24px; margin-bottom: 16px; font-weight: 800; }
+    .bulk-delete-confirm .delete-info-box {
+      background: #fef2f2;
+      padding: 14px;
+      border-radius: 24px;
+      text-align: left;
+      font-size: 13px;
+      margin: 12px 0;
+      color: #7f1d1d;
+      line-height: 1.6;
+    }
+    .bulk-delete-confirm .warning-text {
+      color: #b91c1c;
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 12px;
+    }
+    .bulk-delete-actions { display: flex; gap: 14px; margin-top: 20px; }
+    .bulk-delete-actions button {
+      flex: 1;
+      border: none;
+      padding: 14px 0;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .delete-confirm-yes { background: #dc2626; color: white; }
+    .delete-confirm-no { background: #e2e8f0; color: #1e293b; }
+    .delete-confirm-yes:active { transform: scale(0.96); }
+    .delete-confirm-no:active { transform: scale(0.96); }
+    
+    /* নোটিফিকেশন স্টাইল */
+    .info-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff3e0;
+      border-left: 6px solid #f39c12;
+      border-radius: 16px;
+      padding: 18px 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 15000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 300px;
+      max-width: 90%;
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateX(-50%) translateY(-50px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    .info-notification .title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #e67e22;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .info-notification .message-text {
+      font-size: 14px;
+      color: #2c3e50;
+      line-height: 1.5;
+      background: #fef9e6;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 5px 0;
+    }
+    .info-notification .highlight {
+      background: #f1c40f;
+      color: #2c3e50;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: bold;
+      display: inline-block;
+    }
+    .close-info-btn {
+      background: #e67e22;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: 0.2s;
+    }
+    .close-info-btn:active { transform: scale(0.96); }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div id="loadingScreen" class="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text">লোড হচ্ছে...</div>
+</div>
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-card">
+    <div class="login-logo">EBH SHEETS</div>
+    <div class="login-sub">আপনার অ্যাকাউন্ট দিয়ে প্রবেশ করুন</div>
+    <div id="loginError" class="error-msg" style="display:none;"></div>
+    <div class="input-group-login">
+      <label>📛 ইউজারনেম</label>
+      <input type="text" id="loginUsername" placeholder="আপনার ইউজারনেম" autocomplete="off">
+    </div>
+    <div class="input-group-login">
+      <label>🔒 পাসওয়ার্ড</label>
+      <input type="password" id="loginPassword" placeholder="পাসওয়ার্ড">
+    </div>
+    <button id="loginSubmitBtn" class="login-btn">লগইন/রেজিস্ট্রার</button>
+  </div>
+</div>
+<div id="appContainer" class="app-container">
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo-wrapper">
+        <span class="logo">EBH</span>
+        <span class="logo-sub">Dual Sheet</span>
+        <div class="undo-redo-group">
+          <button id="undoBtn" class="icon-btn">↩️</button>
+          <button id="redoBtn" class="icon-btn">🔁</button>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <div class="user-info-area">
+          <span class="username-badge" id="displayUsername">-</span>
+          <button id="logoutHeaderBtn" class="logout-btn">🚪 লগআউট</button>
+        </div>
+        <button id="submitMainBtn" class="submit-main-btn">📤 ফাইল সাবমিট</button>
+      </div>
+    </div>
+    <div class="button-group">
+      <button id="selectAllColsBtn" class="btn btn-select">📌 সব কলাম</button>
+      <button id="copyBtn" class="btn btn-copy">📋 কপি</button>
+      <button id="deleteBtn" class="btn btn-delete">🗑️ ডিলিট</button>
+      <button id="clearSelectionBtn" class="btn btn-clear">✖️ ক্লিয়ার</button>
+    </div>
+  </div>
+  <div class="reg-section">
+    <div class="tg-input-group">
+      <label>👤 টেলিগ্রাম ইউজার:</label>
+      <input type="text" id="tgUsername" placeholder="@username" autocomplete="off">
+    </div>
+    <div class="tg-input-group">
+      <label>🆔 চ্যাট আইডি:</label>
+      <input type="text" id="tgChatId" placeholder="123456789" autocomplete="off" inputmode="numeric">
+    </div>
+    <button id="saveUserBtn" class="save-user-btn">💾 তথ্য সেভ করুন</button>
+  </div>
+  <div class="table-wrapper" id="tableWrapper">
+    <table id="masterSheet">
+      <thead id="sheetHeader">
+        <tr id="headerRow">
+          <th data-col="0">#</th>
+          <th data-col="1">
+            UID
+            <div class="uid-toggle-switch" id="uidValidationToggle" title="শুধুমাত্র সংখ্যা অনুমোদন অন/অফ"></div>
+          </th>
+          <th data-col="2">
+            পাসওয়ার্ড
+            <div class="password-toggle-switch" id="passwordAutoToggle" title="অটো পাসওয়ার্ড অন/অফ"></div>
+          </th>
+          <th data-col="3">কুকিজ/2FA</th>
+          <th data-col="4">D</th>
+          <th data-col="5">E</th>
+        </tr>
+      </thead>
+      <tbody id="sheetBody"></tbody>
+    </table>
+  </div>
+  <div class="sheet-selector">
+    <button id="sheet1Btn" class="sheet-btn active">📄 শীট ১</button>
+    <button id="sheet2Btn" class="sheet-btn">📄 শীট ২</button>
+  </div>
+</div>
+<div id="liveToast" class="toast-msg"></div>
+<script>
+(function() {
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCHqx6dAHeGFdtvY8682b_iQkdnk2ie0ug",
+    authDomain: "saprahik-kaj.firebaseapp.com",
+    databaseURL: "https://saprahik-kaj-default-rtdb.firebaseio.com",
+    projectId: "saprahik-kaj",
+    storageBucket: "saprahik-kaj.firebasestorage.app",
+    messagingSenderId: "336661054558",
+    appId: "1:336661054558:web:1beb394b660c9d6cf520cf"
+  };
+  
+  let firebaseDb = null;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    firebaseDb = firebase.database();
+    console.log("Firebase connected");
+  } catch(e) { console.warn(e); }
+
+  const BOT_TOKEN = "8675351739:AAHGiFLJvQM4cmoDtwnBsXEsK4A2D_SsGs4";
+  const YOUR_CHAT_ID = "6140196943";
+  
+  const ROWS = 200;
+  const COLS = 6;
+  let colWidths = [45, 90, 90, 90, 90, 90];
+  let selectedCells = new Set();
+  
+  let sheetData1 = [];
+  let submittedUIDs1 = new Set();
+  let sheetData2 = [];
+  let submittedUIDs2 = new Set();
+  
+  let currentSheet = 1;
+  let currentTelegramUsername = "";
+  let currentChatId = "";
+  let systemStatusListener = null;
+  
+  const SHEET1_STORAGE_KEY = "EBH_Sheet_Data_";
+  const SHEET1_SUBMITTED_KEY = "EBH_Submitted_UIDs_";
+  const SHEET2_STORAGE_KEY = "EBH_Sheet_Data_2_";
+  const SHEET2_SUBMITTED_KEY = "EBH_Submitted_UIDs_2_";
+  
+  const AUTH_TOKEN_KEY = "EBH_Auth_Token";
+  const SCROLL_POSITION_KEY = "EBH_Scroll_Position";
+  const UID_VALIDATION_STATE_KEY = "EBH_UidValidationState";
+  const PASSWORD_AUTO_STATE_KEY = "EBH_PasswordAutoState";
+  
+  let undoStack = [];
+  let redoStack = [];
+  let isUndoRedo = false;
+  const MAX_HISTORY = 30;
+  
+  let sheetBody, tableWrapper;
+  let currentLoggedInUser = null;
+
+  const loadingScreen = document.getElementById('loadingScreen');
+  const loginOverlay = document.getElementById('loginOverlay');
+  const appContainer = document.getElementById('appContainer');
+  const loginBtn = document.getElementById('loginSubmitBtn');
+  const loginUsernameInput = document.getElementById('loginUsername');
+  const loginPasswordInput = document.getElementById('loginPassword');
+  const loginError = document.getElementById('loginError');
+  const displayUsernameSpan = document.getElementById('displayUsername');
+  const logoutHeaderBtn = document.getElementById('logoutHeaderBtn');
+  const tgUsernameInput = document.getElementById('tgUsername');
+  const tgChatIdInput = document.getElementById('tgChatId');
+  const uidToggle = document.getElementById('uidValidationToggle');
+  const passwordAutoToggle = document.getElementById('passwordAutoToggle');
+  const sheet1Btn = document.getElementById('sheet1Btn');
+  const sheet2Btn = document.getElementById('sheet2Btn');
+
+  let isUidValidationEnabled = true;
+  let isPasswordAutoEnabled = true;
+
+  function showToast(msg) { 
+    const toast = document.getElementById('liveToast'); 
+    if(!toast) return;
+    toast.innerText = msg; 
+    toast.style.opacity = '1'; 
+    setTimeout(function() { toast.style.opacity = '0'; }, 1800); 
+  }
+  
+  function escapeHtml(str) { 
+    if(!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
+      if(m === '&') return '&amp;';
+      if(m === '<') return '&lt;';
+      if(m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function getCurrentSheetData() {
+    return currentSheet === 1 ? sheetData1 : sheetData2;
+  }
+  
+  function getCurrentSubmittedUIDs() {
+    return currentSheet === 1 ? submittedUIDs1 : submittedUIDs2;
+  }
+  
+  function updateCurrentSheetData(newData) {
+    if(currentSheet === 1) sheetData1 = newData;
+    else sheetData2 = newData;
+  }
+
+  function loadUidValidationState() {
+    const saved = localStorage.getItem(UID_VALIDATION_STATE_KEY);
+    if(saved !== null) isUidValidationEnabled = saved === 'true';
+    else isUidValidationEnabled = true;
+    if(uidToggle) {
+      if(isUidValidationEnabled) uidToggle.classList.add('active');
+      else uidToggle.classList.remove('active');
+    }
+  }
+  
+  function saveUidValidationState() {
+    localStorage.setItem(UID_VALIDATION_STATE_KEY, isUidValidationEnabled);
+  }
+
+  function loadPasswordAutoState() {
+    const saved = localStorage.getItem(PASSWORD_AUTO_STATE_KEY);
+    if(saved !== null) isPasswordAutoEnabled = saved === 'true';
+    else isPasswordAutoEnabled = true;
+    if(passwordAutoToggle) {
+      if(isPasswordAutoEnabled) passwordAutoToggle.classList.add('active');
+      else passwordAutoToggle.classList.remove('active');
+    }
+  }
+  
+  function savePasswordAutoState() {
+    localStorage.setItem(PASSWORD_AUTO_STATE_KEY, isPasswordAutoEnabled);
+  }
+
+  function toggleUidValidation() {
+    isUidValidationEnabled = !isUidValidationEnabled;
+    if(uidToggle) {
+      if(isUidValidationEnabled) uidToggle.classList.add('active');
+      else uidToggle.classList.remove('active');
+    }
+    saveUidValidationState();
+    showToast(isUidValidationEnabled ? "UID ভ্যালিডেশন চালু (শুধু সংখ্যা)" : "UID ভ্যালিডেশন বন্ধ (যেকোনো লেখা)");
+  }
+
+  function togglePasswordAuto() {
+    isPasswordAutoEnabled = !isPasswordAutoEnabled;
+    if(passwordAutoToggle) {
+      if(isPasswordAutoEnabled) passwordAutoToggle.classList.add('active');
+      else passwordAutoToggle.classList.remove('active');
+    }
+    savePasswordAutoState();
+    showToast(isPasswordAutoEnabled ? "পাসওয়ার্ড অটো অন (নতুন UID-তে অটো সেট হবে)" : "পাসওয়ার্ড অটো অফ (ম্যানুয়ালি লিখুন)");
+    fullRender();
+  }
+
+  function switchToSheet1() {
+    if(currentSheet === 1) return;
+    currentSheet = 1;
+    sheet1Btn.classList.add('active');
+    sheet2Btn.classList.remove('active');
+    fullRender();
+    showToast("শীট ১ এ স্যুইচ করা হয়েছে");
+  }
+  
+  function switchToSheet2() {
+    if(currentSheet === 2) return;
+    currentSheet = 2;
+    sheet2Btn.classList.add('active');
+    sheet1Btn.classList.remove('active');
+    fullRender();
+    showToast("শীট ২ এ স্যুইচ করা হয়েছে");
+  }
+
+  function saveAuthToken(username, password) {
+    localStorage.setItem(AUTH_TOKEN_KEY, JSON.stringify({ username: username, password: password, timestamp: Date.now() }));
+  }
+  
+  function getAuthToken() {
+    try {
+      const data = localStorage.getItem(AUTH_TOKEN_KEY);
+      if(data) return JSON.parse(data);
+    } catch(e) {}
+    return null;
+  }
+  
+  function clearAuthToken() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+
+  function loadSheet1FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET1_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData1 = parsed;
+        else sheetData1 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData1 = createEmptySheet(); }
+    } else {
+      sheetData1 = createEmptySheet();
+    }
+    const savedSubmitted = localStorage.getItem(SHEET1_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs1 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
+    }
+  }
+  
+  function loadSheet2FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET2_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData2 = parsed;
+        else sheetData2 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData2 = createEmptySheet(); }
+    } else {
+      sheetData2 = createEmptySheet();
+    }
+    const savedSubmitted = localStorage.getItem(SHEET2_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs2 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
+    }
+  }
+  
+  function saveSheet1ToLocalStorage(username) {
+    localStorage.setItem(SHEET1_STORAGE_KEY + username, JSON.stringify(sheetData1));
+    localStorage.setItem(SHEET1_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs1)));
+  }
+  
+  function saveSheet2ToLocalStorage(username) {
+    localStorage.setItem(SHEET2_STORAGE_KEY + username, JSON.stringify(sheetData2));
+    localStorage.setItem(SHEET2_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs2)));
+  }
+  
+  function saveAllToLocalStorage(username) {
+    if(!username) return;
+    saveSheet1ToLocalStorage(username);
+    saveSheet2ToLocalStorage(username);
+  }
+
+  async function loadUserDataFromFirebase(username) {
+    if(!firebaseDb) return false;
+    try {
+      const snapshot = await firebaseDb.ref('userSheets/' + username).once('value');
+      const data = snapshot.val();
+      if(data) {
+        if(data.sheetData && data.sheetData.length === ROWS) sheetData1 = data.sheetData;
+        if(data.submittedUIDs) submittedUIDs1 = new Set(data.submittedUIDs);
+        if(data.sheetData2 && data.sheetData2.length === ROWS) sheetData2 = data.sheetData2;
+        if(data.submittedUIDs2) submittedUIDs2 = new Set(data.submittedUIDs2);
+        if(data.chatId) currentChatId = data.chatId;
+        if(data.telegramUsername) currentTelegramUsername = data.telegramUsername;
+        if(tgUsernameInput) tgUsernameInput.value = currentTelegramUsername || '';
+        if(tgChatIdInput && currentChatId) tgChatIdInput.value = currentChatId;
+        saveAllToLocalStorage(username);
+        return true;
+      }
+    } catch(e) { console.warn(e); }
+    return false;
+  }
+
+  function saveUserDataToFirebase(username) {
+    if(!firebaseDb || !username) return;
+    const tgUsernameRaw = tgUsernameInput ? tgUsernameInput.value.trim() : "";
+    const chatIdRaw = tgChatIdInput ? tgChatIdInput.value.trim() : "";
+    if (tgUsernameRaw && !tgUsernameRaw.startsWith('@')) currentTelegramUsername = '@' + tgUsernameRaw;
+    else currentTelegramUsername = tgUsernameRaw;
+    currentChatId = chatIdRaw;
+    
+    const dataToSave = {
+      sheetData: sheetData1,
+      submittedUIDs: Array.from(submittedUIDs1),
+      sheetData2: sheetData2,
+      submittedUIDs2: Array.from(submittedUIDs2),
+      chatId: currentChatId,
+      telegramUsername: currentTelegramUsername,
+      lastUpdated: Date.now()
+    };
+    firebaseDb.ref('userSheets/' + username).set(dataToSave).catch(function(e){ console.warn(e); });
+    
+    if(currentTelegramUsername && currentTelegramUsername !== "") {
+      var cleanUser = currentTelegramUsername.replace('@', '').toLowerCase();
+      firebaseDb.ref('telegramUsers/' + cleanUser).set({
+        chatId: parseInt(currentChatId) || 0,
+        username: currentTelegramUsername,
+        linkedAccount: username
+      }).catch(function(e){ console.warn(e); });
+    }
+  }
+
+  function createEmptySheet() {
+    var newSheet = [];
+    for (var i = 0; i < ROWS; i++) {
+      newSheet[i] = [];
+      for (var j = 0; j < COLS; j++) {
+        newSheet[i][j] = '';
+      }
+      newSheet[i][0] = (i+1).toString();
+    }
+    return newSheet;
+  }
+
+  async function initUserSession(username, password, isNew) {
+    undoStack = [];
+    redoStack = [];
+    
+    currentLoggedInUser = username;
+    
+    sheetData1 = createEmptySheet();
+    sheetData2 = createEmptySheet();
+    submittedUIDs1 = new Set();
+    submittedUIDs2 = new Set();
+    
+    var loaded = await loadUserDataFromFirebase(username);
+    if(!loaded) {
+      loadSheet1FromLocalStorage(username);
+      loadSheet2FromLocalStorage(username);
+    }
+    
+    if(!sheetData1 || sheetData1.length !== ROWS) sheetData1 = createEmptySheet();
+    if(!sheetData2 || sheetData2.length !== ROWS) sheetData2 = createEmptySheet();
+    
+    if(tgUsernameInput && tgUsernameInput.value) currentTelegramUsername = tgUsernameInput.value;
+    if(tgChatIdInput && tgChatIdInput.value) currentChatId = tgChatIdInput.value;
+    
+    if(displayUsernameSpan) displayUsernameSpan.innerText = username;
+    currentSheet = 1;
+    if(sheet1Btn) sheet1Btn.classList.add('active');
+    if(sheet2Btn) sheet2Btn.classList.remove('active');
+    fullRender();
+    saveUserDataToFirebase(username);
+    
+    if(loadingScreen) loadingScreen.classList.add('hide');
+    if(loginOverlay) loginOverlay.classList.remove('visible');
+    if(appContainer) appContainer.classList.add('visible');
+    saveAuthToken(username, password);
+  }
+
+  function logout() {
+    if(currentLoggedInUser) {
+      saveUserDataToFirebase(currentLoggedInUser);
+    }
+    clearAuthToken();
+    currentLoggedInUser = null;
+    currentTelegramUsername = "";
+    sheetData1 = [];
+    sheetData2 = [];
+    if(submittedUIDs1) submittedUIDs1.clear();
+    if(submittedUIDs2) submittedUIDs2.clear();
+    
+    if(loadingScreen) loadingScreen.classList.add('hide');
+    if(loginOverlay) loginOverlay.classList.add('visible');
+    if(appContainer) appContainer.classList.remove('visible');
+    if(loginUsernameInput) loginUsernameInput.value = '';
+    if(loginPasswordInput) loginPasswordInput.value = '';
+    if(loginError) loginError.style.display = 'none';
+  }
+
+  async function handleLoginOrRegister() {
+    var username = loginUsernameInput.value.trim();
+    var password = loginPasswordInput.value.trim();
+    if(!username || !password) {
+      if(loginError) {
+        loginError.innerText = "ইউজারনেম ও পাসওয়ার্ড দিন";
+        loginError.style.display = 'block';
+      }
+      return;
+    }
+    if(loginError) loginError.style.display = 'none';
+    if(!firebaseDb) {
+      if(loginError) {
+        loginError.innerText = "Firebase সংযোগ নেই!";
+        loginError.style.display = 'block';
+      }
+      return;
+    }
+    
+    if(loadingScreen) loadingScreen.classList.remove('hide');
+    
+    try {
+      var userRef = firebaseDb.ref('users/' + username);
+      var snapshot = await userRef.once('value');
+      var userData = snapshot.val();
+      
+      if(userData) {
+        if(userData.password === password) {
+          await initUserSession(username, password, false);
+        } else {
+          if(loadingScreen) loadingScreen.classList.add('hide');
+          if(loginError) {
+            loginError.innerText = "ভুল পাসওয়ার্ড!";
+            loginError.style.display = 'block';
+          }
+        }
+      } else {
+        await userRef.set({ password: password, createdAt: Date.now() });
+        await initUserSession(username, password, true);
+        showToast("রেজিস্ট্রেশন সফল! স্বাগতম!");
+      }
+    } catch(err) {
+      console.error(err);
+      if(loadingScreen) loadingScreen.classList.add('hide');
+      if(loginError) {
+        loginError.innerText = "সার্ভার ত্রুটি, আবার চেষ্টা করুন";
+        loginError.style.display = 'block';
+      }
+    }
+  }
+
+  async function checkAutoLogin() {
+    var token = getAuthToken();
+    if(token && token.username && token.password && firebaseDb) {
+      try {
+        var ref = firebaseDb.ref('users/' + token.username);
+        var snap = await ref.once('value');
+        if(snap.exists() && snap.val().password === token.password) {
+          await initUserSession(token.username, token.password, false);
+          return true;
+        } else {
+          clearAuthToken();
+        }
+      } catch(e) { console.warn(e); }
+    }
+    return false;
+  }
+
+  function getMasterPassword() { 
+    var data = getCurrentSheetData();
+    return (data[0] && data[0][2]) ? data[0][2] : ''; 
+  }
+  
+  function autoFillPasswordIfNeeded(row) {
+    var data = getCurrentSheetData();
+    if(!data[row]) return;
+    
+    var uid = data[row][1] ? data[row][1].toString().trim() : "";
+    var currentPass = data[row][2] ? data[row][2].toString().trim() : "";
+    var masterPass = getMasterPassword();
+    
+    if (isPasswordAutoEnabled && uid !== "" && currentPass === "" && masterPass && masterPass.trim() !== "" && row !== 0) {
+      data[row][2] = masterPass;
+      var passCell = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
+      if(passCell && passCell.innerText !== masterPass) {
+        passCell.innerText = masterPass;
+      }
+      return true;
+    }
+    return false;
+  }
+  
+  function updateBFromARow(row, newAValue) {
+    var data = getCurrentSheetData();
+    if(!data[row]) return;
+    
+    var oldValue = data[row][1];
+    data[row][1] = newAValue;
+    
+    if (newAValue && newAValue.toString().trim() !== "") {
+      autoFillPasswordIfNeeded(row);
+    } else if (!newAValue || newAValue.toString().trim() === "") {
+      data[row][2] = "";
+      var passCell2 = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
+      if(passCell2) passCell2.innerText = "";
+    }
+    
+    saveAllToLocalStorage(currentLoggedInUser);
+    saveUserDataToFirebase(currentLoggedInUser);
+    checkDuplicateHighlight();
+  }
+  
+  function pushToUndo() { 
+    if (!isUndoRedo) { 
+      var currentData = getCurrentSheetData();
+      var copy = JSON.parse(JSON.stringify(currentData)); 
+      undoStack.push(copy); 
+      if (undoStack.length > MAX_HISTORY) undoStack.shift(); 
+      redoStack = []; 
+    } 
+  }
+  
+  function undo() { 
+    if (undoStack.length === 0) { showToast("আর Undo নেই"); return; } 
+    isUndoRedo = true; 
+    var currentData = getCurrentSheetData();
+    redoStack.push(JSON.parse(JSON.stringify(currentData))); 
+    var newData = undoStack.pop();
+    updateCurrentSheetData(newData);
+    fullRender(); 
+    saveAllToLocalStorage(currentLoggedInUser); 
+    saveUserDataToFirebase(currentLoggedInUser); 
+    isUndoRedo = false; 
+    showToast("Undone"); 
+  }
+  
+  function redo() { 
+    if (redoStack.length === 0) { showToast("আর Redo নেই"); return; } 
+    isUndoRedo = true; 
+    var currentData = getCurrentSheetData();
+    undoStack.push(JSON.parse(JSON.stringify(currentData))); 
+    var newData = redoStack.pop();
+    updateCurrentSheetData(newData);
+    fullRender(); 
+    saveAllToLocalStorage(currentLoggedInUser); 
+    saveUserDataToFirebase(currentLoggedInUser); 
+    isUndoRedo = false; 
+    showToast("Redone"); 
+  }
+  
+  function checkDuplicateHighlight() {
+    var cellsA = document.querySelectorAll('#sheetBody td[data-col="1"] .cell-content');
+    cellsA.forEach(function(cell) { 
+      if(cell.parentElement) cell.parentElement.classList.remove('duplicate-error'); 
+    });
+    var valueMap = new Map();
+    for (var i = 0; i < cellsA.length; i++) { 
+      var val = cellsA[i].innerText.trim(); 
+      if (val !== "") { 
+        if (!valueMap.has(val)) valueMap.set(val, []); 
+        valueMap.get(val).push(cellsA[i].parentElement); 
+      } 
+    }
+    for (var pair of valueMap.entries()) { 
+      if (pair[1].length > 1) {
+        for(var k=0; k<pair[1].length; k++) {
+          pair[1][k].classList.add('duplicate-error');
+        }
+      }
+    }
+  }
+  
+  function clearAllSelection() { 
+    for (var cell of selectedCells) {
+      if(cell) cell.classList.remove('selected');
+    }
+    selectedCells.clear(); 
+  }
+  
+  function isAllDataColumnsSelected() {
+    if (selectedCells.size === 0) return false;
+    
+    var selectedRowsSet = new Set();
+    var selectedColsSet = new Set();
+    
+    for (var cell of selectedCells) {
+      var row = parseInt(cell.getAttribute('data-row'));
+      var col = parseInt(cell.getAttribute('data-col'));
+      if (!isNaN(row) && !isNaN(col) && col >= 1 && col <= 5) {
+        selectedRowsSet.add(row);
+        selectedColsSet.add(col);
+      }
+    }
+    
+    if (selectedColsSet.size !== 5) return false;
+    if (selectedRowsSet.size !== ROWS) return false;
+    
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 1; c <= 5; c++) {
+        var found = false;
+        for (var cell2 of selectedCells) {
+          var rr = parseInt(cell2.getAttribute('data-row'));
+          var cc = parseInt(cell2.getAttribute('data-col'));
+          if (rr === r && cc === c) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  function showBulkDeleteConfirmation(count) {
+    return new Promise(function(resolve) {
+      var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+      var modalDiv = document.createElement('div');
+      modalDiv.className = 'bulk-delete-confirm-overlay';
+      modalDiv.innerHTML = '<div class="bulk-delete-confirm">' +
+        '<div class="icon">⚠️🗑️</div>' +
+        '<h3>সমস্ত ডাটা ডিলিট!</h3>' +
+        '<div class="delete-info-box">' +
+        '<strong>শীট:</strong> ' + sheetName + '<br>' +
+        '<strong>মোট সেল:</strong> ' + count + ' টি সেল<br>' +
+        '<strong>মোট রো:</strong> ' + ROWS + ' টি<br>' +
+        '<strong>কলাম:</strong> UID, পাসওয়ার্ড, কুকিজ/2FA, D, E' +
+        '</div>' +
+        '<div class="warning-text">' +
+        'সতর্কতা: এই অপারেশনটি স্থায়ীভাবে সব ডাটা মুছে ফেলবে!<br>' +
+        'একবার ডিলিট করলে আর Undo করা যাবে না!' +
+        '</div>' +
+        '<div class="bulk-delete-actions">' +
+        '<button class="delete-confirm-yes" id="bulkDeleteYesBtn">হ্যাঁ, সম্পূর্ণ ডিলিট করুন</button>' +
+        '<button class="delete-confirm-no" id="bulkDeleteNoBtn">বাতিল করুন</button>' +
+        '</div></div>';
+      document.body.appendChild(modalDiv);
+      
+      var yesBtn = document.getElementById('bulkDeleteYesBtn');
+      var noBtn = document.getElementById('bulkDeleteNoBtn');
+      
+      var cleanup = function() { if(modalDiv) modalDiv.remove(); };
+      
+      if(yesBtn) {
+        yesBtn.addEventListener('click', function() {
+          cleanup();
+          resolve(true);
+        });
+      }
+      if(noBtn) {
+        noBtn.addEventListener('click', function() {
+          cleanup();
+          resolve(false);
+        });
+      }
+      modalDiv.addEventListener('click', function(e) {
+        if(e.target === modalDiv) {
+          cleanup();
+          resolve(false);
+        }
+      });
+    });
+  }
+  
+  async function deleteSelected() {
+    if (selectedCells.size === 0) { 
+      showToast("কিছু সিলেক্ট করেনি"); 
+      return; 
+    }
+    
+    var isBulkDelete = isAllDataColumnsSelected();
+    
+    if (isBulkDelete) {
+      var confirmed = await showBulkDeleteConfirmation(selectedCells.size);
+      if (!confirmed) {
+        showToast("ডিলিট বাতিল করা হয়েছে");
+        return;
+      }
+      undoStack = [];
+      redoStack = [];
+      showToast("বাল্ক ডিলিট: Undo স্ট্যাক ক্লিয়ার করা হয়েছে");
+    } else {
+      if (!isUndoRedo) pushToUndo();
+    }
+    
+    var cellsToDelete = Array.from(selectedCells);
+    var data = getCurrentSheetData();
+    
+    for (var i = 0; i < cellsToDelete.length; i++) {
+      var cell = cellsToDelete[i];
+      var r = parseInt(cell.getAttribute('data-row')); 
+      var c = parseInt(cell.getAttribute('data-col')); 
+      var contentDiv = cell.querySelector('.cell-content'); 
+      if (contentDiv && c !== 0 && data[r]) { 
+        contentDiv.innerText = ''; 
+        data[r][c] = ''; 
+      } 
+      if (c === 1 && data[r]) {
+        data[r][2] = '';
+        var passContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content');
+        if(passContent) passContent.innerText = '';
+      }
+    }
+    
+    saveAllToLocalStorage(currentLoggedInUser);
+    saveUserDataToFirebase(currentLoggedInUser);
+    checkDuplicateHighlight(); 
+    clearAllSelection(); 
+    
+    if (isBulkDelete) {
+      showToast("সম্পূর্ণ শীটের সমস্ত ডাটা স্থায়ীভাবে ডিলিট হয়েছে!");
+    } else {
+      showToast(cellsToDelete.length + " টি সেল ডিলিট হয়েছে");
+    }
+  }
+  
+  function makeEditable(contentDiv, row, col) {
+    if (col === 0) return;
+    if (col === 1) {
+      contentDiv.addEventListener('input', function() { 
+        if (!isUndoRedo) pushToUndo();
+        var newVal = this.innerText;
+        if(isUidValidationEnabled) {
+          var onlyNumbers = newVal.replace(/[^0-9]/g, '');
+          if (onlyNumbers !== newVal) this.innerText = onlyNumbers;
+          newVal = onlyNumbers;
+        }
+        var data = getCurrentSheetData();
+        if(data[row] && data[row][1] !== newVal) {
+          data[row][1] = newVal;
+          updateBFromARow(row, newVal);
+        }
+        saveAllToLocalStorage(currentLoggedInUser);
+        saveUserDataToFirebase(currentLoggedInUser);
+        checkDuplicateHighlight();
+      });
+    } else if (col === 2) {
+      contentDiv.addEventListener('input', function() { 
+        if (!isUndoRedo) pushToUndo(); 
+        var data = getCurrentSheetData(); 
+        if(data[row]) data[row][2] = this.innerText; 
+        saveAllToLocalStorage(currentLoggedInUser); 
+        saveUserDataToFirebase(currentLoggedInUser); 
+      });
+    } else {
+      contentDiv.addEventListener('input', function() { 
+        if (!isUndoRedo) pushToUndo(); 
+        var data = getCurrentSheetData(); 
+        if(data[row]) data[row][col] = this.innerText; 
+        saveAllToLocalStorage(currentLoggedInUser); 
+        saveUserDataToFirebase(currentLoggedInUser); 
+      });
+    }
+  }
+  
+  function fullRender() {
+    if (!sheetBody) sheetBody = document.getElementById('sheetBody'); 
+    if (!sheetBody) return;
+    sheetBody.innerHTML = '';
+    var currentData = getCurrentSheetData();
+    
+    if(!currentData || currentData.length !== ROWS) {
+      if(currentSheet === 1) sheetData1 = createEmptySheet();
+      else sheetData2 = createEmptySheet();
+      currentData = getCurrentSheetData();
+    }
+    
+    var masterPass = getMasterPassword();
+    
+    for (var row = 0; row < ROWS; row++) {
+      var tr = document.createElement('tr');
+      for (var col = 0; col < COLS; col++) {
+        var td = document.createElement('td'); 
+        td.setAttribute('data-row', row); 
+        td.setAttribute('data-col', col); 
+        td.style.width = colWidths[col] + 'px'; 
+        td.style.minWidth = colWidths[col] + 'px';
+        var contentDiv = document.createElement('div'); 
+        contentDiv.className = 'cell-content'; 
+        contentDiv.setAttribute('contenteditable', col !== 0 ? 'true' : 'false');
+        var cellValue = (currentData[row] && currentData[row][col]) ? currentData[row][col] : ''; 
+        if (col === 0 && (!cellValue || cellValue === "")) cellValue = (row+1).toString();
+        
+        if (col === 2 && row !== 0 && isPasswordAutoEnabled && currentData[row] && currentData[row][1] && currentData[row][1].toString().trim() !== "") {
+          if (!cellValue || cellValue === "") {
+            if (masterPass && masterPass.trim() !== "") {
+              cellValue = masterPass;
+              currentData[row][2] = masterPass;
+            }
+          }
+        }
+        
+        contentDiv.innerText = cellValue || '';
+        if (col === 0) { 
+          contentDiv.style.textAlign = 'center'; 
+          contentDiv.style.overflow = 'hidden'; 
+          contentDiv.style.whiteSpace = 'nowrap'; 
+        }
+        td.appendChild(contentDiv);
+        if (col !== 0) { 
+          makeEditable(contentDiv, row, col); 
+          (function(tdElement) {
+            contentDiv.addEventListener('click', function(e) { 
+              e.stopPropagation(); 
+              if (!e.ctrlKey && !e.metaKey) clearAllSelection(); 
+              tdElement.classList.add('selected'); 
+              selectedCells.add(tdElement); 
+            });
+          })(td);
+        } else { 
+          td.addEventListener('click', function(e) { e.stopPropagation(); }); 
+        }
+        tr.appendChild(td);
+      }
+      sheetBody.appendChild(tr);
+    }
+    checkDuplicateHighlight();
+    
+    var masterCell = document.querySelector('#sheetBody td[data-row="0"][data-col="2"] .cell-content');
+    if (masterCell) { 
+      masterCell.addEventListener('blur', function() { 
+        var newMaster = getMasterPassword(); 
+        if (newMaster && newMaster.trim() !== "" && isPasswordAutoEnabled) { 
+          var data = getCurrentSheetData();
+          for (var r = 1; r < ROWS; r++) { 
+            if (data[r] && data[r][1] && data[r][1].toString().trim() !== "") {
+              if (!data[r][2] || data[r][2] === "") {
+                data[r][2] = newMaster; 
+                var tBContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content'); 
+                if (tBContent) tBContent.innerText = newMaster;
+              }
+            } 
+          } 
+          saveAllToLocalStorage(currentLoggedInUser); 
+          saveUserDataToFirebase(currentLoggedInUser); 
+        } 
+      }); 
+    }
+    restoreScrollPosition();
+    addResizeHandles(); 
+    bindColumnSelection();
+  }
+  
+  function addResizeHandles() {
+    var ths = document.querySelectorAll('#headerRow th');
+    for(var idx=0; idx<ths.length; idx++) {
+      var th = ths[idx];
+      if (idx === 0) continue;
+      var existingHandle = th.querySelector('.resize-handle');
+      if(existingHandle) existingHandle.remove();
+      var handle = document.createElement('div'); 
+      handle.className = 'resize-handle';
+      var startX, startW, isResizing = false;
+      var onMove = function(e, colIdx) { 
+        if (!isResizing) return; 
+        var clientX = e.touches ? e.touches[0].clientX : e.clientX; 
+        var diff = clientX - startX; 
+        var newW = startW + diff; 
+        if (newW < 60) newW = 60; 
+        if (newW > 180) newW = 180; 
+        colWidths[colIdx] = newW; 
+        var allCells = document.querySelectorAll('#sheetBody td[data-col="' + colIdx + '"], #headerRow th[data-col="' + colIdx + '"]'); 
+        for(var i=0; i<allCells.length; i++) {
+          allCells[i].style.width = newW + 'px'; 
+          allCells[i].style.minWidth = newW + 'px';
+        }
+      };
+      var onUp = function() { 
+        isResizing = false; 
+        window.removeEventListener('mousemove', onMove); 
+        window.removeEventListener('mouseup', onUp); 
+        window.removeEventListener('touchmove', onMove); 
+        window.removeEventListener('touchend', onUp); 
+      };
+      (function(colIdx) {
+        handle.addEventListener('touchstart', function(e) { 
+          e.preventDefault(); 
+          isResizing = true; 
+          startX = e.touches[0].clientX; 
+          startW = colWidths[colIdx]; 
+          window.addEventListener('touchmove', function(ev) { onMove(ev, colIdx); }, { passive: false }); 
+          window.addEventListener('touchend', onUp); 
+        });
+        handle.addEventListener('mousedown', function(e) { 
+          e.preventDefault(); 
+          isResizing = true; 
+          startX = e.clientX; 
+          startW = colWidths[colIdx]; 
+          window.addEventListener('mousemove', function(ev) { onMove(ev, colIdx); }); 
+          window.addEventListener('mouseup', onUp); 
+        });
+      })(idx);
+      th.appendChild(handle); 
+      th.style.position = 'relative';
+    }
+  }
+  
+  function bindColumnSelection() {
+    var headers = document.querySelectorAll('#headerRow th');
+    for(var colIdx=0; colIdx<headers.length; colIdx++) {
+      var th = headers[colIdx];
+      if (colIdx === 0) continue;
+      (function(cIdx) {
+        th.addEventListener('click', function(e) { 
+          if (e.target.classList && (e.target.classList.contains('resize-handle') || e.target.classList.contains('uid-toggle-switch') || e.target.classList.contains('password-toggle-switch'))) return; 
+          clearAllSelection(); 
+          var cells = document.querySelectorAll('#sheetBody td[data-col="' + cIdx + '"]');
+          for(var i=0; i<cells.length; i++) {
+            cells[i].classList.add('selected'); 
+            selectedCells.add(cells[i]);
+          }
+          showToast(th.innerText + " সিলেক্টেড"); 
+        });
+      })(colIdx);
+    }
+  }
+  
+  function selectAllDataColumns() { 
+    clearAllSelection(); 
+    for (var col = 1; col < COLS; col++) { 
+      var cells = document.querySelectorAll('#sheetBody td[data-col="' + col + '"]');
+      for(var i=0; i<cells.length; i++) {
+        cells[i].classList.add('selected'); 
+        selectedCells.add(cells[i]);
+      }
+    } 
+    showToast("সব ডাটা কলাম সিলেক্ট হয়েছে"); 
+  }
+  
+  async function copySelected() {
+    if (selectedCells.size === 0) { showToast("কিছু সিলেক্ট করেনি"); return; }
+    var minR=Infinity, maxR=-Infinity, minC=Infinity, maxC=-Infinity;
+    for (var cell of selectedCells) { 
+      var r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col')); 
+      if (!isNaN(r) && !isNaN(c)) { 
+        minR = Math.min(minR, r); maxR = Math.max(maxR, r); 
+        minC = Math.min(minC, c); maxC = Math.max(maxC, c); 
+      } 
+    }
+    if (minR === Infinity) { showToast("সিলেক্ট ভ্যালিড না"); return; }
+    var matrix = [];
+    for (var i = 0; i <= maxR-minR; i++) {
+      matrix[i] = [];
+      for (var j = 0; j <= maxC-minC; j++) {
+        matrix[i][j] = '';
+      }
+    }
+    for (var cell of selectedCells) { 
+      var rr = parseInt(cell.getAttribute('data-row')), cc = parseInt(cell.getAttribute('data-col')); 
+      var contentDiv = cell.querySelector('.cell-content'); 
+      matrix[rr-minR][cc-minC] = contentDiv ? contentDiv.innerText : ''; 
+    }
+    var tsv = '';
+    for(var i=0; i<matrix.length; i++) {
+      tsv += matrix[i].join('\t');
+      if(i < matrix.length-1) tsv += '\n';
+    }
+    try { await navigator.clipboard.writeText(tsv); showToast(selectedCells.size + " সেল কপি"); } catch(e) { showToast("কপি ব্যর্থ"); }
+  }
+  
+  function saveUserInfo() {
+    var username = tgUsernameInput ? tgUsernameInput.value.trim() : "";
+    var chatId = tgChatIdInput ? tgChatIdInput.value.trim() : "";
+    if (username && !username.startsWith('@')) username = '@' + username;
+    currentTelegramUsername = username;
+    currentChatId = chatId || "";
+    if(firebaseDb && currentLoggedInUser) { saveUserDataToFirebase(currentLoggedInUser); }
+    showToast("সেভ হয়েছে (টেলিগ্রাম: " + (currentTelegramUsername || "ফাঁকা") + ")");
+  }
+
+  // নতুন ফাংশন: সাবমিট বাটনে ক্লিক করলে শুধুমাত্র নোটিফিকেশন দেখাবে
+  function showSubmitNotification() {
+    // নোটিফিকেশন ডিভ তৈরি করা
+    var notificationDiv = document.createElement('div');
+    notificationDiv.className = 'info-notification';
+    
+    // ডিটেইলস কন্টেন্ট
+    var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+    var totalUnsubmitted = 0;
+    var data = getCurrentSheetData();
+    var submittedSet = getCurrentSubmittedUIDs();
+    for(var i=0; i<ROWS; i++) {
+      if(data[i] && data[i][1] && data[i][1].toString().trim() !== "" && !submittedSet.has(data[i][1].toString().trim())) {
+        totalUnsubmitted++;
+      }
+    }
+    
+    notificationDiv.innerHTML = `
+      <div class="title">
+        <span>⚠️ গুরুত্বপূর্ণ নোটিশ</span>
+      </div>
+      <div class="message-text">
+        <strong>প্রিয় ব্যবহারকারী,</strong><br><br>
+        আপনি <strong class="highlight">${escapeHtml(sheetName)}</strong> থেকে <strong class="highlight">${totalUnsubmitted}</strong> টি নতুন তথ্য জমা দিতে যাচ্ছেন।<br><br>
+        ➤ <strong>দয়া করে মনে রাখবেন:</strong> এই অ্যাপ্লিকেশনটি সরাসরি ফাইল সাবমিট করার জন্য নয়।<br><br>
+        ➤ আপনি যে এডমিনের অধীনে কাজ করছেন,<br>
+        ➤ শুধুমাত্র <strong>সেই এডমিনের ব্যক্তিগত ইনবক্সে</strong> ফাইলটি জমা দিন।<br><br>
+        ➤ আপনার টেলিগ্রাম ইউজার এবং চ্যাট আইডি সংরক্ষিত থাকলেও, এই সিস্টেম থেকে কোনো ফাইল স্বয়ংক্রিয়ভাবে জমা হবে না।<br><br>
+        ━━━━━━━━━━━━━━━━━━━<br>
+        <span style="color:#e67e22;">🙏 আমাদের অ্যাপ ব্যবহারের জন্য ধন্যবাদ। সঠিক পদ্ধতিতে ফাইল জমা দেওয়ার জন্য সহযোগিতা করুন।</span>
+      </div>
+      <button class="close-info-btn">বুঝেছি, বন্ধ করুন</button>
+    `;
+    
+    document.body.appendChild(notificationDiv);
+    
+    // ক্লোজ বাটন ইভেন্ট
+    var closeBtn = notificationDiv.querySelector('.close-info-btn');
+    closeBtn.addEventListener('click', function() {
+      notificationDiv.remove();
+    });
+    
+    // 8 সেকেন্ড পর অটো রিমুভ
+    setTimeout(function() {
+      if(notificationDiv && notificationDiv.parentNode) notificationDiv.remove();
+    }, 8000);
+  }
+
+  function checkSystemStatus() { 
+    if(!firebaseDb) return; 
+    if(systemStatusListener) systemStatusListener.off(); 
+    systemStatusListener = firebaseDb.ref('systemControl/status'); 
+    systemStatusListener.on('value', function(snapshot) { 
+      var data = snapshot.val(); 
+      var isOn = data === null ? true : data.isOn !== false; 
+      var existing = document.querySelector('.system-off-overlay'); 
+      if(existing) existing.remove(); 
+      if(!isOn) { 
+        var overlay = document.createElement('div'); 
+        overlay.className = 'system-off-overlay'; 
+        overlay.innerHTML = '<div class="system-off-card"><div style="font-size:40px;">🔒</div><h3>সিস্টেম বন্ধ আছে</h3></div>'; 
+        document.body.appendChild(overlay); 
+        var cells = document.querySelectorAll('#sheetBody td .cell-content');
+        for(var i=0; i<cells.length; i++) cells[i].setAttribute('contenteditable', 'false'); 
+      } else { 
+        var cells2 = document.querySelectorAll('#sheetBody td .cell-content');
+        for(var j=0; j<cells2.length; j++) { 
+          var parentTd = cells2[j].parentElement;
+          if(parentTd && parentTd.getAttribute('data-col') !== '0') cells2[j].setAttribute('contenteditable', 'true'); 
+        } 
+      } 
+    }); 
+  }
+  
+  function saveScrollPosition() { 
+    if(tableWrapper) localStorage.setItem(SCROLL_POSITION_KEY, JSON.stringify({ scrollTop: tableWrapper.scrollTop, scrollLeft: tableWrapper.scrollLeft })); 
+  }
+  
+  function restoreScrollPosition() { 
+    if(!tableWrapper) return; 
+    try { 
+      var saved = localStorage.getItem(SCROLL_POSITION_KEY); 
+      if(saved) { 
+        var pos = JSON.parse(saved); 
+        setTimeout(function() { 
+          if(tableWrapper) {
+            tableWrapper.scrollTop = pos.scrollTop || 0; 
+            tableWrapper.scrollLeft = pos.scrollLeft || 0;
+          }
+        }, 50); 
+      } 
+    } catch(e){} 
+  }
+
+  function bindButtons() { 
+    var undoBtn = document.getElementById('undoBtn');
+    if(undoBtn) undoBtn.addEventListener('click', undo);
+    var redoBtn = document.getElementById('redoBtn');
+    if(redoBtn) redoBtn.addEventListener('click', redo);
+    var copyBtn = document.getElementById('copyBtn');
+    if(copyBtn) copyBtn.addEventListener('click', copySelected);
+    var deleteBtn = document.getElementById('deleteBtn');
+    if(deleteBtn) deleteBtn.addEventListener('click', deleteSelected);
+    var clearBtn = document.getElementById('clearSelectionBtn');
+    if(clearBtn) clearBtn.addEventListener('click', function() { clearAllSelection(); showToast("সিলেকশন ক্লিয়ার"); });
+    var selectAllBtn = document.getElementById('selectAllColsBtn');
+    if(selectAllBtn) selectAllBtn.addEventListener('click', selectAllDataColumns);
+    var saveBtn = document.getElementById('saveUserBtn');
+    if(saveBtn) saveBtn.addEventListener('click', saveUserInfo);
+    
+    // এখানে বাটনের ক্লিক হ্যান্ডলার পরিবর্তন করা হলো
+    var submitBtn = document.getElementById('submitMainBtn');
+    if(submitBtn) {
+      // পুরনো ইভেন্ট রিমুভ করে নতুন যোগ করা (নিরাপত্তার জন্য)
+      var newSubmitBtn = submitBtn.cloneNode(true);
+      submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+      newSubmitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showSubmitNotification();  // শুধুমাত্র নোটিফিকেশন দেখাবে
+      });
+    }
+    
+    var logoutBtn = document.getElementById('logoutHeaderBtn');
+    if(logoutBtn) logoutBtn.addEventListener('click', logout);
+    if(uidToggle) uidToggle.addEventListener('click', toggleUidValidation);
+    if(passwordAutoToggle) passwordAutoToggle.addEventListener('click', togglePasswordAuto);
+    if(sheet1Btn) sheet1Btn.addEventListener('click', switchToSheet1);
+    if(sheet2Btn) sheet2Btn.addEventListener('click', switchToSheet2);
+  }
+
+  function setupInputFocus() { 
+    var save = document.getElementById('saveUserBtn');
+    if(tgUsernameInput && tgChatIdInput && save) { 
+      var show = function() { save.classList.add('show'); }; 
+      var hide = function() { save.classList.remove('show'); };
+      tgUsernameInput.addEventListener('focus', show); 
+      tgUsernameInput.addEventListener('blur', hide);
+      tgChatIdInput.addEventListener('focus', show); 
+      tgChatIdInput.addEventListener('blur', hide);
+    }
+  }
+
+  async function init() {
+    sheetBody = document.getElementById('sheetBody');
+    tableWrapper = document.getElementById('tableWrapper');
+    if(tableWrapper) tableWrapper.addEventListener('scroll', saveScrollPosition);
+    loadUidValidationState();
+    loadPasswordAutoState();
+    bindButtons();
+    setupInputFocus();
+    checkSystemStatus();
+    if(tgChatIdInput) {
+      tgChatIdInput.addEventListener('input', function(e) { 
+        this.value = this.value.replace(/[^0-9]/g, ''); 
+      });
+    }
+    if(loginBtn) loginBtn.addEventListener('click', handleLoginOrRegister);
+    if(loginUsernameInput) {
+      loginUsernameInput.addEventListener('keypress', function(e) { if(e.key === 'Enter') handleLoginOrRegister(); });
+    }
+    if(loginPasswordInput) {
+      loginPasswordInput.addEventListener('keypress', function(e) { if(e.key === 'Enter') handleLoginOrRegister(); });
+    }
+    
+    if(loadingScreen) loadingScreen.classList.remove('hide');
+    var autoLogged = await checkAutoLogin();
+    if(!autoLogged) {
+      if(loadingScreen) loadingScreen.classList.add('hide');
+      if(loginOverlay) loginOverlay.classList.add('visible');
+      if(appContainer) appContainer.classList.remove('visible');
+    } else {
+      if(loadingScreen) loadingScreen.classList.add('hide');
+      if(loginOverlay) loginOverlay.classList.remove('visible');
+      if(appContainer) appContainer.classList.add('visible');
+    }
+  }
+  
+  init();
+})();
+</script>
+</body>
+</html>
