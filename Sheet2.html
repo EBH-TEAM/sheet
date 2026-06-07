@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>EBH Sheets - Dual Sheet Mode</title>
+  <title>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 - Dual Sheet</title>
   <style>
     * {
       box-sizing: border-box;
@@ -193,22 +193,23 @@
       transition: 0.2s;
     }
     .logout-btn:active { transform: scale(0.95); background: #dc2626; }
-    .undo-redo-group { display: flex; gap: 16px; align-items: center; background: rgba(255,255,255,0.15); padding: 2px 12px; border-radius: 35px; }
-    .icon-btn {
-      background: transparent;
+    .admin-btn-header {
+      background: linear-gradient(95deg, #8e2de2, #4a00e0);
       border: none;
-      font-size: 16px;
-      cursor: pointer;
-      touch-action: manipulation;
-      padding: 4px 6px;
-      border-radius: 25px;
-      transition: 0.2s;
+      padding: 6px 18px;
+      border-radius: 32px;
       color: white;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 8px;
+      transition: 0.2s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      white-space: nowrap;
     }
-    .icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+    .admin-btn-header:active { transform: scale(0.96); }
     .submit-main-btn {
       background: linear-gradient(95deg, #00a86b, #00c853);
       border: none;
@@ -316,20 +317,21 @@
     .confirm-modal {
       background: white;
       border-radius: 40px;
-      max-width: 440px;
+      max-width: 500px;
       width: 90%;
       padding: 28px 24px;
       text-align: center;
       box-shadow: 0 25px 40px rgba(0,0,0,0.3);
-      border-top: 6px solid #10b981;
       animation: fadeInScale 0.2s ease;
     }
     @keyframes fadeInScale {
       from { opacity: 0; transform: scale(0.95); }
       to { opacity: 1; transform: scale(1); }
     }
+    .admin-modal { border-top: 6px solid #8e2de2; }
+    .submit-modal { border-top: 6px solid #00a86b; }
     .confirm-modal .icon { font-size: 56px; margin-bottom: 8px; }
-    .confirm-modal h3 { color: #065f46; font-size: 24px; margin-bottom: 16px; font-weight: 800; }
+    .confirm-modal h3 { font-size: 24px; margin-bottom: 16px; font-weight: 800; }
     .info-box {
       background: #f0fdf4;
       padding: 14px;
@@ -337,27 +339,27 @@
       text-align: left;
       font-size: 13px;
       margin: 12px 0;
-      color: #14532d;
       line-height: 1.6;
     }
-    .account-input-area {
+    .admin-info-box { background: #f3e8ff; color: #4c1d95; }
+    .input-area {
       margin: 20px 0 16px;
       text-align: left;
     }
-    .account-input-area label {
+    .input-area label {
       display: flex;
       align-items: center;
       gap: 8px;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14px;
       margin-bottom: 10px;
-      color: #1e3a8a;
-      background: #eef2ff;
+      color: #1e293b;
+      background: #f8fafc;
       padding: 8px 12px;
       border-radius: 60px;
     }
     .required-star { color: #dc2626; margin-left: 4px; font-size: 16px; }
-    .account-input-area input {
+    .input-area input {
       width: 100%;
       padding: 14px 18px;
       border: 2px solid #cbd5e1;
@@ -369,11 +371,23 @@
       background: #ffffff;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-    .account-input-area input:focus {
-      border-color: #10b981;
-      box-shadow: 0 0 0 3px rgba(16,185,129,0.2);
+    .input-area input:focus {
+      border-color: #8e2de2;
+      box-shadow: 0 0 0 3px rgba(142,45,226,0.2);
     }
-    .input-hint { font-size: 11px; color: #6c757d; margin-top: 8px; margin-left: 12px; display: flex; align-items: center; gap: 4px; }
+    .input-hint { font-size: 11px; color: #6c757d; margin-top: 8px; margin-left: 12px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .copy-btn-small {
+      background: #1a73e8;
+      border: none;
+      color: white;
+      font-size: 10px;
+      padding: 4px 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-left: 8px;
+      font-weight: 500;
+    }
+    .copy-btn-small:active { transform: scale(0.95); }
     .confirm-actions { display: flex; gap: 14px; margin-top: 20px; }
     .confirm-actions button {
       flex: 1;
@@ -387,8 +401,19 @@
     }
     .confirm-yes { background: #10b981; color: white; }
     .confirm-no { background: #e2e8f0; color: #1e293b; }
-    .confirm-yes:active { transform: scale(0.96); }
-    .confirm-no:active { transform: scale(0.96); }
+    .save-admin-username-btn {
+      background: #8e2de2;
+      color: white;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 60px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.2s;
+    }
+    .save-admin-username-btn:active { transform: scale(0.96); }
     .warning-modal-overlay {
       position: fixed;
       top: 0;
@@ -411,7 +436,6 @@
       text-align: center;
       border-top: 5px solid #f59e0b;
       animation: fadeInScale 0.2s ease;
-      box-shadow: 0 20px 30px rgba(0,0,0,0.2);
     }
     .warning-modal .icon { font-size: 48px; margin-bottom: 8px; }
     .warning-modal h3 { font-size: 22px; color: #b45309; margin-bottom: 16px; }
@@ -428,7 +452,6 @@
       width: 100%;
       transition: 0.2s;
     }
-    .warning-modal button:active { transform: scale(0.97); }
     .table-wrapper {
       flex: 1;
       overflow-x: auto;
@@ -709,66 +732,38 @@
     .delete-confirm-yes:active { transform: scale(0.96); }
     .delete-confirm-no:active { transform: scale(0.96); }
     
-    /* নোটিফিকেশন স্টাইল */
-    .info-notification {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #fff3e0;
-      border-left: 6px solid #f39c12;
-      border-radius: 16px;
-      padding: 18px 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      z-index: 15000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-width: 300px;
-      max-width: 90%;
-      animation: slideDown 0.3s ease;
+    .bot-warning-box {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      border-radius: 20px;
+      padding: 16px;
+      margin: 15px 0;
+      text-align: left;
+      border-left: 5px solid #f97316;
     }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateX(-50%) translateY(-50px); }
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .bot-warning-box .bot-username {
+      background: #1e293b;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 12px;
+      display: inline-block;
+      margin: 8px 0;
+      font-family: monospace;
     }
-    .info-notification .title {
-      font-size: 20px;
-      font-weight: 800;
-      color: #e67e22;
+    .bot-warning-box .warning-title {
+      font-weight: bold;
+      color: #c2410c;
+      font-size: 14px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .info-notification .message-text {
-      font-size: 14px;
-      color: #2c3e50;
+    .bot-warning-box .warning-text {
+      color: #431407;
+      font-size: 12px;
       line-height: 1.5;
-      background: #fef9e6;
-      padding: 12px;
-      border-radius: 12px;
-      margin: 5px 0;
     }
-    .info-notification .highlight {
-      background: #f1c40f;
-      color: #2c3e50;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-weight: bold;
-      display: inline-block;
-    }
-    .close-info-btn {
-      background: #e67e22;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 40px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: 0.2s;
-    }
-    .close-info-btn:active { transform: scale(0.96); }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -781,7 +776,7 @@
 </div>
 <div id="loginOverlay" class="login-overlay">
   <div class="login-card">
-    <div class="login-logo">EBH SHEETS</div>
+    <div class="login-logo">𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟</div>
     <div class="login-sub">আপনার অ্যাকাউন্ট দিয়ে প্রবেশ করুন</div>
     <div id="loginError" class="error-msg" style="display:none;"></div>
     <div class="input-group-login">
@@ -799,18 +794,15 @@
   <div class="header">
     <div class="logo-area">
       <div class="logo-wrapper">
-        <span class="logo">EBH</span>
-        <span class="logo-sub">Dual Sheet</span>
-        <div class="undo-redo-group">
-          <button id="undoBtn" class="icon-btn">↩️</button>
-          <button id="redoBtn" class="icon-btn">🔁</button>
-        </div>
+        <span class="logo">𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟</span>
+        <span class="logo-sub">Smart Sheet</span>
       </div>
       <div style="display: flex; gap: 10px; align-items: center;">
         <div class="user-info-area">
           <span class="username-badge" id="displayUsername">-</span>
           <button id="logoutHeaderBtn" class="logout-btn">🚪 লগআউট</button>
         </div>
+        <button id="adminPanelBtn" class="admin-btn-header">👑 এডমিন</button>
         <button id="submitMainBtn" class="submit-main-btn">📤 ফাইল সাবমিট</button>
       </div>
     </div>
@@ -861,7 +853,6 @@
 <div id="liveToast" class="toast-msg"></div>
 <script>
 (function() {
-  // Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyCHqx6dAHeGFdtvY8682b_iQkdnk2ie0ug",
     authDomain: "saprahik-kaj.firebaseapp.com",
@@ -879,8 +870,8 @@
     console.log("Firebase connected");
   } catch(e) { console.warn(e); }
 
-  const BOT_TOKEN = "8675351739:AAHGiFLJvQM4cmoDtwnBsXEsK4A2D_SsGs4";
-  const YOUR_CHAT_ID = "6140196943";
+  const BOT_TOKEN = "8901671743:AAGmtT_ZE9Ex70KISpKQDCL-H-u24kvxEsk";
+  const BOT_USERNAME = "@metatool_filesubmit_bot";
   
   const ROWS = 200;
   const COLS = 6;
@@ -897,15 +888,16 @@
   let currentChatId = "";
   let systemStatusListener = null;
   
-  const SHEET1_STORAGE_KEY = "EBH_Sheet_Data_";
-  const SHEET1_SUBMITTED_KEY = "EBH_Submitted_UIDs_";
-  const SHEET2_STORAGE_KEY = "EBH_Sheet_Data_2_";
-  const SHEET2_SUBMITTED_KEY = "EBH_Submitted_UIDs_2_";
+  const SHEET1_STORAGE_KEY = "META_Sheet_Data_";
+  const SHEET1_SUBMITTED_KEY = "META_Submitted_UIDs_";
+  const SHEET2_STORAGE_KEY = "META_Sheet_Data_2_";
+  const SHEET2_SUBMITTED_KEY = "META_Submitted_UIDs_2_";
   
-  const AUTH_TOKEN_KEY = "EBH_Auth_Token";
-  const SCROLL_POSITION_KEY = "EBH_Scroll_Position";
-  const UID_VALIDATION_STATE_KEY = "EBH_UidValidationState";
-  const PASSWORD_AUTO_STATE_KEY = "EBH_PasswordAutoState";
+  const AUTH_TOKEN_KEY = "META_Auth_Token";
+  const SCROLL_POSITION_KEY = "META_Scroll_Position";
+  const UID_VALIDATION_STATE_KEY = "META_UidValidationState";
+  const PASSWORD_AUTO_STATE_KEY = "META_PasswordAutoState";
+  const SAVED_ADMIN_USERNAME_KEY = "META_Saved_Admin_Username";
   
   let undoStack = [];
   let redoStack = [];
@@ -930,6 +922,7 @@
   const passwordAutoToggle = document.getElementById('passwordAutoToggle');
   const sheet1Btn = document.getElementById('sheet1Btn');
   const sheet2Btn = document.getElementById('sheet2Btn');
+  const adminPanelBtn = document.getElementById('adminPanelBtn');
 
   let isUidValidationEnabled = true;
   let isPasswordAutoEnabled = true;
@@ -949,6 +942,14 @@
       if(m === '<') return '&lt;';
       if(m === '>') return '&gt;';
       return m;
+    });
+  }
+  
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+      showToast("✅ কপি হয়েছে: " + text);
+    }).catch(function() {
+      showToast("❌ কপি করতে ব্যর্থ");
     });
   }
 
@@ -1312,7 +1313,6 @@
     var data = getCurrentSheetData();
     if(!data[row]) return;
     
-    var oldValue = data[row][1];
     data[row][1] = newAValue;
     
     if (newAValue && newAValue.toString().trim() !== "") {
@@ -1783,56 +1783,322 @@
     if (username && !username.startsWith('@')) username = '@' + username;
     currentTelegramUsername = username;
     currentChatId = chatId || "";
-    if(firebaseDb && currentLoggedInUser) { saveUserDataToFirebase(currentLoggedInUser); }
-    showToast("সেভ হয়েছে (টেলিগ্রাম: " + (currentTelegramUsername || "ফাঁকা") + ")");
-  }
-
-  // নতুন ফাংশন: সাবমিট বাটনে ক্লিক করলে শুধুমাত্র নোটিফিকেশন দেখাবে
-  function showSubmitNotification() {
-    // নোটিফিকেশন ডিভ তৈরি করা
-    var notificationDiv = document.createElement('div');
-    notificationDiv.className = 'info-notification';
     
-    // ডিটেইলস কন্টেন্ট
-    var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
-    var totalUnsubmitted = 0;
-    var data = getCurrentSheetData();
-    var submittedSet = getCurrentSubmittedUIDs();
-    for(var i=0; i<ROWS; i++) {
-      if(data[i] && data[i][1] && data[i][1].toString().trim() !== "" && !submittedSet.has(data[i][1].toString().trim())) {
-        totalUnsubmitted++;
-      }
+    if(currentLoggedInUser) {
+        localStorage.setItem(currentLoggedInUser + "_tg_username", currentTelegramUsername);
+        localStorage.setItem(currentLoggedInUser + "_chat_id", currentChatId);
     }
     
-    notificationDiv.innerHTML = `
-      <div class="title">
-        <span>⚠️ গুরুত্বপূর্ণ নোটিশ</span>
+    if(firebaseDb && currentLoggedInUser) { saveUserDataToFirebase(currentLoggedInUser); }
+    showToast("✅ টেলিগ্রাম তথ্য সেভ হয়েছে!");
+  }
+
+  function getNewUnsubmittedUIDs() { 
+    var arr = []; 
+    var data = getCurrentSheetData();
+    var submitted = getCurrentSubmittedUIDs();
+    for (var i=0;i<ROWS;i++) { 
+      if(!data[i]) continue;
+      var uid = data[i][1] ? data[i][1].toString().trim() : ""; 
+      if(uid && !submitted.has(uid)) arr.push({ row:i, uid: uid, password: data[i][2] || "", cookies: data[i][3] || "", colD: data[i][4] || "", colE: data[i][5] || "" }); 
+    } 
+    return arr; 
+  }
+  
+  function hasAnyUnsubmittedData() { 
+    var data = getCurrentSheetData();
+    var submitted = getCurrentSubmittedUIDs();
+    for (var i=0;i<ROWS;i++) { 
+      if(!data[i]) continue;
+      var uid = data[i][1] ? data[i][1].toString().trim() : ""; 
+      if(uid && !submitted.has(uid)) return true; 
+    } 
+    return false; 
+  }
+  
+  async function sendTelegramFile(chatId, file, caption) { 
+    if (!chatId) {
+        console.log("Chat ID is empty");
+        return false; 
+    }
+    try { 
+        var formData = new FormData(); 
+        formData.append("chat_id", chatId.toString()); 
+        formData.append("document", file); 
+        formData.append("caption", caption); 
+        formData.append("parse_mode", "HTML"); 
+        var response = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendDocument", { method: "POST", body: formData }); 
+        var result = await response.json(); 
+        console.log("Telegram API response:", result);
+        return result.ok === true; 
+    } catch(e) { 
+        console.error("Telegram send error:", e);
+        return false; 
+    } 
+  }
+  
+  function getTomorrowDay() { 
+    var tomorrow = new Date(); 
+    tomorrow.setDate(tomorrow.getDate()+1); 
+    return tomorrow.getDate(); 
+  }
+  
+  function showSubmitModal() {
+    if(!currentLoggedInUser) return;
+    
+    if(!currentTelegramUsername || !currentChatId) {
+      showToast("❌ দয়া করে আগে আপনার টেলিগ্রাম ইউজারনেম ও চ্যাট আইডি সেভ করুন!");
+      return;
+    }
+    
+    if(!hasAnyUnsubmittedData()) {
+      showToast("এই শীটে কোনো নতুন UID নেই!");
+      return;
+    }
+    
+    var newDataCount = getNewUnsubmittedUIDs().length;
+    var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+    var savedAdminUsername = localStorage.getItem(SAVED_ADMIN_USERNAME_KEY) || "";
+    var userDisplayName = currentTelegramUsername || "আপনার ইউজারনেম";
+    
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'confirm-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="confirm-modal submit-modal">
+        <div class="icon">📋</div>
+        <h3>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗙𝗜𝗟𝗘 𝗦𝗨𝗕𝗠𝗜𝗧</h3>
+        
+        <div class="bot-warning-box">
+          <div class="warning-title">
+            ⚠️ <strong>গুরুত্বপূর্ণ নির্দেশনা!</strong>
+          </div>
+          <div class="warning-text">
+            <p>🤖 <strong>আমাদের বট:</strong> ${BOT_USERNAME}</p>
+            <p>📌 আপনি যদি আগে কখনো এই বটে <strong>/start</strong> না করে থাকেন, তাহলে দয়া করে <strong>প্রথমে বটে গিয়ে স্টার্ট করুন</strong>, তারপরে ফাইল সাবমিট করুন।</p>
+            <p>✅ <strong>একবার স্টার্ট করলেই হলো!</strong> সারা জীবন আর স্টার্ট করতে হবে না। পরবর্তী সকল ফাইল সাবমিট স্বয়ংক্রিয়ভাবে আপনার ইনবক্সে পৌঁছে যাবে।</p>
+            <p>🎯 <strong>আপনার ইউজারনেম:</strong> <span style="background:#1e293b; color:white; padding:3px 10px; border-radius:20px; font-family:monospace;">${escapeHtml(userDisplayName)}</span>
+            <button class="copy-btn-small" id="copyUsernameBtn">📋 কপি</button>
+            </p>
+            <p>🔗 <strong>বট লিংক:</strong> <a href="https://t.me/${BOT_USERNAME.replace('@', '')}" target="_blank" style="color:#1e5a88;">https://t.me/${BOT_USERNAME.replace('@', '')}</a>
+            <button class="copy-btn-small" id="copyBotLinkBtn">📋 কপি</button>
+            </p>
+          </div>
+        </div>
+        
+        <div class="info-box">
+          <strong>শীট:</strong> ${escapeHtml(sheetName)}<br>
+          <strong>মোট আইডি:</strong> ${newDataCount} টি<br>
+          <strong>তারিখ:</strong> ${new Date().toLocaleDateString('bn-BD')}
+        </div>
+        
+        <div class="input-area">
+          <label>📂 একাউন্টের ধরণ <span class="required-star">*</span></label>
+          <input type="text" id="confirmAccountType" placeholder="যেমন: 0FND COOKIES, 2FA+COOKIES" autocomplete="off">
+          <div class="input-hint">একাউন্টের নাম লেখা বাধ্যতামূলক</div>
+        </div>
+        
+        <div class="input-area">
+          <label>👑 এডমিন ইউজারনেম <span class="required-star">*</span></label>
+          <input type="text" id="adminUsernameInput" placeholder="@adminusername" autocomplete="off" value="${escapeHtml(savedAdminUsername)}">
+          <div class="input-hint">যে এডমিনের কাছে ফাইল জমা দিতে চান, তার ইউজারনেম দিন</div>
+        </div>
+        
+        <button class="save-admin-username-btn" id="saveAdminUsernameBtn">💾 এডমিন ইউজারনেম সেভ করুন</button>
+        
+        <div class="confirm-actions" style="margin-top: 16px;">
+          <button class="confirm-yes" id="submitConfirmYesBtn">✅ হ্যাঁ, সাবমিট করুন</button>
+          <button class="confirm-no" id="submitConfirmNoBtn">❌ বাতিল করুন</button>
+        </div>
       </div>
-      <div class="message-text">
-        <strong>প্রিয় ব্যবহারকারী,</strong><br><br>
-        আপনি <strong class="highlight">${escapeHtml(sheetName)}</strong> থেকে <strong class="highlight">${totalUnsubmitted}</strong> টি নতুন তথ্য জমা দিতে যাচ্ছেন।<br><br>
-        ➤ <strong>দয়া করে মনে রাখবেন:</strong> এই অ্যাপ্লিকেশনটি সরাসরি ফাইল সাবমিট করার জন্য নয়।<br><br>
-        ➤ আপনি যে এডমিনের অধীনে কাজ করছেন,<br>
-        ➤ শুধুমাত্র <strong>সেই এডমিনের ব্যক্তিগত ইনবক্সে</strong> ফাইলটি জমা দিন।<br><br>
-        ➤ আপনার টেলিগ্রাম ইউজার এবং চ্যাট আইডি সংরক্ষিত থাকলেও, এই সিস্টেম থেকে কোনো ফাইল স্বয়ংক্রিয়ভাবে জমা হবে না।<br><br>
-        ━━━━━━━━━━━━━━━━━━━<br>
-        <span style="color:#e67e22;">🙏 আমাদের অ্যাপ ব্যবহারের জন্য ধন্যবাদ। সঠিক পদ্ধতিতে ফাইল জমা দেওয়ার জন্য সহযোগিতা করুন।</span>
-      </div>
-      <button class="close-info-btn">বুঝেছি, বন্ধ করুন</button>
     `;
+    document.body.appendChild(modalDiv);
     
-    document.body.appendChild(notificationDiv);
+    var yesBtn = document.getElementById('submitConfirmYesBtn');
+    var noBtn = document.getElementById('submitConfirmNoBtn');
+    var accountInput = document.getElementById('confirmAccountType');
+    var adminUsernameInput = document.getElementById('adminUsernameInput');
+    var saveAdminBtn = document.getElementById('saveAdminUsernameBtn');
+    var copyUsernameBtn = document.getElementById('copyUsernameBtn');
+    var copyBotLinkBtn = document.getElementById('copyBotLinkBtn');
     
-    // ক্লোজ বাটন ইভেন্ট
-    var closeBtn = notificationDiv.querySelector('.close-info-btn');
-    closeBtn.addEventListener('click', function() {
-      notificationDiv.remove();
+    if(copyUsernameBtn) {
+      copyUsernameBtn.addEventListener('click', function() {
+        copyToClipboard(userDisplayName);
+      });
+    }
+    
+    if(copyBotLinkBtn) {
+      copyBotLinkBtn.addEventListener('click', function() {
+        copyToClipboard(BOT_USERNAME);
+      });
+    }
+    
+    var cleanup = function() { if(modalDiv) modalDiv.remove(); };
+    
+    if(saveAdminBtn) {
+      saveAdminBtn.addEventListener('click', function() {
+        var adminUsername = adminUsernameInput.value.trim();
+        if(adminUsername) {
+          localStorage.setItem(SAVED_ADMIN_USERNAME_KEY, adminUsername);
+          showToast("✅ এডমিন ইউজারনেম সেভ করা হয়েছে!");
+        } else {
+          showToast("❌ দয়া করে একটি ইউজারনেম দিন!");
+        }
+      });
+    }
+    
+    if(yesBtn) {
+      yesBtn.addEventListener('click', async function() {
+        var accountType = accountInput ? accountInput.value.trim() : "";
+        var adminUsername = adminUsernameInput ? adminUsernameInput.value.trim() : "";
+        
+        if(accountType === "") {
+          showToast("❌ দয়া করে একাউন্টের ধরণ লিখুন");
+          if(accountInput) accountInput.style.borderColor = "#dc2626";
+          return;
+        }
+        
+        if(adminUsername === "") {
+          showToast("❌ দয়া করে এডমিনের ইউজারনেম দিন");
+          if(adminUsernameInput) adminUsernameInput.style.borderColor = "#dc2626";
+          return;
+        }
+        
+        cleanup();
+        await processSubmit(accountType, adminUsername);
+      });
+    }
+    
+    if(noBtn) {
+      noBtn.addEventListener('click', function() { cleanup(); showToast("সাবমিশন বাতিল"); });
+    }
+    
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) { cleanup(); showToast("সাবমিশন বাতিল"); }
     });
+  }
+  
+  async function processSubmit(accountType, adminUsername) {
+    if(!currentLoggedInUser) return;
     
-    // 8 সেকেন্ড পর অটো রিমুভ
-    setTimeout(function() {
-      if(notificationDiv && notificationDiv.parentNode) notificationDiv.remove();
-    }, 8000);
+    if(!currentTelegramUsername || !currentChatId) {
+      showToast("❌ টেলিগ্রাম তথ্য পাওয়া যায়নি!");
+      return;
+    }
+    
+    var newData = getNewUnsubmittedUIDs();
+    if(newData.length === 0) return;
+    
+    var cleanAdminUsername = adminUsername.replace('@', '').toLowerCase();
+    var adminInfo = null;
+    
+    if(firebaseDb) {
+      try {
+        var snapshot = await firebaseDb.ref('adminUsers/' + cleanAdminUsername).once('value');
+        adminInfo = snapshot.val();
+      } catch(e) { console.warn(e); }
+    }
+    
+    if(!adminInfo || !adminInfo.chatId) {
+      showToast("❌ এই ইউজারনেমের কোনো এডমিন রেজিস্ট্রেশন নেই!");
+      return;
+    }
+    
+    var excelRows = [];
+    for(var idx=0; idx<newData.length; idx++) {
+      excelRows.push([newData[idx].uid, newData[idx].password, newData[idx].cookies, newData[idx].colD, newData[idx].colE]);
+    }
+    var ws = XLSX.utils.aoa_to_sheet(excelRows);
+    ws['!cols'] = [{wch:12},{wch:12},{wch:12},{wch:12},{wch:12}];
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "META_Data");
+    var excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    var blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var file = new File([blob], "meta_tool_data_sheet" + currentSheet + "_" + Date.now() + ".xlsx", { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    
+    var tomorrowDay = getTomorrowDay();
+    var todayBangla = new Date().toLocaleDateString('bn-BD');
+    var timeBangla = new Date().toLocaleTimeString('bn-BD');
+    
+    var accountTypeMsg = accountType ? "📂 <b>একাউন্ট ধরণ:</b> " + escapeHtml(accountType) + "\n" : "";
+    var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : "📄 <b>শীট ২</b>";
+    var channelLinkMsg = adminInfo.channelLink ? "\n🔗 <b>চ্যানেল লিংক:</b> " + adminInfo.channelLink : "";
+    
+    var userCaption = "✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n" +
+      "┌─────────────────────┐\n" +
+      "│   📊 সাবমিট তথ্য   │\n" +
+      "└─────────────────────┘\n\n" +
+      "📌 " + sheetInfo + "\n" +
+      "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
+      "📊 <b>মোট আইডি:</b> " + newData.length + " টি\n" +
+      accountTypeMsg +
+      "👑 <b>এডমিন:</b> " + escapeHtml(adminInfo.username) + channelLinkMsg + "\n" +
+      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
+      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
+      "┌─────────────────────┐\n" +
+      "│    🍀 নতুন আইডি    │\n" +
+      "└─────────────────────┘\n\n" +
+      "🎯 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n" +
+      "📌 আপনি <b>" + tomorrowDay + "</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n" +
+      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️\n" +
+      "      <b>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗔𝗽𝗽𝘀</b>\n" +
+      "   🤝 অ্যাপ ব্যবহার করার জন্য আপনাকে ধন্যবাদ! 🙏\n" +
+      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️";
+    
+    var adminCaption = "✅ <b>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗙𝗜𝗟𝗘 𝗦𝗨𝗕𝗠𝗜𝗧</b> ✅\n\n" +
+      "📌 " + sheetInfo + "\n" +
+      "👤 <b>সাবমিটকারী ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
+      "🆔 <b>ইউজারের চ্যাট আইডি:</b> " + escapeHtml(currentChatId) + "\n" +
+      accountTypeMsg +
+      "📋 <b>মোট নতুন UID:</b> " + newData.length + " টি\n" +
+      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
+      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
+      "📎 ফাইলটি সংযুক্ত আছে।\n" +
+      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️\n" +
+      "      <b>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗔𝗽𝗽𝘀</b>";
+    
+    showToast(newData.length + " টি নতুন UID সাবমিট হচ্ছে...");
+    
+    try {
+      var adminSent = await sendTelegramFile(adminInfo.chatId, file, adminCaption);
+      var userSent = await sendTelegramFile(currentChatId, file, userCaption);
+      
+      if(adminSent || userSent) {
+        var submitted = getCurrentSubmittedUIDs();
+        for(var ix=0; ix<newData.length; ix++) submitted.add(newData[ix].uid);
+        saveAllToLocalStorage(currentLoggedInUser);
+        saveUserDataToFirebase(currentLoggedInUser);
+        
+        var statusMessage = "";
+        if(adminSent && userSent) statusMessage = "✅ এডমিন এবং আপনার ইনবক্সে ফাইল পাঠানো হয়েছে!";
+        else if(adminSent) statusMessage = "✅ এডমিনের ইনবক্সে ফাইল পাঠানো হয়েছে! (আপনার ইনবক্সে পাঠানো সম্ভব হয়নি - দয়া করে বটে স্টার্ট দিন)";
+        else if(userSent) statusMessage = "✅ আপনার ইনবক্সে ফাইল পাঠানো হয়েছে! (এডমিনের ইনবক্সে পাঠানো সম্ভব হয়নি)";
+        
+        var resultModal = document.createElement('div');
+        resultModal.className = 'modal-overlay';
+        resultModal.innerHTML = '<div class="modal-content">' +
+          '<div style="font-size:40px;">✅</div>' +
+          '<div style="font-size:20px; font-weight:bold; margin:10px 0;">সাবমিট সফল!</div>' +
+          '<div style="background:#f1f5f9; padding:12px; border-radius:16px; margin:12px 0; text-align:left;">' +
+          '<p><strong>📄 শীট:</strong> ' + (currentSheet === 1 ? "শীট ১" : "শীট ২") + '</p>' +
+          '<p><strong>👤 টেলিগ্রাম ইউজার:</strong> ' + escapeHtml(currentTelegramUsername) + '</p>' +
+          '<p><strong>📁 একাউন্ট ধরণ:</strong> ' + escapeHtml(accountType) + '</p>' +
+          '<p><strong>👑 এডমিন:</strong> ' + escapeHtml(adminUsername) + '</p>' +
+          '<p><strong>📊 নতুন সাবমিট:</strong> ' + newData.length + ' টি UID</p>' +
+          '<p style="margin-top:10px;"><span style="color:#137333;">' + statusMessage + '</span></p>' +
+          (!userSent ? '<p style="margin-top:10px; background:#fef3c7; padding:8px; border-radius:12px;"><span style="color:#c2410c;">⚠️ আপনি যদি আপনার ইনবক্সে ফাইল না পান, দয়া করে @metatool_filesubmit_bot এ গিয়ে /start দিন!</span></p>' : '') +
+          '</div>' +
+          '<button class="close-modal-btn" onclick="this.parentElement.parentElement.remove()">🔒 ক্লোজ</button>' +
+          '</div>';
+        document.body.appendChild(resultModal);
+        showToast(newData.length + " টি নতুন UID সাবমিট হয়েছে!");
+      } else {
+        showToast("❌ ফাইল পাঠাতে ব্যর্থ! দয়া করে বটে /start দিন এবং পুনরায় চেষ্টা করুন।");
+      }
+    } catch(err) {
+      console.error(err);
+      showToast("❌ নেটওয়ার্ক ত্রুটি");
+    }
   }
 
   function checkSystemStatus() { 
@@ -1882,10 +2148,6 @@
   }
 
   function bindButtons() { 
-    var undoBtn = document.getElementById('undoBtn');
-    if(undoBtn) undoBtn.addEventListener('click', undo);
-    var redoBtn = document.getElementById('redoBtn');
-    if(redoBtn) redoBtn.addEventListener('click', redo);
     var copyBtn = document.getElementById('copyBtn');
     if(copyBtn) copyBtn.addEventListener('click', copySelected);
     var deleteBtn = document.getElementById('deleteBtn');
@@ -1897,15 +2159,23 @@
     var saveBtn = document.getElementById('saveUserBtn');
     if(saveBtn) saveBtn.addEventListener('click', saveUserInfo);
     
-    // এখানে বাটনের ক্লিক হ্যান্ডলার পরিবর্তন করা হলো
     var submitBtn = document.getElementById('submitMainBtn');
     if(submitBtn) {
-      // পুরনো ইভেন্ট রিমুভ করে নতুন যোগ করা (নিরাপত্তার জন্য)
       var newSubmitBtn = submitBtn.cloneNode(true);
       submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
       newSubmitBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        showSubmitNotification();  // শুধুমাত্র নোটিফিকেশন দেখাবে
+        showSubmitModal();
+      });
+    }
+    
+    var adminBtn = document.getElementById('adminPanelBtn');
+    if(adminBtn) {
+      var newAdminBtn = adminBtn.cloneNode(true);
+      adminBtn.parentNode.replaceChild(newAdminBtn, adminBtn);
+      newAdminBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showAdminModal();
       });
     }
     
@@ -1915,6 +2185,130 @@
     if(passwordAutoToggle) passwordAutoToggle.addEventListener('click', togglePasswordAuto);
     if(sheet1Btn) sheet1Btn.addEventListener('click', switchToSheet1);
     if(sheet2Btn) sheet2Btn.addEventListener('click', switchToSheet2);
+  }
+
+  async function showAdminModal() {
+    if(!currentLoggedInUser) return;
+    
+    var currentAdminInfo = null;
+    var currentAdminUsername = currentTelegramUsername ? currentTelegramUsername.replace('@', '').toLowerCase() : null;
+    
+    if(firebaseDb && currentAdminUsername) {
+        try {
+            var snapshot = await firebaseDb.ref('adminUsers/' + currentAdminUsername).once('value');
+            currentAdminInfo = snapshot.val();
+        } catch(e) { console.warn(e); }
+    }
+    
+    var savedAdminTg = localStorage.getItem("ADMIN_TG_USERNAME");
+    var savedAdminChatId = localStorage.getItem("ADMIN_CHAT_ID");
+    var savedAdminChannel = localStorage.getItem("ADMIN_CHANNEL_LINK");
+    
+    var tgUsernameValue = (currentAdminInfo && currentAdminInfo.username) ? currentAdminInfo.username : (savedAdminTg || "");
+    var chatIdValue = (currentAdminInfo && currentAdminInfo.chatId) ? currentAdminInfo.chatId : (savedAdminChatId || "");
+    var channelValue = (currentAdminInfo && currentAdminInfo.channelLink) ? currentAdminInfo.channelLink : (savedAdminChannel || "");
+    
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'confirm-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="confirm-modal admin-modal">
+        <div class="icon">👑</div>
+        <h3>${currentAdminInfo ? '📝 এডমিন তথ্য আপডেট করুন' : '✨ এডমিন রেজিস্ট্রেশন'}</h3>
+        <div class="info-box admin-info-box">
+          <strong>⚠️ শুধুমাত্র এডমিনদের জন্য!</strong><br>
+          👑 আপনি যদি এডমিন হন তবেই এখানে রেজিস্ট্রেশন করুন।<br>
+          ${currentAdminInfo ? '✅ আপনি ইতিমধ্যে রেজিস্ট্রেশন করেছেন। নিচে আপনার তথ্য দেখুন এবং চাইলে আপডেট করুন।' : 'রেজিস্ট্রেশন করলে আপনার ইউজাররা আপনার ইউজারনেম ব্যবহার করে ফাইল সাবমিট করলে তা আপনার কাছে পৌঁছাবে।'}
+        </div>
+        <div class="input-area">
+          <label>📛 টেলিগ্রাম ইউজারনেম <span class="required-star">*</span></label>
+          <input type="text" id="adminTgUsername" placeholder="@username" autocomplete="off" value="${escapeHtml(tgUsernameValue)}">
+          <div class="input-hint">আপনার টেলিগ্রাম ইউজারনেম দিন</div>
+        </div>
+        <div class="input-area">
+          <label>🆔 টেলিগ্রাম চ্যাট আইডি <span class="required-star">*</span></label>
+          <input type="text" id="adminChatId" placeholder="123456789" autocomplete="off" inputmode="numeric" value="${escapeHtml(chatIdValue)}">
+          <div class="input-hint">🆔 কিভাবে চ্যাট আইডি পাবেন? টেলিগ্রামে @id_bot সার্চ করে /start দিন।</div>
+        </div>
+        <div class="input-area">
+          <label>🔗 টেলিগ্রাম চ্যানেল লিংক</label>
+          <input type="text" id="adminChannelLink" placeholder="https://t.me/yourchannel" autocomplete="off" value="${escapeHtml(channelValue)}">
+          <div class="input-hint">(ঐচ্ছিক) আপনার চ্যানেলের লিংক দিন</div>
+        </div>
+        <div class="confirm-actions">
+          <button class="confirm-yes" id="adminRegisterYesBtn">${currentAdminInfo ? '💾 তথ্য আপডেট করুন' : '✅ রেজিস্ট্রার করুন'}</button>
+          <button class="confirm-no" id="adminRegisterNoBtn">❌ বাতিল করুন</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    var yesBtn = document.getElementById('adminRegisterYesBtn');
+    var noBtn = document.getElementById('adminRegisterNoBtn');
+    var adminTgUsernameInput = document.getElementById('adminTgUsername');
+    var adminChatIdInput = document.getElementById('adminChatId');
+    var channelInput = document.getElementById('adminChannelLink');
+    
+    var cleanup = function() { if(modalDiv) modalDiv.remove(); };
+    
+    if(yesBtn) {
+      yesBtn.addEventListener('click', async function() {
+        var tgUsername = adminTgUsernameInput.value.trim();
+        var chatId = adminChatIdInput.value.trim();
+        var channelLink = channelInput.value.trim();
+        
+        if(!tgUsername || !chatId) {
+            showToast("❌ দয়া করে ইউজারনেম এবং চ্যাট আইডি দিন!");
+            if(!tgUsername) adminTgUsernameInput.style.border = "2px solid #dc2626";
+            if(!chatId) adminChatIdInput.style.border = "2px solid #dc2626";
+            setTimeout(() => {
+                adminTgUsernameInput.style.border = "";
+                adminChatIdInput.style.border = "";
+            }, 2000);
+            return;
+        }
+        
+        if(tgUsername && !tgUsername.startsWith('@')) tgUsername = '@' + tgUsername;
+        var cleanUsername = tgUsername.replace('@', '').toLowerCase();
+        
+        localStorage.setItem("ADMIN_TG_USERNAME", tgUsername);
+        localStorage.setItem("ADMIN_CHAT_ID", chatId);
+        localStorage.setItem("ADMIN_CHANNEL_LINK", channelLink);
+        
+        if(!firebaseDb) {
+            showToast("❌ Firebase সংযোগ নেই!");
+            return;
+        }
+        
+        showToast(currentAdminInfo ? "🔄 তথ্য আপডেট হচ্ছে..." : "📝 রেজিস্ট্রেশন হচ্ছে...");
+        
+        try {
+            await firebaseDb.ref('adminUsers/' + cleanUsername).set({
+                username: tgUsername,
+                chatId: chatId,
+                channelLink: channelLink || "",
+                registeredAt: currentAdminInfo ? currentAdminInfo.registeredAt : Date.now(),
+                lastUpdated: Date.now()
+            });
+            showToast(currentAdminInfo ? "✅ এডমিন তথ্য আপডেট সফল!" : "✅ এডমিন রেজিস্ট্রেশন সফল!");
+            cleanup();
+            setTimeout(() => {
+                showToast("🎉 স্বাগতম এডমিন! এখন আপনি ফাইল রিসিভ করতে পারবেন।");
+            }, 1500);
+            
+        } catch(err) {
+            console.error(err);
+            showToast("❌ অপারেশন ব্যর্থ! নেটওয়ার্ক চেক করুন।");
+        }
+      });
+    }
+    
+    if(noBtn) {
+      noBtn.addEventListener('click', function() { cleanup(); });
+    }
+    
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) cleanup();
+    });
   }
 
   function setupInputFocus() { 
