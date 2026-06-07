@@ -141,58 +141,77 @@
     }
     .app-container.visible { opacity: 1; }
 
+    /* হেডার - 390px ডিপির জন্য অপটিমাইজড */
     .header {
       background: linear-gradient(135deg, #0b2b44 0%, #1e5a88 100%);
-      padding: 8px 12px;
+      padding: 8px 10px;
       flex-shrink: 0;
     }
-    .logo-area {
+    
+    /* প্রথম সারি: লোগো + ইউজার + লগআউট */
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       flex-wrap: wrap;
       gap: 6px;
     }
-    .logo-wrapper { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .logo-area {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
     .logo {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 800;
       background: linear-gradient(135deg, #FFD700, #FFA500);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      letter-spacing: 1px;
     }
-    .logo-sub { font-size: 9px; font-weight: 400; color: #FFE4B5; font-style: italic; }
-    .user-info-area {
+    .smart-sheet {
+      font-size: 9px;
+      font-weight: 500;
+      background: rgba(255,255,255,0.2);
+      padding: 2px 6px;
+      border-radius: 20px;
+      color: #FFE4B5;
+    }
+    .user-controls {
       display: flex;
       align-items: center;
-      gap: 12px;
-      background: rgba(255,255,255,0.15);
-      padding: 4px 14px;
-      border-radius: 40px;
+      gap: 8px;
     }
     .username-badge {
       color: white;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
       background: rgba(0,0,0,0.3);
       padding: 4px 10px;
       border-radius: 30px;
     }
     .logout-btn {
-      background: rgba(220,38,38,0.8);
+      background: rgba(220,38,38,0.85);
       border: none;
       color: white;
-      font-size: 12px;
+      font-size: 11px;
       padding: 4px 12px;
       border-radius: 30px;
       cursor: pointer;
       font-weight: 600;
-      transition: 0.2s;
+      white-space: nowrap;
     }
-    .logout-btn:active { transform: scale(0.95); background: #dc2626; }
+    .logout-btn:active { transform: scale(0.95); }
+    
+    /* দ্বিতীয় সারি: এডমিন + সাবমিট (মাঝখানে) */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
     .admin-btn-header {
       background: linear-gradient(95deg, #8e2de2, #4a00e0);
       border: none;
@@ -200,16 +219,10 @@
       border-radius: 32px;
       color: white;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: 0.2s;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
       white-space: nowrap;
     }
-    .admin-btn-header:active { transform: scale(0.96); }
     .submit-main-btn {
       background: linear-gradient(95deg, #00a86b, #00c853);
       border: none;
@@ -217,27 +230,26 @@
       border-radius: 32px;
       color: white;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: 0.2s;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
       white-space: nowrap;
     }
-    .submit-main-btn:active { transform: scale(0.96); }
-    .button-group { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .admin-btn-header:active, .submit-main-btn:active { transform: scale(0.96); }
+    
+    /* তৃতীয় সারি: টুল বাটন (মাঝখানে) */
+    .tool-button-group {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
     .btn {
-      flex: 1;
-      min-width: 60px;
       border: none;
-      padding: 6px 8px;
+      padding: 6px 14px;
       border-radius: 35px;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
-      touch-action: manipulation;
       transition: 0.2s;
       text-align: center;
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
@@ -247,6 +259,18 @@
     .btn-copy { background: #1a73e8; color: white; }
     .btn-delete { background: #dc2626; color: white; }
     .btn-clear { background: #ea580c; color: white; }
+    
+    /* 390px ডিপির জন্য রেস্পন্সিভ */
+    @media (max-width: 400px) {
+      .top-bar { flex-direction: column; align-items: stretch; }
+      .user-controls { justify-content: flex-end; margin-top: -28px; }
+      .action-buttons { gap: 8px; margin-top: 4px; }
+      .admin-btn-header, .submit-main-btn { padding: 5px 14px; font-size: 11px; }
+      .btn { padding: 5px 10px; font-size: 10px; }
+      .username-badge { font-size: 10px; padding: 3px 8px; }
+      .logout-btn { font-size: 10px; padding: 3px 10px; }
+    }
+
     .reg-section {
       background: #f1f5f9;
       padding: 4px 12px;
@@ -475,7 +499,6 @@
     }
     .save-admin-username-btn:active { transform: scale(0.96); }
     
-    /* Success Modal Styles */
     .success-modal-overlay {
       position: fixed;
       top: 0;
@@ -903,21 +926,21 @@
 </div>
 <div id="appContainer" class="app-container">
   <div class="header">
-    <div class="logo-area">
-      <div class="logo-wrapper">
-        <span class="logo">𝗠𝗘𝗧𝗔</span>
-        <span class="logo-sub">Dual Sheet</span>
+    <div class="top-bar">
+      <div class="logo-area">
+        <span class="logo">𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟</span>
+        <span class="smart-sheet">𝗦𝗺𝗮𝗿𝘁 𝗦𝗵𝗲𝗲𝘁</span>
       </div>
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <div class="user-info-area">
-          <span class="username-badge" id="displayUsername">-</span>
-          <button id="logoutHeaderBtn" class="logout-btn">🚪 লগআউট</button>
-        </div>
-        <button id="adminPanelBtn" class="admin-btn-header">👑 এডমিন</button>
-        <button id="submitMainBtn" class="submit-main-btn">📤 ফাইল সাবমিট</button>
+      <div class="user-controls">
+        <span class="username-badge" id="displayUsername">-</span>
+        <button id="logoutHeaderBtn" class="logout-btn">🚪 লগআউট</button>
       </div>
     </div>
-    <div class="button-group">
+    <div class="action-buttons">
+      <button id="adminPanelBtn" class="admin-btn-header">👑 এডমিন প্যানেল</button>
+      <button id="submitMainBtn" class="submit-main-btn">📤 ফাইল সাবমিট</button>
+    </div>
+    <div class="tool-button-group">
       <button id="selectAllColsBtn" class="btn btn-select">📌 সব কলাম</button>
       <button id="copyBtn" class="btn btn-copy">📋 কপি</button>
       <button id="deleteBtn" class="btn btn-delete">🗑️ ডিলিট</button>
@@ -951,7 +974,7 @@
           <th data-col="3">কুকিজ/2FA</th>
           <th data-col="4">D</th>
           <th data-col="5">E</th>
-        </tr>
+        </td>
       </thead>
       <tbody id="sheetBody"></tbody>
     </table>
@@ -1966,7 +1989,6 @@
     } 
   }
   
-  // সাকসেস মডেল দেখানোর ফাংশন - সম্পূর্ণ ডিটেইলস সহ
   function showSuccessModal(newDataCount, accountType, adminUsername, adminConfirmed, userSent, sheetName) {
     var todayBangla = new Date().toLocaleDateString('bn-BD', {
       year: 'numeric',
@@ -2024,6 +2046,41 @@
     });
   }
   
+  function showAdminNotFoundError(adminUsername) {
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'confirm-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="confirm-modal" style="border-top: 6px solid #dc2626;">
+        <div class="icon">❌</div>
+        <h3 style="color:#991b1b;">এডমিন খুঁজে পাওয়া যায়নি!</h3>
+        <div class="info-box" style="background:#fef2f2; color:#7f1d1d;">
+          <p><strong>👑 আপনি যে এডমিন ব্যবহার করছেন:</strong> ${escapeHtml(adminUsername)}</p>
+          <p><strong>⚠️ সমস্যা:</strong> এই ইউজারনেমের কোনো এডমিন রেজিস্ট্রেশন নেই!</p>
+          <p><strong>📌 সমাধান:</strong> দয়া করে নিচের কাজগুলো করুন:</p>
+          <ul style="margin-left: 20px; margin-top: 8px;">
+            <li>✅ আপনার এডমিনকে বলুন "এডমিন প্যানেল" এ গিয়ে রেজিস্ট্রেশন করতে</li>
+            <li>✅ অথবা সঠিক এডমিন ইউজারনেম ব্যবহার করুন</li>
+            <li>✅ অথবা সরাসরি আপনার এডমিনের ইনবক্সে ফাইল পাঠান</li>
+          </ul>
+        </div>
+        <div class="confirm-actions">
+          <button class="confirm-no" id="adminNotFoundCloseBtn" style="background:#dc2626; color:white;">🔒 বুঝেছি</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    var closeBtn = document.getElementById('adminNotFoundCloseBtn');
+    if(closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        modalDiv.remove();
+      });
+    }
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) modalDiv.remove();
+    });
+  }
+  
   async function showSubmitModal() {
     if(!currentLoggedInUser) return;
     
@@ -2067,7 +2124,7 @@
           <div class="warning-text">
             <p>🤖 <strong>আমাদের বট:</strong> ${BOT_USERNAME}</p>
             <p>📌 আপনি যদি আগে কখনো এই বটে <strong>/start</strong> না করে থাকেন, তাহলে দয়া করে <strong>প্রথমে বটে গিয়ে স্টার্ট করুন</strong>, তারপরে ফাইল সাবমিট করুন।</p>
-            <p>✅ <strong>একবার স্টার্ট করলেই হলো!</strong> পরবর্তী সকল ফাইল সাবমিট স্বয়ংক্রিয়ভাবে您的 ইনবক্সে পৌঁছে যাবে।</p>
+            <p>✅ <strong>একবার স্টার্ট করলেই হলো!</strong> পরবর্তী সকল ফাইল সাবমিট স্বয়ংক্রিয়ভাবে আপনার ইনবক্সে পৌঁছে যাবে।</p>
             <p>🔗 <strong>বট লিংক:</strong> <a href="https://t.me/${BOT_USERNAME.replace('@', '')}" target="_blank" style="color:#1e5a88;">https://t.me/${BOT_USERNAME.replace('@', '')}</a>
             <button class="copy-btn-small" id="copyBotLinkBtn">📋 কপি</button>
             </p>
@@ -2172,11 +2229,12 @@
       try {
         var snapshot = await firebaseDb.ref('adminUsers/' + cleanAdminUsername).once('value');
         adminInfo = snapshot.val();
+        console.log("Admin info from Firebase:", adminInfo);
       } catch(e) { console.warn(e); }
     }
     
     if(!adminInfo || !adminInfo.chatId) {
-      showToast("❌ এই ইউজারনেমের কোনো এডমিন রেজিস্ট্রেশন নেই!");
+      showAdminNotFoundError(adminUsername);
       return;
     }
     
@@ -2236,7 +2294,7 @@
       var adminResult = await sendTelegramFileWithRetry(adminInfo.chatId, file, adminCaption);
       
       if (!adminResult.success) {
-        showToast("❌ এডমিনে ফাইল পাঠাতে ব্যর্থ! নেটওয়ার্ক চেক করুন। দয়া করে বটে /start দিন।");
+        showToast("❌ এডমিনে ফাইল পাঠাতে ব্যর্থ! নেটওয়ার্ক চেক করুন। দয়া করে এডমিন নিশ্চিত করুন যে তিনি রেজিস্ট্রেশন করেছেন।");
         return;
       }
       
@@ -2345,12 +2403,12 @@
         <div class="input-area">
           <label>📛 টেলিগ্রাম ইউজারনেম <span class="required-star">*</span></label>
           <input type="text" id="adminTgUsername" placeholder="@username" autocomplete="off" value="${escapeHtml(tgUsernameValue)}">
-          <div class="input-hint">আপনার টেলিগ্রাম ইউজারনেম দিন</div>
+          <div class="input-hint">আপনার টেলিগ্রাম ইউজারনেম দিন (যেটা আপনি @ দিয়ে শুরু করবেন)</div>
         </div>
         <div class="input-area">
           <label>🆔 টেলিগ্রাম চ্যাট আইডি <span class="required-star">*</span></label>
           <input type="text" id="adminChatId" placeholder="123456789" autocomplete="off" inputmode="numeric" value="${escapeHtml(chatIdValue)}">
-          <div class="input-hint">🆔 কিভাবে চ্যাট আইডি পাবেন? টেলিগ্রামে @ChatIDBot সার্চ করে /start দিন।</div>
+          <div class="input-hint">🆔 শুধুমাত্র সংখ্যা দিন - অন্য লেখা থাকলে অটো ডিলিট হবে</div>
         </div>
         <div class="input-area">
           <label>🔗 টেলিগ্রাম চ্যানেল লিংক</label>
@@ -2371,6 +2429,16 @@
     var adminChatIdInput = document.getElementById('adminChatId');
     var channelInput = document.getElementById('adminChannelLink');
     
+    if(adminChatIdInput) {
+      adminChatIdInput.addEventListener('input', function(e) {
+        var rawValue = e.target.value;
+        var numbersOnly = rawValue.replace(/[^0-9]/g, '');
+        if (rawValue !== numbersOnly) {
+          e.target.value = numbersOnly;
+        }
+      });
+    }
+    
     var cleanup = function() { if(modalDiv) modalDiv.remove(); };
     
     if(yesBtn) {
@@ -2378,6 +2446,8 @@
         var tgUsername = adminTgUsernameInput.value.trim();
         var chatId = adminChatIdInput.value.trim();
         var channelLink = channelInput.value.trim();
+        
+        chatId = chatId.replace(/[^0-9]/g, '');
         
         if(!tgUsername || !chatId) {
             showToast("❌ দয়া করে ইউজারনেম এবং চ্যাট আইডি দিন!");
