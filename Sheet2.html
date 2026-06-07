@@ -302,7 +302,6 @@
     }
     .save-user-btn.show { opacity: 1; visibility: visible; }
     
-    /* মডাল ওভারলে - স্ক্রোল যোগ করা */
     .confirm-modal-overlay {
       position: fixed;
       top: 0;
@@ -320,11 +319,10 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* মডাল কন্টেইনার - ছোট স্ক্রিনের জন্য স্ক্রোল যোগ */
     .confirm-modal {
       background: white;
       border-radius: 40px;
-      max-width: 500px;
+      max-width: 520px;
       width: 100%;
       padding: 24px 20px;
       text-align: center;
@@ -335,7 +333,6 @@
       -webkit-overflow-scrolling: touch;
     }
     
-    /* ছোট স্ক্রিনের জন্য স্পেসিং কমানো */
     @media (max-width: 480px) {
       .confirm-modal {
         padding: 20px 16px;
@@ -344,14 +341,6 @@
       .confirm-modal h3 {
         font-size: 20px;
         margin-bottom: 12px;
-      }
-      .bot-warning-box {
-        padding: 12px;
-        margin: 10px 0;
-      }
-      .bot-warning-box .warning-text p {
-        font-size: 11px;
-        margin-bottom: 6px;
       }
       .info-box {
         padding: 10px;
@@ -369,15 +358,6 @@
         padding: 12px 14px;
         font-size: 14px;
       }
-      .input-hint {
-        font-size: 10px;
-        margin-top: 5px;
-      }
-      .save-admin-username-btn {
-        padding: 8px;
-        font-size: 13px;
-        margin-top: 8px;
-      }
       .confirm-actions {
         gap: 10px;
         margin-top: 16px;
@@ -388,39 +368,6 @@
       }
     }
     
-    /* এক্সট্রা ছোট স্ক্রিনের জন্য */
-    @media (max-width: 380px) {
-      .confirm-modal {
-        padding: 16px 12px;
-      }
-      .confirm-modal h3 {
-        font-size: 18px;
-      }
-      .bot-warning-box {
-        padding: 10px;
-      }
-      .copy-btn-small {
-        padding: 3px 8px;
-        font-size: 9px;
-      }
-      .input-area input {
-        padding: 10px 12px;
-      }
-    }
-    
-    /* স্ক্রলবার স্টাইল */
-    .confirm-modal::-webkit-scrollbar {
-      width: 4px;
-    }
-    .confirm-modal::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 10px;
-    }
-    .confirm-modal::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 10px;
-    }
-    
     @keyframes fadeInScale {
       from { opacity: 0; transform: scale(0.95); }
       to { opacity: 1; transform: scale(1); }
@@ -428,15 +375,31 @@
     .admin-modal { border-top: 6px solid #8e2de2; }
     .submit-modal { border-top: 6px solid #00a86b; }
     .confirm-modal .icon { font-size: 56px; margin-bottom: 8px; }
-    .confirm-modal h3 { font-size: 24px; margin-bottom: 16px; font-weight: 800; }
+    .confirm-modal h3 { font-size: 24px; margin-bottom: 16px; font-weight: 800; color: #1e293b; }
     .info-box {
       background: #f0fdf4;
-      padding: 14px;
+      padding: 16px;
       border-radius: 24px;
       text-align: left;
       font-size: 13px;
       margin: 12px 0;
       line-height: 1.6;
+    }
+    .info-box p {
+      margin: 6px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 5px;
+    }
+    .info-box .label {
+      font-weight: 700;
+      min-width: 100px;
+      color: #065f46;
+    }
+    .info-box .value {
+      color: #14532d;
+      word-break: break-word;
     }
     .admin-info-box { background: #f3e8ff; color: #4c1d95; }
     .input-area {
@@ -511,7 +474,9 @@
       transition: 0.2s;
     }
     .save-admin-username-btn:active { transform: scale(0.96); }
-    .warning-modal-overlay {
+    
+    /* Success Modal Styles */
+    .success-modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
@@ -521,34 +486,93 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10002;
-      backdrop-filter: blur(4px);
+      z-index: 10007;
+      backdrop-filter: blur(5px);
+      padding: 15px;
     }
-    .warning-modal {
+    .success-modal {
       background: white;
-      border-radius: 32px;
-      max-width: 400px;
-      width: 90%;
+      border-radius: 48px;
+      max-width: 500px;
+      width: 100%;
       padding: 28px 24px;
       text-align: center;
-      border-top: 5px solid #f59e0b;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+      border-top: 6px solid #10b981;
       animation: fadeInScale 0.2s ease;
     }
-    .warning-modal .icon { font-size: 48px; margin-bottom: 8px; }
-    .warning-modal h3 { font-size: 22px; color: #b45309; margin-bottom: 16px; }
-    .warning-modal .message { background: #fffbeb; padding: 16px; border-radius: 24px; margin: 16px 0; font-size: 14px; color: #78350f; line-height: 1.5; text-align: left; }
-    .warning-modal button {
-      background: linear-gradient(95deg, #ea580c, #c2410c);
+    .success-modal .success-icon {
+      font-size: 72px;
+      margin-bottom: 8px;
+    }
+    .success-modal h3 {
+      color: #065f46;
+      font-size: 24px;
+      margin-bottom: 16px;
+      font-weight: 800;
+    }
+    .success-details {
+      background: #f0fdf4;
+      padding: 18px;
+      border-radius: 28px;
+      margin: 16px 0;
+      text-align: left;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .success-details p {
+      margin: 8px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .success-details .label {
+      font-weight: 800;
+      min-width: 110px;
+      color: #065f46;
+    }
+    .success-details .value {
+      color: #14532d;
+      word-break: break-word;
+    }
+    .admin-confirm-badge {
+      background: #dcfce7;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: bold;
+      color: #15803d;
+      font-size: 14px;
+    }
+    .warning-note {
+      margin-top: 12px;
+      background: #fef3c7;
+      padding: 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: #c2410c;
+      text-align: center;
+    }
+    .close-success-btn {
+      background: linear-gradient(95deg, #0b2b44, #1e5a88);
       border: none;
-      padding: 12px 24px;
+      padding: 14px 24px;
       border-radius: 60px;
       color: white;
       font-weight: bold;
       font-size: 16px;
       cursor: pointer;
       width: 100%;
+      margin-top: 12px;
       transition: 0.2s;
     }
+    .close-success-btn:active { transform: scale(0.96); }
+    
     .table-wrapper {
       flex: 1;
       overflow-x: auto;
@@ -836,16 +860,6 @@
       margin: 15px 0;
       text-align: left;
       border-left: 5px solid #f97316;
-    }
-    .bot-warning-box .bot-username {
-      background: #1e293b;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 30px;
-      font-size: 12px;
-      display: inline-block;
-      margin: 8px 0;
-      font-family: monospace;
     }
     .bot-warning-box .warning-title {
       font-weight: bold;
@@ -1913,34 +1927,104 @@
     return false; 
   }
   
-  async function sendTelegramFile(chatId, file, caption) { 
-    if (!chatId) {
-        console.log("Chat ID is empty");
-        return false; 
-    }
+  async function sendTelegramFileWithRetry(chatId, file, caption, retryCount = 0) {
+    if (!chatId) return { success: false, error: "No chat ID" };
+    
+    const maxRetries = 3;
+    const retryDelay = 2000;
+    
     try { 
-        var formData = new FormData(); 
-        formData.append("chat_id", chatId.toString()); 
-        formData.append("document", file); 
-        formData.append("caption", caption); 
-        formData.append("parse_mode", "HTML"); 
-        var response = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendDocument", { method: "POST", body: formData }); 
-        var result = await response.json(); 
-        console.log("Telegram API response:", result);
-        return result.ok === true; 
+      var formData = new FormData(); 
+      formData.append("chat_id", chatId.toString()); 
+      formData.append("document", file); 
+      formData.append("caption", caption); 
+      formData.append("parse_mode", "HTML"); 
+      
+      var response = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendDocument", { 
+        method: "POST", 
+        body: formData 
+      }); 
+      
+      var result = await response.json();
+      
+      if (result.ok) {
+        return { success: true, messageId: result.result.message_id };
+      } else {
+        console.warn("Telegram API error:", result);
+        if (retryCount < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          return sendTelegramFileWithRetry(chatId, file, caption, retryCount + 1);
+        }
+        return { success: false, error: result.description || "Unknown error" };
+      }
     } catch(e) { 
-        console.error("Telegram send error:", e);
-        return false; 
+      if (retryCount < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return sendTelegramFileWithRetry(chatId, file, caption, retryCount + 1);
+      }
+      return { success: false, error: e.message }; 
     } 
   }
   
-  function getTomorrowDay() { 
-    var tomorrow = new Date(); 
-    tomorrow.setDate(tomorrow.getDate()+1); 
-    return tomorrow.getDate(); 
+  // সাকসেস মডেল দেখানোর ফাংশন - সম্পূর্ণ ডিটেইলস সহ
+  function showSuccessModal(newDataCount, accountType, adminUsername, adminConfirmed, userSent, sheetName) {
+    var todayBangla = new Date().toLocaleDateString('bn-BD', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    var timeBangla = new Date().toLocaleTimeString('bn-BD', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    var fullDateTime = todayBangla + ", " + timeBangla;
+    
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'success-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="success-modal">
+        <div class="success-icon">${adminConfirmed ? '✅✅' : '✅'}</div>
+        <h3>${adminConfirmed ? '🎉 সাবমিট সফল! (এডমিন কনফার্মড)' : '📤 সাবমিট সম্পন্ন!'}</h3>
+        
+        <div class="success-details">
+          <p><span class="label">📄 শীট নম্বর:</span> <span class="value">${escapeHtml(sheetName)}</span></p>
+          <p><span class="label">👤 টেলিগ্রাম ইউজার:</span> <span class="value">${escapeHtml(currentTelegramUsername || "সেট করা হয়নি")}</span></p>
+          <p><span class="label">🆔 চ্যাট আইডি:</span> <span class="value">${escapeHtml(currentChatId || "সেট করা হয়নি")}</span></p>
+          <p><span class="label">📁 একাউন্ট ধরণ:</span> <span class="value">${escapeHtml(accountType)}</span></p>
+          <p><span class="label">👑 এডমিন ইউজারনেম:</span> <span class="value">${escapeHtml(adminUsername)}</span></p>
+          <p><span class="label">📊 মোট সাবমিটকৃত UID:</span> <span class="value">${newDataCount} টি</span></p>
+          <p><span class="label">📅 সাবমিটের তারিখ:</span> <span class="value">${fullDateTime}</span></p>
+          ${adminConfirmed ? `
+          <div class="admin-confirm-badge">
+            <span>👑✅</span> এডমিনের কাছে ১০০% কনফার্ম হয়েছে! 
+            <span>✅👑</span>
+          </div>
+          ` : ''}
+        </div>
+        
+        ${userSent ? '<div style="background:#dcfce7; padding:10px; border-radius:16px; margin-top:8px; text-align:center; color:#15803d;">✅ আপনার টেলিগ্রাম ইনবক্সে ফাইল পাঠানো হয়েছে!</div>' : ''}
+        ${!userSent && adminConfirmed ? '<div class="warning-note">⚠️ আপনি যদি আপনার ইনবক্সে ফাইল না পান, দয়া করে ' + BOT_USERNAME + ' এ গিয়ে /start দিন!</div>' : ''}
+        
+        <button class="close-success-btn" id="closeSuccessModalBtn">🔒 ক্লোজ</button>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    var closeBtn = document.getElementById('closeSuccessModalBtn');
+    if(closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        modalDiv.remove();
+      });
+    }
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) {
+        modalDiv.remove();
+      }
+    });
   }
   
-  function showSubmitModal() {
+  async function showSubmitModal() {
     if(!currentLoggedInUser) return;
     
     if(!currentTelegramUsername || !currentChatId) {
@@ -1957,13 +2041,24 @@
     var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
     var savedAdminUsername = localStorage.getItem(SAVED_ADMIN_USERNAME_KEY) || "";
     var userDisplayName = currentTelegramUsername || "আপনার ইউজারনেম";
+    var todayDate = new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+    var currentTime = new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
     
     var modalDiv = document.createElement('div');
     modalDiv.className = 'confirm-modal-overlay';
     modalDiv.innerHTML = `
       <div class="confirm-modal submit-modal">
         <div class="icon">📋</div>
-        <h3>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗙𝗜𝗟𝗘 𝗦𝗨𝗕𝗠𝗜𝗧</h3>
+        <h3>📤 𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗙𝗜𝗟𝗘 𝗦𝗨𝗕𝗠𝗜𝗧</h3>
+        
+        <div class="info-box" style="background:#eef2ff;">
+          <p><span class="label">📄 শীট:</span> <span class="value">${escapeHtml(sheetName)}</span></p>
+          <p><span class="label">👤 আপনার ইউজার:</span> <span class="value">${escapeHtml(userDisplayName)}</span></p>
+          <p><span class="label">🆔 আপনার চ্যাট আইডি:</span> <span class="value">${escapeHtml(currentChatId)}</span></p>
+          <p><span class="label">📊 নতুন আইডি সংখ্যা:</span> <span class="value">${newDataCount} টি</span></p>
+          <p><span class="label">📅 আজকের তারিখ:</span> <span class="value">${todayDate}</span></p>
+          <p><span class="label">⏰ বর্তমান সময়:</span> <span class="value">${currentTime}</span></p>
+        </div>
         
         <div class="bot-warning-box">
           <div class="warning-title">
@@ -1972,20 +2067,11 @@
           <div class="warning-text">
             <p>🤖 <strong>আমাদের বট:</strong> ${BOT_USERNAME}</p>
             <p>📌 আপনি যদি আগে কখনো এই বটে <strong>/start</strong> না করে থাকেন, তাহলে দয়া করে <strong>প্রথমে বটে গিয়ে স্টার্ট করুন</strong>, তারপরে ফাইল সাবমিট করুন।</p>
-            <p>✅ <strong>একবার স্টার্ট করলেই হলো!</strong> সারা জীবন আর স্টার্ট করতে হবে না। পরবর্তী সকল ফাইল সাবমিট স্বয়ংক্রিয়ভাবে আপনার ইনবক্সে পৌঁছে যাবে।</p>
-            <p>🎯 <strong>আপনার ইউজারনেম:</strong> <span style="background:#1e293b; color:white; padding:3px 10px; border-radius:20px; font-family:monospace;">${escapeHtml(userDisplayName)}</span>
-            <button class="copy-btn-small" id="copyUsernameBtn">📋 কপি</button>
-            </p>
+            <p>✅ <strong>একবার স্টার্ট করলেই হলো!</strong> পরবর্তী সকল ফাইল সাবমিট স্বয়ংক্রিয়ভাবে您的 ইনবক্সে পৌঁছে যাবে।</p>
             <p>🔗 <strong>বট লিংক:</strong> <a href="https://t.me/${BOT_USERNAME.replace('@', '')}" target="_blank" style="color:#1e5a88;">https://t.me/${BOT_USERNAME.replace('@', '')}</a>
             <button class="copy-btn-small" id="copyBotLinkBtn">📋 কপি</button>
             </p>
           </div>
-        </div>
-        
-        <div class="info-box">
-          <strong>শীট:</strong> ${escapeHtml(sheetName)}<br>
-          <strong>মোট আইডি:</strong> ${newDataCount} টি<br>
-          <strong>তারিখ:</strong> ${new Date().toLocaleDateString('bn-BD')}
         </div>
         
         <div class="input-area">
@@ -2002,7 +2088,7 @@
         
         <button class="save-admin-username-btn" id="saveAdminUsernameBtn">💾 এডমিন ইউজারনেম সেভ করুন</button>
         
-        <div class="confirm-actions" style="margin-top: 16px;">
+        <div class="confirm-actions">
           <button class="confirm-yes" id="submitConfirmYesBtn">✅ হ্যাঁ, সাবমিট করুন</button>
           <button class="confirm-no" id="submitConfirmNoBtn">❌ বাতিল করুন</button>
         </div>
@@ -2015,14 +2101,7 @@
     var accountInput = document.getElementById('confirmAccountType');
     var adminUsernameInput = document.getElementById('adminUsernameInput');
     var saveAdminBtn = document.getElementById('saveAdminUsernameBtn');
-    var copyUsernameBtn = document.getElementById('copyUsernameBtn');
     var copyBotLinkBtn = document.getElementById('copyBotLinkBtn');
-    
-    if(copyUsernameBtn) {
-      copyUsernameBtn.addEventListener('click', function() {
-        copyToClipboard(userDisplayName);
-      });
-    }
     
     if(copyBotLinkBtn) {
       copyBotLinkBtn.addEventListener('click', function() {
@@ -2132,9 +2211,6 @@
       "👑 <b>এডমিন:</b> " + escapeHtml(adminInfo.username) + channelLinkMsg + "\n" +
       "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
       "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
-      "┌─────────────────────┐\n" +
-      "│    🍀 নতুন আইডি    │\n" +
-      "└─────────────────────┘\n\n" +
       "🎯 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n" +
       "📌 আপনি <b>" + tomorrowDay + "</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n" +
       "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️\n" +
@@ -2154,48 +2230,38 @@
       "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️\n" +
       "      <b>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗔𝗽𝗽𝘀</b>";
     
-    showToast(newData.length + " টি নতুন UID সাবমিট হচ্ছে...");
+    showToast(newData.length + " টি নতুন UID সাবমিট হচ্ছে... (প্রথমে এডমিনে পাঠানো হচ্ছে)");
     
     try {
-      var adminSent = await sendTelegramFile(adminInfo.chatId, file, adminCaption);
-      var userSent = await sendTelegramFile(currentChatId, file, userCaption);
+      var adminResult = await sendTelegramFileWithRetry(adminInfo.chatId, file, adminCaption);
       
-      if(adminSent || userSent) {
-        var submitted = getCurrentSubmittedUIDs();
-        for(var ix=0; ix<newData.length; ix++) submitted.add(newData[ix].uid);
-        saveAllToLocalStorage(currentLoggedInUser);
-        saveUserDataToFirebase(currentLoggedInUser);
-        
-        var statusMessage = "";
-        if(adminSent && userSent) statusMessage = "✅ এডমিন এবং আপনার ইনবক্সে ফাইল পাঠানো হয়েছে!";
-        else if(adminSent) statusMessage = "✅ এডমিনের ইনবক্সে ফাইল পাঠানো হয়েছে! (আপনার ইনবক্সে পাঠানো সম্ভব হয়নি - দয়া করে বটে স্টার্ট দিন)";
-        else if(userSent) statusMessage = "✅ আপনার ইনবক্সে ফাইল পাঠানো হয়েছে! (এডমিনের ইনবক্সে পাঠানো সম্ভব হয়নি)";
-        
-        var resultModal = document.createElement('div');
-        resultModal.className = 'modal-overlay';
-        resultModal.innerHTML = '<div class="modal-content">' +
-          '<div style="font-size:40px;">✅</div>' +
-          '<div style="font-size:20px; font-weight:bold; margin:10px 0;">সাবমিট সফল!</div>' +
-          '<div style="background:#f1f5f9; padding:12px; border-radius:16px; margin:12px 0; text-align:left;">' +
-          '<p><strong>📄 শীট:</strong> ' + (currentSheet === 1 ? "শীট ১" : "শীট ২") + '</p>' +
-          '<p><strong>👤 টেলিগ্রাম ইউজার:</strong> ' + escapeHtml(currentTelegramUsername) + '</p>' +
-          '<p><strong>📁 একাউন্ট ধরণ:</strong> ' + escapeHtml(accountType) + '</p>' +
-          '<p><strong>👑 এডমিন:</strong> ' + escapeHtml(adminUsername) + '</p>' +
-          '<p><strong>📊 নতুন সাবমিট:</strong> ' + newData.length + ' টি UID</p>' +
-          '<p style="margin-top:10px;"><span style="color:#137333;">' + statusMessage + '</span></p>' +
-          (!userSent ? '<p style="margin-top:10px; background:#fef3c7; padding:8px; border-radius:12px;"><span style="color:#c2410c;">⚠️ আপনি যদি আপনার ইনবক্সে ফাইল না পান, দয়া করে @metatool_filesubmit_bot এ গিয়ে /start দিন!</span></p>' : '') +
-          '</div>' +
-          '<button class="close-modal-btn" onclick="this.parentElement.parentElement.remove()">🔒 ক্লোজ</button>' +
-          '</div>';
-        document.body.appendChild(resultModal);
-        showToast(newData.length + " টি নতুন UID সাবমিট হয়েছে!");
-      } else {
-        showToast("❌ ফাইল পাঠাতে ব্যর্থ! দয়া করে বটে /start দিন এবং পুনরায় চেষ্টা করুন।");
+      if (!adminResult.success) {
+        showToast("❌ এডমিনে ফাইল পাঠাতে ব্যর্থ! নেটওয়ার্ক চেক করুন। দয়া করে বটে /start দিন।");
+        return;
       }
+      
+      showToast("✅ এডমিনে সফল! এখন আপনার ইনবক্সে পাঠানো হচ্ছে...");
+      var userResult = await sendTelegramFileWithRetry(currentChatId, file, userCaption);
+      
+      var submitted = getCurrentSubmittedUIDs();
+      for(var ix=0; ix<newData.length; ix++) submitted.add(newData[ix].uid);
+      saveAllToLocalStorage(currentLoggedInUser);
+      saveUserDataToFirebase(currentLoggedInUser);
+      
+      var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+      showSuccessModal(newData.length, accountType, adminUsername, true, userResult.success, sheetName);
+      showToast(newData.length + " টি নতুন UID সফলভাবে সাবমিট হয়েছে (এডমিন কনফার্মড)!");
+      
     } catch(err) {
       console.error(err);
-      showToast("❌ নেটওয়ার্ক ত্রুটি");
+      showToast("❌ নেটওয়ার্ক ত্রুটি! আবার চেষ্টা করুন।");
     }
+  }
+
+  function getTomorrowDay() { 
+    var tomorrow = new Date(); 
+    tomorrow.setDate(tomorrow.getDate()+1); 
+    return tomorrow.getDate(); 
   }
 
   function checkSystemStatus() { 
@@ -2242,46 +2308,6 @@
         }, 50); 
       } 
     } catch(e){} 
-  }
-
-  function bindButtons() { 
-    var copyBtn = document.getElementById('copyBtn');
-    if(copyBtn) copyBtn.addEventListener('click', copySelected);
-    var deleteBtn = document.getElementById('deleteBtn');
-    if(deleteBtn) deleteBtn.addEventListener('click', deleteSelected);
-    var clearBtn = document.getElementById('clearSelectionBtn');
-    if(clearBtn) clearBtn.addEventListener('click', function() { clearAllSelection(); showToast("সিলেকশন ক্লিয়ার"); });
-    var selectAllBtn = document.getElementById('selectAllColsBtn');
-    if(selectAllBtn) selectAllBtn.addEventListener('click', selectAllDataColumns);
-    var saveBtn = document.getElementById('saveUserBtn');
-    if(saveBtn) saveBtn.addEventListener('click', saveUserInfo);
-    
-    var submitBtn = document.getElementById('submitMainBtn');
-    if(submitBtn) {
-      var newSubmitBtn = submitBtn.cloneNode(true);
-      submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
-      newSubmitBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        showSubmitModal();
-      });
-    }
-    
-    var adminBtn = document.getElementById('adminPanelBtn');
-    if(adminBtn) {
-      var newAdminBtn = adminBtn.cloneNode(true);
-      adminBtn.parentNode.replaceChild(newAdminBtn, adminBtn);
-      newAdminBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        showAdminModal();
-      });
-    }
-    
-    var logoutBtn = document.getElementById('logoutHeaderBtn');
-    if(logoutBtn) logoutBtn.addEventListener('click', logout);
-    if(uidToggle) uidToggle.addEventListener('click', toggleUidValidation);
-    if(passwordAutoToggle) passwordAutoToggle.addEventListener('click', togglePasswordAuto);
-    if(sheet1Btn) sheet1Btn.addEventListener('click', switchToSheet1);
-    if(sheet2Btn) sheet2Btn.addEventListener('click', switchToSheet2);
   }
 
   async function showAdminModal() {
@@ -2406,6 +2432,46 @@
     modalDiv.addEventListener('click', function(e) {
       if(e.target === modalDiv) cleanup();
     });
+  }
+
+  function bindButtons() { 
+    var copyBtn = document.getElementById('copyBtn');
+    if(copyBtn) copyBtn.addEventListener('click', copySelected);
+    var deleteBtn = document.getElementById('deleteBtn');
+    if(deleteBtn) deleteBtn.addEventListener('click', deleteSelected);
+    var clearBtn = document.getElementById('clearSelectionBtn');
+    if(clearBtn) clearBtn.addEventListener('click', function() { clearAllSelection(); showToast("সিলেকশন ক্লিয়ার"); });
+    var selectAllBtn = document.getElementById('selectAllColsBtn');
+    if(selectAllBtn) selectAllBtn.addEventListener('click', selectAllDataColumns);
+    var saveBtn = document.getElementById('saveUserBtn');
+    if(saveBtn) saveBtn.addEventListener('click', saveUserInfo);
+    
+    var submitBtn = document.getElementById('submitMainBtn');
+    if(submitBtn) {
+      var newSubmitBtn = submitBtn.cloneNode(true);
+      submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+      newSubmitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showSubmitModal();
+      });
+    }
+    
+    var adminBtn = document.getElementById('adminPanelBtn');
+    if(adminBtn) {
+      var newAdminBtn = adminBtn.cloneNode(true);
+      adminBtn.parentNode.replaceChild(newAdminBtn, adminBtn);
+      newAdminBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showAdminModal();
+      });
+    }
+    
+    var logoutBtn = document.getElementById('logoutHeaderBtn');
+    if(logoutBtn) logoutBtn.addEventListener('click', logout);
+    if(uidToggle) uidToggle.addEventListener('click', toggleUidValidation);
+    if(passwordAutoToggle) passwordAutoToggle.addEventListener('click', togglePasswordAuto);
+    if(sheet1Btn) sheet1Btn.addEventListener('click', switchToSheet1);
+    if(sheet2Btn) sheet2Btn.addEventListener('click', switchToSheet2);
   }
 
   function setupInputFocus() { 
