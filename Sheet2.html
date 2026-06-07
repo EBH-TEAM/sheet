@@ -196,7 +196,7 @@
     .admin-btn-header {
       background: linear-gradient(95deg, #8e2de2, #4a00e0);
       border: none;
-      padding: 6px 10px;
+      padding: 6px 18px;
       border-radius: 32px;
       color: white;
       font-weight: bold;
@@ -301,6 +301,8 @@
       z-index: 100;
     }
     .save-user-btn.show { opacity: 1; visibility: visible; }
+    
+    /* মডাল ওভারলে - স্ক্রোল যোগ করা */
     .confirm-modal-overlay {
       position: fixed;
       top: 0;
@@ -313,17 +315,112 @@
       justify-content: center;
       z-index: 10005;
       backdrop-filter: blur(5px);
+      padding: 15px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
+
+    /* মডাল কন্টেইনার - ছোট স্ক্রিনের জন্য স্ক্রোল যোগ */
     .confirm-modal {
       background: white;
       border-radius: 40px;
       max-width: 500px;
-      width: 90%;
-      padding: 28px 24px;
+      width: 100%;
+      padding: 24px 20px;
       text-align: center;
       box-shadow: 0 25px 40px rgba(0,0,0,0.3);
       animation: fadeInScale 0.2s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
+    
+    /* ছোট স্ক্রিনের জন্য স্পেসিং কমানো */
+    @media (max-width: 480px) {
+      .confirm-modal {
+        padding: 20px 16px;
+        border-radius: 32px;
+      }
+      .confirm-modal h3 {
+        font-size: 20px;
+        margin-bottom: 12px;
+      }
+      .bot-warning-box {
+        padding: 12px;
+        margin: 10px 0;
+      }
+      .bot-warning-box .warning-text p {
+        font-size: 11px;
+        margin-bottom: 6px;
+      }
+      .info-box {
+        padding: 10px;
+        font-size: 12px;
+        margin: 10px 0;
+      }
+      .input-area {
+        margin: 15px 0 12px;
+      }
+      .input-area label {
+        font-size: 13px;
+        padding: 6px 10px;
+      }
+      .input-area input {
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+      .input-hint {
+        font-size: 10px;
+        margin-top: 5px;
+      }
+      .save-admin-username-btn {
+        padding: 8px;
+        font-size: 13px;
+        margin-top: 8px;
+      }
+      .confirm-actions {
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .confirm-actions button {
+        padding: 12px 0;
+        font-size: 14px;
+      }
+    }
+    
+    /* এক্সট্রা ছোট স্ক্রিনের জন্য */
+    @media (max-width: 380px) {
+      .confirm-modal {
+        padding: 16px 12px;
+      }
+      .confirm-modal h3 {
+        font-size: 18px;
+      }
+      .bot-warning-box {
+        padding: 10px;
+      }
+      .copy-btn-small {
+        padding: 3px 8px;
+        font-size: 9px;
+      }
+      .input-area input {
+        padding: 10px 12px;
+      }
+    }
+    
+    /* স্ক্রলবার স্টাইল */
+    .confirm-modal::-webkit-scrollbar {
+      width: 4px;
+    }
+    .confirm-modal::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    .confirm-modal::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+    
     @keyframes fadeInScale {
       from { opacity: 0; transform: scale(0.95); }
       to { opacity: 1; transform: scale(1); }
@@ -794,8 +891,8 @@
   <div class="header">
     <div class="logo-area">
       <div class="logo-wrapper">
-        <span class="logo">𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟</span>
-        <span class="logo-sub">Smart Sheet</span>
+        <span class="logo">𝗠𝗘𝗧𝗔</span>
+        <span class="logo-sub">Dual Sheet</span>
       </div>
       <div style="display: flex; gap: 10px; align-items: center;">
         <div class="user-info-area">
@@ -2227,7 +2324,7 @@
         <div class="input-area">
           <label>🆔 টেলিগ্রাম চ্যাট আইডি <span class="required-star">*</span></label>
           <input type="text" id="adminChatId" placeholder="123456789" autocomplete="off" inputmode="numeric" value="${escapeHtml(chatIdValue)}">
-          <div class="input-hint">🆔 কিভাবে চ্যাট আইডি পাবেন? টেলিগ্রামে @id_bot সার্চ করে /start দিন।</div>
+          <div class="input-hint">🆔 কিভাবে চ্যাট আইডি পাবেন? টেলিগ্রামে @ChatIDBot সার্চ করে /start দিন।</div>
         </div>
         <div class="input-area">
           <label>🔗 টেলিগ্রাম চ্যানেল লিংক</label>
