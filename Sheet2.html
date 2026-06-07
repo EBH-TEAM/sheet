@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 - Dual Sheet</title>
+  <title>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 - Quad Sheet</title>
   <style>
     * {
       box-sizing: border-box;
@@ -141,14 +141,12 @@
     }
     .app-container.visible { opacity: 1; }
 
-    /* হেডার - 390px ডিপির জন্য অপটিমাইজড */
     .header {
       background: linear-gradient(135deg, #0b2b44 0%, #1e5a88 100%);
       padding: 8px 10px;
       flex-shrink: 0;
     }
     
-    /* প্রথম সারি: লোগো + ইউজার + লগআউট */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -204,7 +202,6 @@
     }
     .logout-btn:active { transform: scale(0.95); }
     
-    /* দ্বিতীয় সারি: এডমিন + সাবমিট (মাঝখানে) */
     .action-buttons {
       display: flex;
       justify-content: center;
@@ -236,7 +233,6 @@
     }
     .admin-btn-header:active, .submit-main-btn:active { transform: scale(0.96); }
     
-    /* তৃতীয় সারি: টুল বাটন (মাঝখানে) */
     .tool-button-group {
       display: flex;
       justify-content: center;
@@ -260,7 +256,6 @@
     .btn-delete { background: #dc2626; color: white; }
     .btn-clear { background: #ea580c; color: white; }
     
-    /* 390px ডিপির জন্য রেস্পন্সিভ */
     @media (max-width: 400px) {
       .top-bar { flex-direction: column; align-items: stretch; }
       .user-controls { justify-content: flex-end; margin-top: -28px; }
@@ -796,14 +791,15 @@
       background: #f1f5f9;
       border-top: 1px solid #e2e8f0;
       flex-shrink: 0;
+      flex-wrap: wrap;
     }
     .sheet-btn {
-      flex: 1;
-      max-width: 120px;
+      flex: 0 0 auto;
+      min-width: 70px;
       padding: 6px 12px;
       border: none;
       border-radius: 40px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -910,7 +906,7 @@
 </div>
 <div id="loginOverlay" class="login-overlay">
   <div class="login-card">
-    <div class="login-logo">𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟</div>
+    <div class="login-logo">𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 SHEET</div>
     <div class="login-sub">আপনার অ্যাকাউন্ট দিয়ে প্রবেশ করুন</div>
     <div id="loginError" class="error-msg" style="display:none;"></div>
     <div class="input-group-login">
@@ -929,7 +925,7 @@
     <div class="top-bar">
       <div class="logo-area">
         <span class="logo">𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟</span>
-        <span class="smart-sheet">𝗦𝗺𝗮𝗿𝘁 𝗦𝗵𝗲𝗲𝘁</span>
+        <span class="smart-sheet">𝗤𝘂𝗮𝗱 𝗦𝗵𝗲𝗲𝘁</span>
       </div>
       <div class="user-controls">
         <span class="username-badge" id="displayUsername">-</span>
@@ -937,8 +933,8 @@
       </div>
     </div>
     <div class="action-buttons">
-      <button id="adminPanelBtn" class="admin-btn-header">👑 এডমিন রেজিষ্ট্রেশন </button>
-      <button id="submitMainBtn" class="submit-main-btn">📤 ফাইল সাবমিট করুন</button>
+      <button id="adminPanelBtn" class="admin-btn-header">👑 এডমিন প্যানেল</button>
+      <button id="submitMainBtn" class="submit-main-btn">📤 ফাইল সাবমিট</button>
     </div>
     <div class="tool-button-group">
       <button id="selectAllColsBtn" class="btn btn-select">📌 সব কলাম</button>
@@ -964,8 +960,7 @@
         <tr id="headerRow">
           <th data-col="0">#</th>
           <th data-col="1">
-            UID
-            <div class="uid-toggle-switch" id="uidValidationToggle" title="শুধুমাত্র সংখ্যা অনুমোদন অন/অফ"></div>
+            UID            <div class="uid-toggle-switch" id="uidValidationToggle" title="শুধুমাত্র সংখ্যা অনুমোদন অন/অফ"></div>
           </th>
           <th data-col="2">
             পাসওয়ার্ড
@@ -974,7 +969,7 @@
           <th data-col="3">কুকিজ/2FA</th>
           <th data-col="4">D</th>
           <th data-col="5">E</th>
-        </td>
+        </tr>
       </thead>
       <tbody id="sheetBody"></tbody>
     </table>
@@ -982,6 +977,8 @@
   <div class="sheet-selector">
     <button id="sheet1Btn" class="sheet-btn active">📄 শীট ১</button>
     <button id="sheet2Btn" class="sheet-btn">📄 শীট ২</button>
+    <button id="sheet3Btn" class="sheet-btn">📄 শীট ৩</button>
+    <button id="sheet4Btn" class="sheet-btn">📄 শীট ৪</button>
   </div>
 </div>
 <div id="liveToast" class="toast-msg"></div>
@@ -1016,6 +1013,10 @@
   let submittedUIDs1 = new Set();
   let sheetData2 = [];
   let submittedUIDs2 = new Set();
+  let sheetData3 = [];
+  let submittedUIDs3 = new Set();
+  let sheetData4 = [];
+  let submittedUIDs4 = new Set();
   
   let currentSheet = 1;
   let currentTelegramUsername = "";
@@ -1026,12 +1027,17 @@
   const SHEET1_SUBMITTED_KEY = "META_Submitted_UIDs_";
   const SHEET2_STORAGE_KEY = "META_Sheet_Data_2_";
   const SHEET2_SUBMITTED_KEY = "META_Submitted_UIDs_2_";
+  const SHEET3_STORAGE_KEY = "META_Sheet_Data_3_";
+  const SHEET3_SUBMITTED_KEY = "META_Submitted_UIDs_3_";
+  const SHEET4_STORAGE_KEY = "META_Sheet_Data_4_";
+  const SHEET4_SUBMITTED_KEY = "META_Submitted_UIDs_4_";
   
   const AUTH_TOKEN_KEY = "META_Auth_Token";
   const SCROLL_POSITION_KEY = "META_Scroll_Position";
   const UID_VALIDATION_STATE_KEY = "META_UidValidationState";
   const PASSWORD_AUTO_STATE_KEY = "META_PasswordAutoState";
   const SAVED_ADMIN_USERNAME_KEY = "META_Saved_Admin_Username";
+  const LAST_SHEET_KEY = "META_Last_Sheet";
   
   let undoStack = [];
   let redoStack = [];
@@ -1056,6 +1062,8 @@
   const passwordAutoToggle = document.getElementById('passwordAutoToggle');
   const sheet1Btn = document.getElementById('sheet1Btn');
   const sheet2Btn = document.getElementById('sheet2Btn');
+  const sheet3Btn = document.getElementById('sheet3Btn');
+  const sheet4Btn = document.getElementById('sheet4Btn');
   const adminPanelBtn = document.getElementById('adminPanelBtn');
 
   let isUidValidationEnabled = true;
@@ -1088,16 +1096,42 @@
   }
 
   function getCurrentSheetData() {
-    return currentSheet === 1 ? sheetData1 : sheetData2;
+    if(currentSheet === 1) return sheetData1;
+    if(currentSheet === 2) return sheetData2;
+    if(currentSheet === 3) return sheetData3;
+    if(currentSheet === 4) return sheetData4;
+    return sheetData1;
   }
   
   function getCurrentSubmittedUIDs() {
-    return currentSheet === 1 ? submittedUIDs1 : submittedUIDs2;
+    if(currentSheet === 1) return submittedUIDs1;
+    if(currentSheet === 2) return submittedUIDs2;
+    if(currentSheet === 3) return submittedUIDs3;
+    if(currentSheet === 4) return submittedUIDs4;
+    return submittedUIDs1;
   }
   
   function updateCurrentSheetData(newData) {
     if(currentSheet === 1) sheetData1 = newData;
-    else sheetData2 = newData;
+    else if(currentSheet === 2) sheetData2 = newData;
+    else if(currentSheet === 3) sheetData3 = newData;
+    else if(currentSheet === 4) sheetData4 = newData;
+  }
+  
+  function saveLastSheet() {
+    if(currentLoggedInUser) {
+      localStorage.setItem(LAST_SHEET_KEY + "_" + currentLoggedInUser, currentSheet);
+    }
+  }
+  
+  function loadLastSheet() {
+    if(currentLoggedInUser) {
+      const saved = localStorage.getItem(LAST_SHEET_KEY + "_" + currentLoggedInUser);
+      if(saved && saved >= 1 && saved <= 4) {
+        return parseInt(saved);
+      }
+    }
+    return 1;
   }
 
   function loadUidValidationState() {
@@ -1154,6 +1188,9 @@
     currentSheet = 1;
     sheet1Btn.classList.add('active');
     sheet2Btn.classList.remove('active');
+    sheet3Btn.classList.remove('active');
+    sheet4Btn.classList.remove('active');
+    saveLastSheet();
     fullRender();
     showToast("শীট ১ এ স্যুইচ করা হয়েছে");
   }
@@ -1163,8 +1200,35 @@
     currentSheet = 2;
     sheet2Btn.classList.add('active');
     sheet1Btn.classList.remove('active');
+    sheet3Btn.classList.remove('active');
+    sheet4Btn.classList.remove('active');
+    saveLastSheet();
     fullRender();
     showToast("শীট ২ এ স্যুইচ করা হয়েছে");
+  }
+  
+  function switchToSheet3() {
+    if(currentSheet === 3) return;
+    currentSheet = 3;
+    sheet3Btn.classList.add('active');
+    sheet1Btn.classList.remove('active');
+    sheet2Btn.classList.remove('active');
+    sheet4Btn.classList.remove('active');
+    saveLastSheet();
+    fullRender();
+    showToast("শীট ৩ এ স্যুইচ করা হয়েছে");
+  }
+  
+  function switchToSheet4() {
+    if(currentSheet === 4) return;
+    currentSheet = 4;
+    sheet4Btn.classList.add('active');
+    sheet1Btn.classList.remove('active');
+    sheet2Btn.classList.remove('active');
+    sheet3Btn.classList.remove('active');
+    saveLastSheet();
+    fullRender();
+    showToast("শীট ৪ এ স্যুইচ করা হয়েছে");
   }
 
   function saveAuthToken(username, password) {
@@ -1217,6 +1281,40 @@
     }
   }
   
+  function loadSheet3FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET3_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData3 = parsed;
+        else sheetData3 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData3 = createEmptySheet(); }
+    } else {
+      sheetData3 = createEmptySheet();
+    }
+    const savedSubmitted = localStorage.getItem(SHEET3_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs3 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
+    }
+  }
+  
+  function loadSheet4FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET4_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData4 = parsed;
+        else sheetData4 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData4 = createEmptySheet(); }
+    } else {
+      sheetData4 = createEmptySheet();
+    }
+    const savedSubmitted = localStorage.getItem(SHEET4_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs4 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
+    }
+  }
+  
   function saveSheet1ToLocalStorage(username) {
     localStorage.setItem(SHEET1_STORAGE_KEY + username, JSON.stringify(sheetData1));
     localStorage.setItem(SHEET1_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs1)));
@@ -1227,10 +1325,22 @@
     localStorage.setItem(SHEET2_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs2)));
   }
   
+  function saveSheet3ToLocalStorage(username) {
+    localStorage.setItem(SHEET3_STORAGE_KEY + username, JSON.stringify(sheetData3));
+    localStorage.setItem(SHEET3_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs3)));
+  }
+  
+  function saveSheet4ToLocalStorage(username) {
+    localStorage.setItem(SHEET4_STORAGE_KEY + username, JSON.stringify(sheetData4));
+    localStorage.setItem(SHEET4_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs4)));
+  }
+  
   function saveAllToLocalStorage(username) {
     if(!username) return;
     saveSheet1ToLocalStorage(username);
     saveSheet2ToLocalStorage(username);
+    saveSheet3ToLocalStorage(username);
+    saveSheet4ToLocalStorage(username);
   }
 
   async function loadUserDataFromFirebase(username) {
@@ -1243,6 +1353,10 @@
         if(data.submittedUIDs) submittedUIDs1 = new Set(data.submittedUIDs);
         if(data.sheetData2 && data.sheetData2.length === ROWS) sheetData2 = data.sheetData2;
         if(data.submittedUIDs2) submittedUIDs2 = new Set(data.submittedUIDs2);
+        if(data.sheetData3 && data.sheetData3.length === ROWS) sheetData3 = data.sheetData3;
+        if(data.submittedUIDs3) submittedUIDs3 = new Set(data.submittedUIDs3);
+        if(data.sheetData4 && data.sheetData4.length === ROWS) sheetData4 = data.sheetData4;
+        if(data.submittedUIDs4) submittedUIDs4 = new Set(data.submittedUIDs4);
         if(data.chatId) currentChatId = data.chatId;
         if(data.telegramUsername) currentTelegramUsername = data.telegramUsername;
         if(tgUsernameInput) tgUsernameInput.value = currentTelegramUsername || '';
@@ -1267,6 +1381,10 @@
       submittedUIDs: Array.from(submittedUIDs1),
       sheetData2: sheetData2,
       submittedUIDs2: Array.from(submittedUIDs2),
+      sheetData3: sheetData3,
+      submittedUIDs3: Array.from(submittedUIDs3),
+      sheetData4: sheetData4,
+      submittedUIDs4: Array.from(submittedUIDs4),
       chatId: currentChatId,
       telegramUsername: currentTelegramUsername,
       lastUpdated: Date.now()
@@ -1303,25 +1421,38 @@
     
     sheetData1 = createEmptySheet();
     sheetData2 = createEmptySheet();
+    sheetData3 = createEmptySheet();
+    sheetData4 = createEmptySheet();
     submittedUIDs1 = new Set();
     submittedUIDs2 = new Set();
+    submittedUIDs3 = new Set();
+    submittedUIDs4 = new Set();
     
     var loaded = await loadUserDataFromFirebase(username);
     if(!loaded) {
       loadSheet1FromLocalStorage(username);
       loadSheet2FromLocalStorage(username);
+      loadSheet3FromLocalStorage(username);
+      loadSheet4FromLocalStorage(username);
     }
     
     if(!sheetData1 || sheetData1.length !== ROWS) sheetData1 = createEmptySheet();
     if(!sheetData2 || sheetData2.length !== ROWS) sheetData2 = createEmptySheet();
+    if(!sheetData3 || sheetData3.length !== ROWS) sheetData3 = createEmptySheet();
+    if(!sheetData4 || sheetData4.length !== ROWS) sheetData4 = createEmptySheet();
     
     if(tgUsernameInput && tgUsernameInput.value) currentTelegramUsername = tgUsernameInput.value;
     if(tgChatIdInput && tgChatIdInput.value) currentChatId = tgChatIdInput.value;
     
     if(displayUsernameSpan) displayUsernameSpan.innerText = username;
-    currentSheet = 1;
-    if(sheet1Btn) sheet1Btn.classList.add('active');
-    if(sheet2Btn) sheet2Btn.classList.remove('active');
+    
+    var lastSheet = loadLastSheet();
+    currentSheet = lastSheet;
+    if(currentSheet === 1) { sheet1Btn.classList.add('active'); sheet2Btn.classList.remove('active'); sheet3Btn.classList.remove('active'); sheet4Btn.classList.remove('active'); }
+    else if(currentSheet === 2) { sheet2Btn.classList.add('active'); sheet1Btn.classList.remove('active'); sheet3Btn.classList.remove('active'); sheet4Btn.classList.remove('active'); }
+    else if(currentSheet === 3) { sheet3Btn.classList.add('active'); sheet1Btn.classList.remove('active'); sheet2Btn.classList.remove('active'); sheet4Btn.classList.remove('active'); }
+    else if(currentSheet === 4) { sheet4Btn.classList.add('active'); sheet1Btn.classList.remove('active'); sheet2Btn.classList.remove('active'); sheet3Btn.classList.remove('active'); }
+    
     fullRender();
     saveUserDataToFirebase(username);
     
@@ -1340,8 +1471,12 @@
     currentTelegramUsername = "";
     sheetData1 = [];
     sheetData2 = [];
+    sheetData3 = [];
+    sheetData4 = [];
     if(submittedUIDs1) submittedUIDs1.clear();
     if(submittedUIDs2) submittedUIDs2.clear();
+    if(submittedUIDs3) submittedUIDs3.clear();
+    if(submittedUIDs4) submittedUIDs4.clear();
     
     if(loadingScreen) loadingScreen.classList.add('hide');
     if(loginOverlay) loginOverlay.classList.add('visible');
@@ -1567,7 +1702,7 @@
   
   function showBulkDeleteConfirmation(count) {
     return new Promise(function(resolve) {
-      var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+      var sheetName = currentSheet === 1 ? "শীট ১" : (currentSheet === 2 ? "শীট ২" : (currentSheet === 3 ? "শীট ৩" : "শীট ৪"));
       var modalDiv = document.createElement('div');
       modalDiv.className = 'bulk-delete-confirm-overlay';
       modalDiv.innerHTML = '<div class="bulk-delete-confirm">' +
@@ -1714,7 +1849,9 @@
     
     if(!currentData || currentData.length !== ROWS) {
       if(currentSheet === 1) sheetData1 = createEmptySheet();
-      else sheetData2 = createEmptySheet();
+      else if(currentSheet === 2) sheetData2 = createEmptySheet();
+      else if(currentSheet === 3) sheetData3 = createEmptySheet();
+      else if(currentSheet === 4) sheetData4 = createEmptySheet();
       currentData = getCurrentSheetData();
     }
     
@@ -1950,6 +2087,39 @@
     return false; 
   }
   
+  function showTelegramWarning() {
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'confirm-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="confirm-modal" style="border-top: 6px solid #f97316;">
+        <div class="icon">⚠️</div>
+        <h3 style="color:#c2410c;">টেলিগ্রাম তথ্য প্রয়োজন!</h3>
+        <div class="info-box" style="background:#fffbeb; color:#78350f;">
+          <p><strong>📌 আপনার টেলিগ্রাম ইউজারনেম ও চ্যাট আইডি সেট করুন</strong></p>
+          <p>🔹 <strong>টেলিগ্রাম ইউজারনেম:</strong> আপনার টেলিগ্রাম আইডি (যেমন: @username)</p>
+          <p>🔹 <strong>চ্যাট আইডি:</strong> আপনার টেলিগ্রাম চ্যাট আইডি</p>
+          <p>🤖 <strong>কিভাবে চ্যাট আইডি পাবেন?</strong><br>
+          টেলিগ্রামে <strong>@idbot</strong> সার্চ করুন → /start কমান্ড দিন → আপনার চ্যাট আইডি দেখাবে</p>
+          <p>✅ উপরের বক্সে তথ্য দিন এবং "তথ্য সেভ করুন" বাটনে ক্লিক করুন</p>
+        </div>
+        <div class="confirm-actions">
+          <button class="confirm-yes" id="tgWarningCloseBtn" style="background:#f97316;">🔒 বুঝেছি</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    var closeBtn = document.getElementById('tgWarningCloseBtn');
+    if(closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        modalDiv.remove();
+      });
+    }
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) modalDiv.remove();
+    });
+  }
+  
   async function sendTelegramFileWithRetry(chatId, file, caption, retryCount = 0) {
     if (!chatId) return { success: false, error: "No chat ID" };
     
@@ -2085,7 +2255,7 @@
     if(!currentLoggedInUser) return;
     
     if(!currentTelegramUsername || !currentChatId) {
-      showToast("❌ দয়া করে আগে আপনার টেলিগ্রাম ইউজারনেম ও চ্যাট আইডি সেভ করুন!");
+      showTelegramWarning();
       return;
     }
     
@@ -2095,7 +2265,7 @@
     }
     
     var newDataCount = getNewUnsubmittedUIDs().length;
-    var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+    var sheetName = currentSheet === 1 ? "শীট ১" : (currentSheet === 2 ? "শীট ২" : (currentSheet === 3 ? "শীট ৩" : "শীট ৪"));
     var savedAdminUsername = localStorage.getItem(SAVED_ADMIN_USERNAME_KEY) || "";
     var userDisplayName = currentTelegramUsername || "আপনার ইউজারনেম";
     var todayDate = new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -2215,7 +2385,7 @@
     if(!currentLoggedInUser) return;
     
     if(!currentTelegramUsername || !currentChatId) {
-      showToast("❌ টেলিগ্রাম তথ্য পাওয়া যায়নি!");
+      showTelegramWarning();
       return;
     }
     
@@ -2255,7 +2425,7 @@
     var timeBangla = new Date().toLocaleTimeString('bn-BD');
     
     var accountTypeMsg = accountType ? "📂 <b>একাউন্ট ধরণ:</b> " + escapeHtml(accountType) + "\n" : "";
-    var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : "📄 <b>শীট ২</b>";
+    var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : (currentSheet === 2 ? "📄 <b>শীট ২</b>" : (currentSheet === 3 ? "📄 <b>শীট ৩</b>" : "📄 <b>শীট ৪</b>"));
     var channelLinkMsg = adminInfo.channelLink ? "\n🔗 <b>চ্যানেল লিংক:</b> " + adminInfo.channelLink : "";
     
     var userCaption = "✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n" +
@@ -2306,7 +2476,7 @@
       saveAllToLocalStorage(currentLoggedInUser);
       saveUserDataToFirebase(currentLoggedInUser);
       
-      var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+      var sheetName = currentSheet === 1 ? "শীট ১" : (currentSheet === 2 ? "শীট ২" : (currentSheet === 3 ? "শীট ৩" : "শীট ৪"));
       showSuccessModal(newData.length, accountType, adminUsername, true, userResult.success, sheetName);
       showToast(newData.length + " টি নতুন UID সফলভাবে সাবমিট হয়েছে (এডমিন কনফার্মড)!");
       
@@ -2408,7 +2578,7 @@
         <div class="input-area">
           <label>🆔 টেলিগ্রাম চ্যাট আইডি <span class="required-star">*</span></label>
           <input type="text" id="adminChatId" placeholder="123456789" autocomplete="off" inputmode="numeric" value="${escapeHtml(chatIdValue)}">
-          <div class="input-hint">🆔 শুধুমাত্র সংখ্যা দিন - অন্য লেখা থাকলে অটো ডিলিট হবে</div>
+          <div class="input-hint">🆔 শুধুমাত্র সংখ্যা দিন - অন্য লেখা থাকলে অটো ডিলিট হবে। 🤖 চ্যাট আইডি পেতে @idbot এ /start দিন</div>
         </div>
         <div class="input-area">
           <label>🔗 টেলিগ্রাম চ্যানেল লিংক</label>
@@ -2542,6 +2712,8 @@
     if(passwordAutoToggle) passwordAutoToggle.addEventListener('click', togglePasswordAuto);
     if(sheet1Btn) sheet1Btn.addEventListener('click', switchToSheet1);
     if(sheet2Btn) sheet2Btn.addEventListener('click', switchToSheet2);
+    if(sheet3Btn) sheet3Btn.addEventListener('click', switchToSheet3);
+    if(sheet4Btn) sheet4Btn.addEventListener('click', switchToSheet4);
   }
 
   function setupInputFocus() { 
