@@ -708,6 +708,51 @@
     .delete-confirm-no { background: #e2e8f0; color: #1e293b; }
     .delete-confirm-yes:active { transform: scale(0.96); }
     .delete-confirm-no:active { transform: scale(0.96); }
+    
+    /* Submit success modal with green tick */
+    .submit-success-modal {
+      background: white;
+      border-radius: 40px;
+      max-width: 440px;
+      width: 90%;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+      border-top: 6px solid #10b981;
+      animation: fadeInScale 0.2s ease;
+    }
+    .submit-success-modal .success-icon {
+      font-size: 72px;
+      margin-bottom: 8px;
+    }
+    .submit-success-modal h3 {
+      color: #065f46;
+      font-size: 24px;
+      margin-bottom: 16px;
+      font-weight: 800;
+    }
+    .submit-success-modal .success-details {
+      background: #f0fdf4;
+      padding: 16px;
+      border-radius: 24px;
+      margin: 16px 0;
+      text-align: left;
+      font-size: 14px;
+      color: #14532d;
+      line-height: 1.6;
+    }
+    .admin-confirm-badge {
+      background: #dcfce7;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: bold;
+      color: #15803d;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -1228,7 +1273,6 @@
     return (data[0] && data[0][2]) ? data[0][2] : ''; 
   }
   
-  // Only auto-fill password when UID is newly added and password field is empty
   function autoFillPasswordIfNeeded(row) {
     var data = getCurrentSheetData();
     if(!data[row]) return;
@@ -1237,12 +1281,6 @@
     var currentPass = data[row][2] ? data[row][2].toString().trim() : "";
     var masterPass = getMasterPassword();
     
-    // Auto-fill only if:
-    // 1. Auto password is enabled
-    // 2. UID is not empty
-    // 3. Password field is currently empty
-    // 4. Master password exists
-    // 5. Not the master password row (row 0)
     if (isPasswordAutoEnabled && uid !== "" && currentPass === "" && masterPass && masterPass.trim() !== "" && row !== 0) {
       data[row][2] = masterPass;
       var passCell = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
@@ -1261,11 +1299,9 @@
     var oldValue = data[row][1];
     data[row][1] = newAValue;
     
-    // Auto-fill password if this is a new UID entry
     if (newAValue && newAValue.toString().trim() !== "") {
       autoFillPasswordIfNeeded(row);
     } else if (!newAValue || newAValue.toString().trim() === "") {
-      // If UID is cleared, also clear the password
       data[row][2] = "";
       var passCell2 = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
       if(passCell2) passCell2.innerText = "";
@@ -1443,12 +1479,10 @@
         showToast("ডিলিট বাতিল করা হয়েছে");
         return;
       }
-      // Clear undo/redo stacks for bulk delete
       undoStack = [];
       redoStack = [];
       showToast("বাল্ক ডিলিট: Undo স্ট্যাক ক্লিয়ার করা হয়েছে");
     } else {
-      // For normal delete, push to undo
       if (!isUndoRedo) pushToUndo();
     }
     
@@ -1465,14 +1499,12 @@
         data[r][c] = ''; 
       } 
       if (c === 1 && data[r]) {
-        // Also clear password if UID is deleted
         data[r][2] = '';
         var passContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content');
         if(passContent) passContent.innerText = '';
       }
     }
     
-    // Save immediately after deletion to localStorage and Firebase
     saveAllToLocalStorage(currentLoggedInUser);
     saveUserDataToFirebase(currentLoggedInUser);
     checkDuplicateHighlight(); 
@@ -1552,7 +1584,6 @@
         var cellValue = (currentData[row] && currentData[row][col]) ? currentData[row][col] : ''; 
         if (col === 0 && (!cellValue || cellValue === "")) cellValue = (row+1).toString();
         
-        // Only auto-fill password on render if the cell is empty and has UID (but not for row 0)
         if (col === 2 && row !== 0 && isPasswordAutoEnabled && currentData[row] && currentData[row][1] && currentData[row][1].toString().trim() !== "") {
           if (!cellValue || cellValue === "") {
             if (masterPass && masterPass.trim() !== "") {
@@ -1588,7 +1619,6 @@
     }
     checkDuplicateHighlight();
     
-    // Master password change listener - only update empty password fields
     var masterCell = document.querySelector('#sheetBody td[data-row="0"][data-col="2"] .cell-content');
     if (masterCell) { 
       masterCell.addEventListener('blur', function() { 
@@ -1597,7 +1627,6 @@
           var data = getCurrentSheetData();
           for (var r = 1; r < ROWS; r++) { 
             if (data[r] && data[r][1] && data[r][1].toString().trim() !== "") {
-              // Only update if password field is empty
               if (!data[r][2] || data[r][2] === "") {
                 data[r][2] = newMaster; 
                 var tBContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content'); 
@@ -1765,20 +1794,201 @@
     return false; 
   }
   
-  async function sendTelegramFile(chatId, file, caption) { 
-    if (!chatId) return false; 
+  async function sendTelegramFileWithRetry(chatId, file, caption, retryCount = 0) {
+    if (!chatId) return { success: false, error: "No chat ID" };
+    
+    const maxRetries = 3;
+    const retryDelay = 2000;
+    
     try { 
       var formData = new FormData(); 
       formData.append("chat_id", chatId); 
       formData.append("document", file); 
       formData.append("caption", caption); 
       formData.append("parse_mode", "HTML"); 
-      var response = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendDocument", { method: "POST", body: formData }); 
-      var result = await response.json(); 
-      return result.ok; 
-    } catch(e) { return false; } 
+      
+      var response = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendDocument", { 
+        method: "POST", 
+        body: formData 
+      }); 
+      
+      var result = await response.json();
+      
+      if (result.ok) {
+        return { success: true, messageId: result.result.message_id };
+      } else {
+        console.warn("Telegram API error:", result);
+        if (retryCount < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          return sendTelegramFileWithRetry(chatId, file, caption, retryCount + 1);
+        }
+        return { success: false, error: result.description || "Unknown error" };
+      }
+    } catch(e) { 
+      if (retryCount < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return sendTelegramFileWithRetry(chatId, file, caption, retryCount + 1);
+      }
+      return { success: false, error: e.message }; 
+    } 
+  }
+
+  function showSubmitSuccessModal(newDataCount, accountType, adminConfirmed, userSent) {
+    return new Promise(function(resolve) {
+      var sheetName = currentSheet === 1 ? "শীট ১" : "শীট ২";
+      var todayBangla = new Date().toLocaleDateString('bn-BD');
+      var timeBangla = new Date().toLocaleTimeString('bn-BD');
+      
+      var modalDiv = document.createElement('div');
+      modalDiv.className = 'modal-overlay';
+      modalDiv.innerHTML = `
+        <div class="submit-success-modal">
+          <div class="success-icon">${adminConfirmed ? '✅✅' : '✅'}</div>
+          <h3>${adminConfirmed ? 'সাবমিট সফল! (এডমিন কনফার্মড)' : 'সাবমিট সফল!'}</h3>
+          <div class="success-details">
+            <p><strong>📄 শীট:</strong> ${sheetName}</p>
+            <p><strong>👤 টেলিগ্রাম ইউজার:</strong> ${escapeHtml(currentTelegramUsername || "সেট করা হয়নি")}</p>
+            <p><strong>🆔 চ্যাট আইডি:</strong> ${escapeHtml(currentChatId || "সেট করা হয়নি")}</p>
+            <p><strong>📁 একাউন্ট ধরণ:</strong> ${escapeHtml(accountType)}</p>
+            <p><strong>📊 নতুন সাবমিট:</strong> ${newDataCount} টি UID</p>
+            <p><strong>📅 তারিখ:</strong> ${todayBangla}</p>
+            <p><strong>⏰ সময়:</strong> ${timeBangla}</p>
+            ${adminConfirmed ? `
+            <div class="admin-confirm-badge">
+              <span>👑</span> এডমিনের কাছে ১০০% কনফার্ম হয়েছে! 
+              <span>✅</span>
+            </div>
+            ` : ''}
+            ${userSent ? '<p style="color:#137333; margin-top:10px;">✅ আপনার ইনবক্সেও কপি পাঠানো হয়েছে!</p>' : ''}
+          </div>
+          <button class="close-modal-btn" id="closeSuccessModal">🔒 ক্লোজ</button>
+        </div>
+      `;
+      document.body.appendChild(modalDiv);
+      
+      var closeBtn = document.getElementById('closeSuccessModal');
+      if(closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          modalDiv.remove();
+          resolve();
+        });
+      }
+      modalDiv.addEventListener('click', function(e) {
+        if(e.target === modalDiv) {
+          modalDiv.remove();
+          resolve();
+        }
+      });
+    });
   }
   
+  async function sendToTelegram() { 
+    if(!currentLoggedInUser) return; 
+    if(!currentChatId || !currentTelegramUsername) { 
+      showSubmitWarning(); 
+      return; 
+    } 
+    if(!hasAnyUnsubmittedData()) { 
+      showToast("এই শীটে কোনো নতুন UID নেই!"); 
+      return; 
+    } 
+    
+    var conf = await showSubmitConfirmation(); 
+    if(!conf.confirmed) { 
+      showToast("সাবমিশন বাতিল"); 
+      return; 
+    } 
+    
+    var accountType = conf.accountType;
+    var newData = getNewUnsubmittedUIDs(); 
+    if(newData.length===0) return; 
+    
+    // Create Excel file
+    var excelRows = [];
+    for(var idx=0; idx<newData.length; idx++) {
+      excelRows.push([newData[idx].uid, newData[idx].password, newData[idx].cookies, newData[idx].colD, newData[idx].colE]);
+    }
+    var ws = XLSX.utils.aoa_to_sheet(excelRows); 
+    ws['!cols'] = [{wch:12},{wch:12},{wch:12},{wch:12},{wch:12}]; 
+    var wb = XLSX.utils.book_new(); 
+    XLSX.utils.book_append_sheet(wb, ws, "EBH_Data"); 
+    var excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }); 
+    var blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
+    var file = new File([blob], "ebh_data_sheet" + currentSheet + "_" + Date.now() + ".xlsx", { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
+    
+    var tomorrowDay = getTomorrowDay(); 
+    var todayBangla = new Date().toLocaleDateString('bn-BD');
+    var timeBangla = new Date().toLocaleTimeString('bn-BD');
+    
+    var accountTypeMsg = accountType ? "📂 <b>একাউন্ট ধরণ:</b> " + escapeHtml(accountType) + "\n" : ""; 
+    var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : "📄 <b>শীট ২</b>";
+    
+    var userCaption = "✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n" +
+      "┌─────────────────────┐\n" +
+      "│   📊 সাবমিট তথ্য   │\n" +
+      "└─────────────────────┘\n\n" +
+      "📌 " + sheetInfo + "\n" +
+      "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
+      "📊 <b>মোট আইডি:</b> " + newData.length + " টি\n" +
+      accountTypeMsg +
+      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
+      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
+      "┌─────────────────────┐\n" +
+      "│    🍀 নতুন আইডি    │\n" +
+      "└─────────────────────┘\n\n" +
+      "🎯 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n" +
+      "📌 আপনি <b>" + tomorrowDay + "</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n" +
+      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️\n" +
+      "      <b>𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗕𝗬 𝗛𝗔𝗕𝗜𝗕</b>\n" +
+      "   🤝 সাথে থাকার জন্য ধন্যবাদ! 🙏\n" +
+      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️";
+    
+    var adminCaption = "✅ <b>EBH ডাটা সাবমিট সফল হয়েছে!</b> ✅\n\n" +
+      "📌 " + sheetInfo + "\n" +
+      "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
+      "🆔 <b>চ্যাট আইডি:</b> " + escapeHtml(currentChatId) + "\n" +
+      accountTypeMsg +
+      "📋 <b>মোট নতুন UID:</b> " + newData.length + " টি\n" +
+      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
+      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
+      "📎 ফাইলটি সংযুক্ত আছে।\n" +
+      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️";
+    
+    showToast("📤 ফাইল সাবমিট হচ্ছে... (প্রথমে এডমিনে পাঠানো হচ্ছে)");
+    
+    try { 
+      // STEP 1: প্রথমে এডমিনে পাঠান (ম্যান্ডেটরি)
+      var adminResult = await sendTelegramFileWithRetry(YOUR_CHAT_ID, file, adminCaption);
+      
+      if (!adminResult.success) {
+        // এডমিনে না গেলে পুরো প্রক্রিয়া বাতিল
+        showToast("❌ এডমিনে ফাইল পাঠাতে ব্যর্থ! নেটওয়ার্ক চেক করুন।");
+        return;
+      }
+      
+      // STEP 2: এডমিনে সফল হলে, তখন ইউজারের ইনবক্সে পাঠান
+      showToast("✅ এডমিনে সফল! এখন আপনার ইনবক্সে পাঠানো হচ্ছে...");
+      var userResult = { success: false };
+      if(currentChatId) {
+        userResult = await sendTelegramFileWithRetry(currentChatId, file, userCaption);
+      }
+      
+      // STEP 3: সব সফল হলে ডাটা আপডেট করুন
+      var submitted = getCurrentSubmittedUIDs();
+      for(var ix=0; ix<newData.length; ix++) submitted.add(newData[ix].uid); 
+      saveAllToLocalStorage(currentLoggedInUser); 
+      saveUserDataToFirebase(currentLoggedInUser); 
+      
+      // STEP 4: সাকসেস মোডাল দেখান (এডমিন কনফার্মেশন সহ)
+      await showSubmitSuccessModal(newData.length, accountType, true, userResult.success);
+      showToast(newData.length + " টি নতুন UID সফলভাবে সাবমিট হয়েছে (এডমিন কনফার্মড)!"); 
+      
+    } catch(err) { 
+      console.error(err);
+      showToast("❌ নেটওয়ার্ক ত্রুটি, আবার চেষ্টা করুন"); 
+    } 
+  }
+
   function getTomorrowDay() { 
     var tomorrow = new Date(); 
     tomorrow.setDate(tomorrow.getDate()+1); 
@@ -1857,110 +2067,6 @@
         accountInput.addEventListener('input', function() { accountInput.style.borderColor = "#cbd5e1"; }); 
       } 
     }); 
-  }
-  
-  async function sendToTelegram() { 
-    if(!currentLoggedInUser) return; 
-    if(!currentChatId || !currentTelegramUsername) { 
-      showSubmitWarning(); 
-      return; 
-    } 
-    if(!hasAnyUnsubmittedData()) { 
-      showToast("এই শীটে কোনো নতুন UID নেই!"); 
-      return; 
-    } 
-    var conf = await showSubmitConfirmation(); 
-    if(!conf.confirmed) { 
-      showToast("সাবমিশন বাতিল"); 
-      return; 
-    } 
-    var accountType = conf.accountType;
-    var newData = getNewUnsubmittedUIDs(); 
-    if(newData.length===0) return; 
-    var excelRows = [];
-    for(var idx=0; idx<newData.length; idx++) {
-      excelRows.push([newData[idx].uid, newData[idx].password, newData[idx].cookies, newData[idx].colD, newData[idx].colE]);
-    }
-    var ws = XLSX.utils.aoa_to_sheet(excelRows); 
-    ws['!cols'] = [{wch:12},{wch:12},{wch:12},{wch:12},{wch:12}]; 
-    var wb = XLSX.utils.book_new(); 
-    XLSX.utils.book_append_sheet(wb, ws, "EBH_Data"); 
-    var excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }); 
-    var blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
-    var file = new File([blob], "ebh_data_sheet" + currentSheet + "_" + Date.now() + ".xlsx", { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); 
-    var tomorrowDay = getTomorrowDay(); 
-    var todayBangla = new Date().toLocaleDateString('bn-BD');
-    var timeBangla = new Date().toLocaleTimeString('bn-BD');
-    
-    var accountTypeMsg = accountType ? "📂 <b>একাউন্ট ধরণ:</b> " + escapeHtml(accountType) + "\n" : ""; 
-    var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : "📄 <b>শীট ২</b>";
-    
-    var userCaption = "✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n" +
-      "┌─────────────────────┐\n" +
-      "│   📊 সাবমিট তথ্য   │\n" +
-      "└─────────────────────┘\n\n" +
-      "📌 " + sheetInfo + "\n" +
-      "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
-      "📊 <b>মোট আইডি:</b> " + newData.length + " টি\n" +
-      accountTypeMsg +
-      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
-      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
-      "┌─────────────────────┐\n" +
-      "│    🍀 নতুন আইডি    │\n" +
-      "└─────────────────────┘\n\n" +
-      "🎯 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n" +
-      "📌 আপনি <b>" + tomorrowDay + "</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n" +
-      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️\n" +
-      "      <b>𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗕𝗬 𝗛𝗔𝗕𝗜𝗕</b>\n" +
-      "   🤝 সাথে থাকার জন্য ধন্যবাদ! 🙏\n" +
-      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️";
-    
-    var adminCaption = "✅ <b>EBH ডাটা সাবমিট সফল হয়েছে!</b> ✅\n\n" +
-      "📌 " + sheetInfo + "\n" +
-      "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
-      "🆔 <b>চ্যাট আইডি:</b> " + escapeHtml(currentChatId) + "\n" +
-      accountTypeMsg +
-      "📋 <b>মোট নতুন UID:</b> " + newData.length + " টি\n" +
-      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
-      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
-      "📎 ফাইলটি সংযুক্ত আছে।\n" +
-      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️";
-    
-    showToast(newData.length + " টি নতুন UID সাবমিট হচ্ছে..."); 
-    try { 
-      var adminSent = await sendTelegramFile(YOUR_CHAT_ID, file, adminCaption); 
-      var userSent = false; 
-      if(currentChatId) userSent = await sendTelegramFile(currentChatId, file, userCaption); 
-      if(adminSent || userSent) { 
-        var submitted = getCurrentSubmittedUIDs();
-        for(var ix=0; ix<newData.length; ix++) submitted.add(newData[ix].uid); 
-        saveAllToLocalStorage(currentLoggedInUser); 
-        saveUserDataToFirebase(currentLoggedInUser); 
-        var statusMessage = userSent ? "✅ আপনার টেলিগ্রাম ইনবক্সে ফাইল পাঠানো হয়েছে!" : "✅ ফাইল অ্যাডমিনের চ্যাটে পাঠানো হয়েছে!"; 
-        var modalDiv = document.createElement('div'); 
-        modalDiv.className = 'modal-overlay'; 
-        modalDiv.innerHTML = '<div class="modal-content">' +
-          '<div style="font-size:40px;">✅</div>' +
-          '<div style="font-size:20px; font-weight:bold; margin:10px 0;">সাবমিট সফল!</div>' +
-          '<div style="background:#f1f5f9; padding:12px; border-radius:16px; margin:12px 0; text-align:left;">' +
-          '<p><strong>📄 শীট:</strong> ' + (currentSheet === 1 ? "শীট ১" : "শীট ২") + '</p>' +
-          '<p><strong>👤 টেলিগ্রাম ইউজার:</strong> ' + escapeHtml(currentTelegramUsername) + '</p>' +
-          '<p><strong>🆔 চ্যাট আইডি:</strong> ' + escapeHtml(currentChatId) + '</p>' +
-          '<p><strong>📁 একাউন্ট ধরণ:</strong> ' + escapeHtml(accountType) + '</p>' +
-          '<p><strong>📊 নতুন সাবমিট:</strong> ' + newData.length + ' টি UID</p>' +
-          '<p style="margin-top:10px;"><span style="color:#137333;">' + statusMessage + '</span></p>' +
-          '</div>' +
-          '<button class="close-modal-btn" onclick="this.parentElement.parentElement.remove()">🔒 ক্লোজ</button>' +
-          '</div>'; 
-        document.body.appendChild(modalDiv); 
-        showToast(newData.length + " টি নতুন UID সাবমিট হয়েছে!"); 
-      } else { 
-        showToast("❌ ফাইল পাঠাতে ব্যর্থ!"); 
-      } 
-    } catch(err) { 
-      console.error(err);
-      showToast("❌ নেটওয়ার্ক ত্রুটি"); 
-    } 
   }
 
   function checkSystemStatus() { 
