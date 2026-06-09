@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Advance MetaTool | File Receiver</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #EFF6FF 0%, #F9F4FF 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .receiver-card {
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 40px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 20px 35px -12px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(236, 72, 153, 0.1) inset;
+            overflow: hidden;
+        }
+
+        .logo-area {
+            padding: 28px 20px 20px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #2563EB 0%, #EC4899 100%);
+        }
+
+        .logo-icon {
+            font-size: 3rem;
+            margin-bottom: 8px;
+            display: inline-block;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        }
+
+        .logo-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            color: rgba(255,255,240,0.9);
+            margin-top: 6px;
+            letter-spacing: 0.8px;
+            font-weight: 500;
+        }
+
+        .content {
+            padding: 24px 22px 32px;
+            background: #FFFFFF;
+        }
+
+        .input-field {
+            margin-bottom: 28px;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            color: #1E40AF;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .chat-input {
+            width: 100%;
+            background: #F8FAFE;
+            border: 1.5px solid #DBEAFE;
+            border-radius: 28px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            color: #1E293B;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background: #FFFFFF;
+        }
+
+        .message-input {
+            width: 100%;
+            background: #F8FAFE;
+            border: 1.5px solid #DBEAFE;
+            border-radius: 28px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            color: #1E293B;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            border-color: #EC4899;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
+            background: #FFFFFF;
+        }
+
+        .shortcut-single {
+            margin: 18px 0 10px;
+        }
+
+        .shortcut-btn {
+            background: linear-gradient(95deg, #FCE7F3, #FDF2F8);
+            border: 1px solid #F9A8D4;
+            border-radius: 40px;
+            padding: 12px 18px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #BE185D;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .shortcut-btn:hover {
+            background: #FCE7F3;
+            border-color: #EC4899;
+            transform: scale(0.98);
+            box-shadow: 0 4px 10px rgba(236, 72, 153, 0.2);
+        }
+
+        .shortcut-icon {
+            font-size: 1.3rem;
+        }
+
+        .send-button {
+            background: linear-gradient(95deg, #2563EB, #3B82F6);
+            width: 100%;
+            border: none;
+            padding: 15px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            margin: 24px 0 18px;
+            transition: 0.2s;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.3);
+        }
+
+        .send-button:active {
+            transform: scale(0.97);
+            background: #1D4ED8;
+        }
+
+        .status-area {
+            background: #EFF6FF;
+            border-radius: 24px;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            text-align: center;
+            color: #1E3A8A;
+            border-left: 4px solid #3B82F6;
+            word-break: break-word;
+        }
+
+        .credit {
+            text-align: center;
+            font-size: 0.6rem;
+            color: #94A3B8;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #E2E8F0;
+        }
+    </style>
+</head>
+<body>
+<div class="receiver-card">
+    <div class="logo-area">
+        <div class="logo-icon">📡</div>
+        <div class="logo-title">Advance MetaTool</div>
+        <div class="logo-sub">FILE RECEIVER</div>
+    </div>
+
+    <div class="content">
+        <div class="input-field">
+            <div class="input-label">
+                <span>🆔</span> <span>চ্যাট আইডি (শুধু সংখ্যা)</span>
+            </div>
+            <input type="text" id="chatIdInput" class="chat-input" placeholder="উদাহরণ: 123456789" inputmode="numeric" autocomplete="off">
+        </div>
+
+        <div class="input-field">
+            <div class="input-label">
+                <span>📝</span> <span>মেসেজ লিখুন</span>
+            </div>
+            <textarea id="messageInput" class="message-input" rows="3" placeholder="আপনার মেসেজ লিখুন..."></textarea>
+        </div>
+
+        <div class="shortcut-single">
+            <div id="shortcutMsgBtn" class="shortcut-btn">
+                <span class="shortcut-icon">✨</span>
+                <span>📨 এডমিন মেসেজ (শর্টকাট)</span>
+            </div>
+        </div>
+
+        <button id="sendBtn" class="send-button">
+            ✈️ সেন্ড মেসেজ
+        </button>
+
+        <div id="statusMsg" class="status-area">
+            ✅ প্রস্তুত | শুধু সংখ্যাসূচক চ্যাট আইডি দিন
+        </div>
+        <div class="credit">
+            secured • telegram messenger
+        </div>
+    </div>
+</div>
+
+<script>
+    const BOT_TOKEN = "8901671743:AAGmtT_ZE9Ex70KISpKQDCL-H-u24kvxEsk";
+    const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+    const chatIdInput = document.getElementById('chatIdInput');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendBtn');
+    const statusDiv = document.getElementById('statusMsg');
+    const shortcutBtn = document.getElementById('shortcutMsgBtn');
+
+    chatIdInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // তারিখ + সময় ফাংশন (DD-MM-YYYY এবং টাইম সহ)
+    function getCurrentDateTime() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const dateStr = `${day}-${month}-${year}`;
+        const timeStr = `${hours}:${minutes}:${seconds}`;
+        return { dateStr, timeStr };
+    }
+
+    // ১০০% সঠিক মেসেজ ফরম্যাট (বোল্ড টেক্সট টেলিগ্রামে HTML bold দেখাবে)
+    function getAdminMessage() {
+        const { dateStr, timeStr } = getCurrentDateTime();
+        const message = `━━━━━━━━━━━━━━━━━━━━━
+👑 <b>𝗔𝗗𝗠𝗜𝗡 𝗠𝗘𝗦𝗦𝗔𝗚𝗘</b> 👑
+📅 ${dateStr}  🕐 ${timeStr}
+━━━━━━━━━━━━━━━━━━━━━
+
+✅ <b>আপনার ফাইল সফলভাবে রিসিভ করা হয়েছে!</b>
+
+💖 <b>আমাদের সাথে কাজ করার জন্য আন্তরিক ধন্যবাদ।</b>
+
+━━━━━━━━━━━━━━━━━━━━━
+✨ <b>𝗧𝗵𝗮𝗻𝗸𝘀 𝗙𝗼𝗿 𝗨𝘀𝗶𝗻𝗴</b> ✨
+🚀 <b>𝗔𝗱𝘃𝗮𝗻𝗰𝗲 𝗠𝗲𝘁𝗮𝗧𝗼𝗼𝗹</b> 🚀
+━━━━━━━━━━━━━━━━━━━━━`;
+        return message;
+    }
+
+    shortcutBtn.addEventListener('click', () => {
+        const fullMessage = getAdminMessage();
+        messageInput.value = fullMessage;
+        statusDiv.innerHTML = "📋 এডমিন মেসেজ (ডেট+টাইম সহ) বসানো হয়েছে";
+        statusDiv.style.borderLeftColor = "#EC4899";
+        messageInput.focus();
+        setTimeout(() => {
+            if (statusDiv.innerHTML.includes("এডমিন মেসেজ")) {
+                statusDiv.innerHTML = "💬 মেসেজ প্রস্তুত। এখন সেন্ড করুন।";
+            }
+        }, 2000);
+    });
+
+    async function sendToTelegram(chatId, text) {
+        if (!chatId || chatId.trim() === "") {
+            throw new Error("চ্যাট আইডি খালি! শুধু সংখ্যা দিন।");
+        }
+        if (!text || text.trim() === "") {
+            throw new Error("মেসেজ খালি! কিছু লিখুন বা শর্টকাট ব্যবহার করুন।");
+        }
+
+        const payload = {
+            chat_id: chatId.trim(),
+            text: text.trim(),
+            parse_mode: "HTML"
+        };
+
+        const response = await fetch(TELEGRAM_API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!result.ok) {
+            let errDesc = result.description || "টেলিগ্রাম এপিআই ত্রুটি";
+            throw new Error(`ব্যর্থ: ${errDesc}`);
+        }
+        return result;
+    }
+
+    sendButton.addEventListener('click', async () => {
+        const rawChatId = chatIdInput.value.trim();
+        const messageText = messageInput.value.trim();
+
+        if (!rawChatId) {
+            statusDiv.innerHTML = "❌ দয়া করে চ্যাট আইডি দিন (শুধু সংখ্যা)";
+            statusDiv.style.borderLeftColor = "#F87171";
+            return;
+        }
+        if (!messageText) {
+            statusDiv.innerHTML = "❓ মেসেজ খালি! কিছু লিখুন বা শর্টকাট বাটন ব্যবহার করুন।";
+            statusDiv.style.borderLeftColor = "#FBBF24";
+            return;
+        }
+
+        if (!/^\d+$/.test(rawChatId)) {
+            statusDiv.innerHTML = "⚠️ চ্যাট আইডি শুধুমাত্র সংখ্যা হতে হবে! (0-9)";
+            statusDiv.style.borderLeftColor = "#F87171";
+            return;
+        }
+
+        statusDiv.innerHTML = "⏳ মেসেজ পাঠানো হচ্ছে... দয়া করে অপেক্ষা করুন";
+        statusDiv.style.borderLeftColor = "#FBBF24";
+        sendButton.disabled = true;
+        sendButton.style.opacity = "0.7";
+
+        try {
+            await sendToTelegram(rawChatId, messageText);
+            const nowTime = new Date().toLocaleString('bn-BD');
+            statusDiv.innerHTML = `✅ সফল! মেসেজ পৌঁছেছে (${nowTime})\n📨 চ্যাট আইডি: ${rawChatId}`;
+            statusDiv.style.borderLeftColor = "#10B981";
+        } catch (error) {
+            console.error(error);
+            statusDiv.innerHTML = `❌ ব্যর্থ: ${error.message}`;
+            statusDiv.style.borderLeftColor = "#EF4444";
+        } finally {
+            sendButton.disabled = false;
+            sendButton.style.opacity = "1";
+        }
+    });
+
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            sendButton.click();
+        }
+    });
+</script>
+</body>
+</html>
