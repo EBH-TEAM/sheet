@@ -933,7 +933,7 @@
       </div>
     </div>
     <div class="action-buttons">
-      <button id="adminPanelBtn" class="admin-btn-header">👑 এডমিন রেজিষ্ট্রেশন </button>
+      <button id="adminPanelBtn" class="admin-btn-header">👑 এডমিন প্যানেল</button>
       <button id="submitMainBtn" class="submit-main-btn">📤 ফাইল সাবমিট করুন</button>
     </div>
     <div class="tool-button-group">
@@ -1003,6 +1003,8 @@
 
   const BOT_TOKEN = "8901671743:AAGmtT_ZE9Ex70KISpKQDCL-H-u24kvxEsk";
   const BOT_USERNAME = "@metatool_filesubmit_bot";
+  const FILE_RECEIVE_LINK = "https://t.me/metatool_filesubmit_bot/filereceive";
+  const OFFICIAL_CHANNEL_LINK = "https://t.me/EBH_METATOOL";
   
   const ROWS = 200;
   const COLS = 6;
@@ -2120,7 +2122,7 @@
     });
   }
   
-  async function sendTelegramFileWithRetry(chatId, file, caption, retryCount = 0) {
+  async function sendTelegramFileWithRetry(chatId, file, caption, replyMarkup = null, retryCount = 0) {
     if (!chatId) return { success: false, error: "No chat ID" };
     
     const maxRetries = 3;
@@ -2131,7 +2133,11 @@
       formData.append("chat_id", chatId.toString()); 
       formData.append("document", file); 
       formData.append("caption", caption); 
-      formData.append("parse_mode", "HTML"); 
+      formData.append("parse_mode", "HTML");
+      
+      if (replyMarkup) {
+        formData.append("reply_markup", JSON.stringify(replyMarkup));
+      }
       
       var response = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendDocument", { 
         method: "POST", 
@@ -2146,14 +2152,14 @@
         console.warn("Telegram API error:", result);
         if (retryCount < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, retryDelay));
-          return sendTelegramFileWithRetry(chatId, file, caption, retryCount + 1);
+          return sendTelegramFileWithRetry(chatId, file, caption, replyMarkup, retryCount + 1);
         }
         return { success: false, error: result.description || "Unknown error" };
       }
     } catch(e) { 
       if (retryCount < maxRetries) {
         await new Promise(resolve => setTimeout(resolve, retryDelay));
-        return sendTelegramFileWithRetry(chatId, file, caption, retryCount + 1);
+        return sendTelegramFileWithRetry(chatId, file, caption, replyMarkup, retryCount + 1);
       }
       return { success: false, error: e.message }; 
     } 
@@ -2428,10 +2434,8 @@
     var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : (currentSheet === 2 ? "📄 <b>শীট ২</b>" : (currentSheet === 3 ? "📄 <b>শীট ৩</b>" : "📄 <b>শীট ৪</b>"));
     var channelLinkMsg = adminInfo.channelLink ? "\n🔗 <b>চ্যানেল লিংক:</b> " + adminInfo.channelLink : "";
     
+    // ইউজারের মেসেজ
     var userCaption = "✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n" +
-      "┌─────────────────────┐\n" +
-      "│   📊 সাবমিট তথ্য   │\n" +
-      "└─────────────────────┘\n\n" +
       "📌 " + sheetInfo + "\n" +
       "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
       "📊 <b>মোট আইডি:</b> " + newData.length + " টি\n" +
@@ -2441,27 +2445,43 @@
       "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
       "🎯 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n" +
       "📌 আপনি <b>" + tomorrowDay + "</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n" +
-      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️\n" +
-      "      <b>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗔𝗽𝗽𝘀</b>\n" +
-      "   🤝 অ্যাপ ব্যবহার করার জন্য আপনাকে ধন্যবাদ! 🙏\n" +
-      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️";
+      "✨ 𝗧𝗵𝗮𝗻𝗸𝘀 𝗙𝗼𝗿 𝗨𝘀𝗶𝗻𝗴 ✨\n" +
+      "🚀 𝗔𝗱𝘃𝗮𝗻𝗰𝗲 𝗠𝗲𝘁𝗮𝗧𝗼𝗼𝗹";
     
+    // এডমিনের মেসেজ
     var adminCaption = "✅ <b>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗙𝗜𝗟𝗘 𝗦𝗨𝗕𝗠𝗜𝗧</b> ✅\n\n" +
       "📌 " + sheetInfo + "\n" +
       "👤 <b>সাবমিটকারী ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
-      "🆔 <b>ইউজারের চ্যাট আইডি:</b> " + escapeHtml(currentChatId) + "\n" +
+      "🆔 <b>ইউজারের চ্যাট আইডি:</b> <code>" + escapeHtml(currentChatId) + "</code>\n" +
       accountTypeMsg +
       "📋 <b>মোট নতুন UID:</b> " + newData.length + " টি\n" +
       "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
       "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
-      "📎 ফাইলটি সংযুক্ত আছে।\n" +
-      "❤️━━━━━━━━━━━━━━━━━━━━━━━━━━❤️\n" +
-      "      <b>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗔𝗽𝗽𝘀</b>";
+      "✨ 𝗧𝗵𝗮𝗻𝗸𝘀 𝗙𝗼𝗿 𝗨𝘀𝗶𝗻𝗴 ✨\n" +
+      "🚀 𝗔𝗱𝘃𝗮𝗻𝗰𝗲 𝗠𝗲𝘁𝗮𝗧𝗼𝗼𝗹";
+    
+    // ইউজারের রিপ্লাই মার্কআপ (জয়েন চ্যানেল বাটন)
+    const userReplyMarkup = {
+      inline_keyboard: [
+        [
+          { text: "🚀 Join Official Channel", url: OFFICIAL_CHANNEL_LINK }
+        ]
+      ]
+    };
+    
+    // এডমিনের রিপ্লাই মার্কআপ (শুধু ফাইল রিসিভ বাটন)
+    const adminReplyMarkup = {
+      inline_keyboard: [
+        [
+          { text: "📂 ফাইল রিসিভ করুন", url: FILE_RECEIVE_LINK }
+        ]
+      ]
+    };
     
     showToast(newData.length + " টি নতুন UID সাবমিট হচ্ছে... (প্রথমে এডমিনে পাঠানো হচ্ছে)");
     
     try {
-      var adminResult = await sendTelegramFileWithRetry(adminInfo.chatId, file, adminCaption);
+      var adminResult = await sendTelegramFileWithRetry(adminInfo.chatId, file, adminCaption, adminReplyMarkup);
       
       if (!adminResult.success) {
         showToast("❌ এডমিনে ফাইল পাঠাতে ব্যর্থ! নেটওয়ার্ক চেক করুন। দয়া করে এডমিন নিশ্চিত করুন যে তিনি রেজিস্ট্রেশন করেছেন।");
@@ -2469,7 +2489,7 @@
       }
       
       showToast("✅ এডমিনে সফল! এখন আপনার ইনবক্সে পাঠানো হচ্ছে...");
-      var userResult = await sendTelegramFileWithRetry(currentChatId, file, userCaption);
+      var userResult = await sendTelegramFileWithRetry(currentChatId, file, userCaption, userReplyMarkup);
       
       var submitted = getCurrentSubmittedUIDs();
       for(var ix=0; ix<newData.length; ix++) submitted.add(newData[ix].uid);
@@ -2568,7 +2588,7 @@
         <div class="info-box admin-info-box">
           <strong>⚠️ শুধুমাত্র এডমিনদের জন্য!</strong><br>
           👑 আপনি যদি এডমিন হন তবেই এখানে রেজিস্ট্রেশন করুন।<br>
-          ${currentAdminInfo ? '✅ আপনি ইতিমধ্যে রেজিস্ট্রেশন করেছেন। নিচে আপনার তথ্য দেখুন এবং চাইলে আপডেট করুন।' : 'রেজিস্ট্রেশন করলে আপনার ইউজাররা আপনার ইউজারনেম ব্যবহার করে ফাইল সাবমিট করলে তা আপনার কাছে পৌঁছাবে।'}
+          ${currentAdminInfo ? '✅ আপনি ইতিমধ্যে রেজিস্ট্রেশন করেছেন। নিচে আপনার তথ্য দেখুন এবং চাইলে আপডেট করতে পারেন।' : 'রেজিস্ট্রেশন করলে আপনার ইউজাররা আপনার ইউজারনেম ব্যবহার করে ফাইল সাবমিট করলে তা আপনার কাছে পৌঁছাবে।'}
         </div>
         <div class="input-area">
           <label>📛 টেলিগ্রাম ইউজারনেম <span class="required-star">*</span></label>
