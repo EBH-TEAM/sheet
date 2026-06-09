@@ -246,12 +246,25 @@
     const sendButton = document.getElementById('sendBtn');
     const statusDiv = document.getElementById('statusMsg');
     const shortcutBtn = document.getElementById('shortcutMsgBtn');
+    
+    // ========== স্থায়ী চ্যানেল লিংক (আপনার দেওয়া) ==========
+    const PERMANENT_CHANNEL_URL = "https://t.me/EBH_METATOOL";
+    
+    // ========== ইনলাইন বাটন তৈরির ফাংশন (সব সময় থাকবে) ==========
+    function getInlineKeyboard() {
+        return {
+            inline_keyboard: [
+                [
+                    { text: "🚀 Join Official Channel 🚀", url: PERMANENT_CHANNEL_URL }
+                ]
+            ]
+        };
+    }
 
     chatIdInput.addEventListener('input', function(e) {
         this.value = this.value.replace(/[^0-9]/g, '');
     });
 
-    // তারিখ + সময় ফাংশন (DD-MM-YYYY এবং টাইম সহ)
     function getCurrentDateTime() {
         const now = new Date();
         const day = String(now.getDate()).padStart(2, '0');
@@ -265,7 +278,6 @@
         return { dateStr, timeStr };
     }
 
-    // ১০০% সঠিক মেসেজ ফরম্যাট (বোল্ড টেক্সট টেলিগ্রামে HTML bold দেখাবে)
     function getAdminMessage() {
         const { dateStr, timeStr } = getCurrentDateTime();
         const message = `━━━━━━━━━━━━━━━━━━━━━
@@ -287,14 +299,9 @@
     shortcutBtn.addEventListener('click', () => {
         const fullMessage = getAdminMessage();
         messageInput.value = fullMessage;
-        statusDiv.innerHTML = "📋 এডমিন মেসেজ (ডেট+টাইম সহ) বসানো হয়েছে";
+        statusDiv.innerHTML = "📋 এডমিন মেসেজ (ডেট+টাইম সহ) বসানো হয়েছে। এখন সেন্ড বাটনে ক্লিক করুন।";
         statusDiv.style.borderLeftColor = "#EC4899";
         messageInput.focus();
-        setTimeout(() => {
-            if (statusDiv.innerHTML.includes("এডমিন মেসেজ")) {
-                statusDiv.innerHTML = "💬 মেসেজ প্রস্তুত। এখন সেন্ড করুন।";
-            }
-        }, 2000);
     });
 
     async function sendToTelegram(chatId, text) {
@@ -308,7 +315,8 @@
         const payload = {
             chat_id: chatId.trim(),
             text: text.trim(),
-            parse_mode: "HTML"
+            parse_mode: "HTML",
+            reply_markup: JSON.stringify(getInlineKeyboard())  // সবসময় বাটন যুক্ত হবে
         };
 
         const response = await fetch(TELEGRAM_API, {
@@ -353,7 +361,7 @@
         try {
             await sendToTelegram(rawChatId, messageText);
             const nowTime = new Date().toLocaleString('bn-BD');
-            statusDiv.innerHTML = `✅ সফল! মেসেজ পৌঁছেছে (${nowTime})\n📨 চ্যাট আইডি: ${rawChatId}`;
+            statusDiv.innerHTML = `✅ সফল! মেসেজ + জয়েন বাটন পৌঁছেছে (${nowTime})\n📨 চ্যাট আইডি: ${rawChatId}`;
             statusDiv.style.borderLeftColor = "#10B981";
         } catch (error) {
             console.error(error);
