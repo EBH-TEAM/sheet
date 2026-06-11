@@ -109,8 +109,10 @@
             outline: none;
             resize: vertical;
             font-family: inherit;
+            transition: all 0.2s;
         }
 
+        /* ফোকাস দিলেই কিবোর্ড আসবে, কিন্তু আমরা ফোকাস করছি না শর্টকাটে */
         .message-input:focus {
             border-color: #EC4899;
             box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
@@ -247,10 +249,10 @@
     const statusDiv = document.getElementById('statusMsg');
     const shortcutBtn = document.getElementById('shortcutMsgBtn');
     
-    // ========== স্থায়ী চ্যানেল লিংক (আপনার দেওয়া) ==========
+    // ========== স্থায়ী চ্যানেল লিংক ==========
     const PERMANENT_CHANNEL_URL = "https://t.me/earningbyhabib";
     
-    // ========== ইনলাইন বাটন তৈরির ফাংশন (সব সময় থাকবে) ==========
+    // ========== ইনলাইন বাটন তৈরির ফাংশন ==========
     function getInlineKeyboard() {
         return {
             inline_keyboard: [
@@ -261,6 +263,7 @@
         };
     }
 
+    // চ্যাট আইডি ইনপুটে শুধু সংখ্যা অনুমতি
     chatIdInput.addEventListener('input', function(e) {
         this.value = this.value.replace(/[^0-9]/g, '');
     });
@@ -296,12 +299,15 @@
         return message;
     }
 
+    // ✅ শুধু মেসেজ সেট করবে, ফোকাস দেবে না → কিবোর্ড আসবে না
     shortcutBtn.addEventListener('click', () => {
         const fullMessage = getAdminMessage();
         messageInput.value = fullMessage;
         statusDiv.innerHTML = "📋 এডমিন মেসেজ (ডেট+টাইম সহ) বসানো হয়েছে। এখন সেন্ড বাটনে ক্লিক করুন।";
         statusDiv.style.borderLeftColor = "#EC4899";
-        messageInput.focus();
+        
+        // ❌ এখানে messageInput.focus() লাইনটি সরিয়ে দেওয়া হয়েছে
+        // ফলে কিবোর্ড আর আসবে না
     });
 
     async function sendToTelegram(chatId, text) {
@@ -316,7 +322,7 @@
             chat_id: chatId.trim(),
             text: text.trim(),
             parse_mode: "HTML",
-            reply_markup: JSON.stringify(getInlineKeyboard())  // সবসময় বাটন যুক্ত হবে
+            reply_markup: JSON.stringify(getInlineKeyboard())
         };
 
         const response = await fetch(TELEGRAM_API, {
@@ -373,6 +379,7 @@
         }
     });
 
+    // Ctrl+Enter দিলে সেন্ড হবে, সেটা রাখলাম
     messageInput.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'Enter') {
             e.preventDefault();
