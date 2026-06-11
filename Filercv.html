@@ -296,12 +296,13 @@
         return message;
     }
 
+    // ✅ শুধুমাত্র এখানে পরিবর্তন: focus() লাইনটি সরানো হয়েছে
     shortcutBtn.addEventListener('click', () => {
         const fullMessage = getAdminMessage();
         messageInput.value = fullMessage;
         statusDiv.innerHTML = "📋 এডমিন মেসেজ (ডেট+টাইম সহ) বসানো হয়েছে। এখন সেন্ড বাটনে ক্লিক করুন।";
         statusDiv.style.borderLeftColor = "#EC4899";
-        messageInput.focus();
+        // messageInput.focus();  // ← এই লাইনটি সরিয়ে দেওয়া হয়েছে (কিবোর্ড আসবে না)
     });
 
     async function sendToTelegram(chatId, text) {
@@ -316,7 +317,7 @@
             chat_id: chatId.trim(),
             text: text.trim(),
             parse_mode: "HTML",
-            reply_markup: JSON.stringify(getInlineKeyboard())  // সবসময় বাটন যুক্ত হবে
+            reply_markup: JSON.stringify(getInlineKeyboard())
         };
 
         const response = await fetch(TELEGRAM_API, {
