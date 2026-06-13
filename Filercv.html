@@ -2,138 +2,174 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Advance MetaTool | File Receiver + Auto Save</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Advance MetaTool | Send Message</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+
         body {
-            background: linear-gradient(145deg, #EFF6FF 0%, #F9F4FF 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
-        .receiver-card {
+
+        .sender-card {
             max-width: 450px;
             width: 100%;
             background: #FFFFFF;
             border-radius: 40px;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            box-shadow: 0 20px 35px -12px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(236, 72, 153, 0.1) inset;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             overflow: hidden;
         }
+
         .logo-area {
-            padding: 28px 20px 20px 20px;
+            padding: 30px 20px;
             text-align: center;
-            background: linear-gradient(135deg, #2563EB 0%, #EC4899 100%);
+            background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
         }
-        .logo-icon { font-size: 3rem; margin-bottom: 8px; display: inline-block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
-        .logo-title { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .logo-sub { font-size: 0.7rem; color: rgba(255,255,240,0.9); margin-top: 6px; letter-spacing: 0.8px; font-weight: 500; }
-        .content { padding: 24px 22px 32px; background: #FFFFFF; }
-        .input-field { margin-bottom: 28px; }
-        .input-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #1E40AF; font-weight: 600; font-size: 0.85rem; }
-        .chat-input, .message-input { width: 100%; background: #F8FAFE; border: 1.5px solid #DBEAFE; border-radius: 28px; padding: 14px 18px; font-size: 1rem; color: #1E293B; outline: none; transition: all 0.2s; font-family: inherit; }
-        .chat-input:focus, .message-input:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); background: #FFFFFF; }
+
+        .logo-icon { font-size: 3rem; margin-bottom: 8px; }
+        .logo-title { font-size: 1.6rem; font-weight: 800; color: white; }
+        .logo-sub { font-size: 0.7rem; color: rgba(255,255,240,0.9); margin-top: 6px; }
+
+        .content { padding: 28px 24px 32px; }
+
+        .input-group { margin-bottom: 22px; }
+        label { display: block; color: #334155; font-weight: 600; margin-bottom: 8px; font-size: 0.85rem; }
+        input, textarea {
+            width: 100%;
+            background: #F8FAFE;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 24px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        input:focus, textarea:focus { border-color: #7C3AED; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+
         .shortcut-btn {
             background: linear-gradient(95deg, #FCE7F3, #FDF2F8);
             border: 1px solid #F9A8D4;
             border-radius: 40px;
-            padding: 12px 18px;
+            padding: 14px 18px;
             width: 100%;
-            text-align: left;
             cursor: pointer;
-            transition: all 0.2s;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 12px;
             color: #BE185D;
-            font-size: 0.9rem;
             font-weight: 600;
-            margin-bottom: 20px;
         }
-        .shortcut-btn:hover { background: #FCE7F3; border-color: #EC4899; transform: scale(0.98); box-shadow: 0 4px 10px rgba(236, 72, 153, 0.2); }
-        .send-button {
-            background: linear-gradient(95deg, #2563EB, #3B82F6);
+        .shortcut-btn:hover { background: #FCE7F3; border-color: #EC4899; }
+
+        .send-btn {
+            background: linear-gradient(95deg, #2563EB, #7C3AED);
             width: 100%;
             border: none;
-            padding: 15px;
+            padding: 16px;
             border-radius: 60px;
             font-weight: 700;
             font-size: 1rem;
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
             cursor: pointer;
-            margin: 24px 0 18px;
+            margin: 10px 0;
             transition: 0.2s;
-            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.3);
         }
-        .send-button:active { transform: scale(0.97); background: #1D4ED8; }
-        .status-area { background: #EFF6FF; border-radius: 24px; padding: 12px 16px; font-size: 0.75rem; text-align: center; color: #1E3A8A; border-left: 4px solid #3B82F6; word-break: break-word; }
-        .credit { text-align: center; font-size: 0.6rem; color: #94A3B8; margin-top: 16px; padding-top: 12px; border-top: 1px solid #E2E8F0; }
+        .send-btn:active { transform: scale(0.97); }
+
+        .status {
+            background: #F1F5F9;
+            border-radius: 20px;
+            padding: 12px;
+            font-size: 0.75rem;
+            text-align: center;
+            color: #475569;
+            margin-top: 20px;
+            border-left: 4px solid #7C3AED;
+        }
+
+        .credit { text-align: center; font-size: 0.6rem; color: #94A3B8; margin-top: 20px; padding-top: 16px; border-top: 1px solid #E2E8F0; }
     </style>
 </head>
 <body>
-<div class="receiver-card">
+<div class="sender-card">
     <div class="logo-area">
         <div class="logo-icon">📡</div>
         <div class="logo-title">Advance MetaTool</div>
-        <div class="logo-sub">FILE RECEIVER + AUTO SAVE</div>
+        <div class="logo-sub">MESSAGE SENDER</div>
     </div>
     <div class="content">
-        <div class="input-field">
-            <div class="input-label"><span>🆔</span> <span>চ্যাট আইডি (শুধু সংখ্যা)</span></div>
-            <input type="text" id="chatIdInput" class="chat-input" placeholder="উদাহরণ: 123456789" inputmode="numeric" autocomplete="off">
+        <div class="input-group">
+            <label>🆔 চ্যাট আইডি (শুধু সংখ্যা)</label>
+            <input type="text" id="chatIdInput" placeholder="উদাহরণ: 123456789" inputmode="numeric">
         </div>
-        <div class="input-field">
-            <div class="input-label"><span>📝</span> <span>মেসেজ লিখুন</span></div>
-            <textarea id="messageInput" class="message-input" rows="3" placeholder="আপনার মেসেজ লিখুন..."></textarea>
+        <div class="input-group">
+            <label>📝 মেসেজ লিখুন</label>
+            <textarea id="messageInput" rows="4" placeholder="আপনার মেসেজ লিখুন..."></textarea>
         </div>
-        <div id="shortcutMsgBtn" class="shortcut-btn">
-            <span class="shortcut-icon">✨</span>
-            <span>📨 এডমিন মেসেজ (শর্টকাট)</span>
+        <div id="shortcutBtn" class="shortcut-btn">
+            <span>✨</span> 📨 এডমিন মেসেজ (শর্টকাট)
         </div>
-        <button id="sendBtn" class="send-button">✈️ সেন্ড মেসেজ</button>
-        <div id="statusMsg" class="status-area">✅ প্রস্তুত | মেসেজ পাঠালেই চ্যাট আইডি স্টোর হবে</div>
-        <div class="credit">secured • telegram messenger • auto collector</div>
+        <button id="sendBtn" class="send-btn">✈️ সেন্ড মেসেজ</button>
+        <div id="statusMsg" class="status">✅ প্রস্তুত | মেসেজ পাঠালে চ্যাট আইডি সংরক্ষিত হবে</div>
+        <div class="credit">secured • telegram messenger • firebase cloud</div>
     </div>
 </div>
-<script>
-    const BOT_TOKEN = "8901671743:AAGmtT_ZE9Ex70KISpKQDCL-H-u24kvxEsk";
-    const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-    const STORAGE_KEY = "advance_metatool_chatids";
 
-    const chatIdInput = document.getElementById('chatIdInput');
-    const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendBtn');
-    const statusDiv = document.getElementById('statusMsg');
-    const shortcutBtn = document.getElementById('shortcutMsgBtn');
+<script>
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyBg3DjdzzwEt1M76MIc3ynyyYMjmNRgaYc",
+        authDomain: "lt-play-9c597.firebaseapp.com",
+        databaseURL: "https://lt-play-9c597-default-rtdb.firebaseio.com",
+        projectId: "lt-play-9c597",
+        storageBucket: "lt-play-9c597.firebasestorage.app",
+        messagingSenderId: "294625465495",
+        appId: "1:294625465495:web:c6714068cd607abfd545d2",
+        measurementId: "G-JB6929GT1T"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const BOT_TOKEN = "8901671743:AAGmtT_ZE9Ex70KISpKQDCL-H-u24kvxEsk";
     const PERMANENT_CHANNEL_URL = "https://t.me/EBH_METATOOL";
 
-    function getInlineKeyboard() {
-        return { inline_keyboard: [[{ text: "🚀 Join Official Channel 🚀", url: PERMANENT_CHANNEL_URL }]] };
+    // ফাংশন: চ্যাট আইডি Firebase এ সেভ করা
+    async function saveChatIdToFirebase(chatId) {
+        try {
+            await database.ref(`chatids/${chatId}`).set({
+                id: chatId,
+                timestamp: Date.now(),
+                date: new Date().toISOString()
+            });
+            return true;
+        } catch (error) {
+            console.error("Firebase save error:", error);
+            return false;
+        }
     }
 
-    // ---------- স্টোরেজ ফাংশন ----------
-    function saveChatId(chatId) {
-        if (!chatId) return false;
-        let existing = localStorage.getItem(STORAGE_KEY);
-        let ids = existing ? JSON.parse(existing) : [];
-        if (!ids.includes(chatId)) {
-            ids.push(chatId);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-            return true;
-        }
-        return false;
+    function getInlineKeyboard() {
+        return {
+            inline_keyboard: [
+                [{ text: "🚀 Join Official Channel 🚀", url: PERMANENT_CHANNEL_URL }]
+            ]
+        };
     }
 
     function getCurrentDateTime() {
@@ -152,46 +188,48 @@
         return `━━━━━━━━━━━━━━━━━━━━━\n👑 <b>𝗔𝗗𝗠𝗜𝗡 𝗠𝗘𝗦𝗦𝗔𝗚𝗘</b> 👑\n📅 ${dateStr}  🕐 ${timeStr}\n━━━━━━━━━━━━━━━━━━━━━\n\n✅ <b>আপনার ফাইল সফলভাবে রিসিভ করা হয়েছে!</b>\n\n💖 <b>আমাদের সাথে কাজ করার জন্য আন্তরিক ধন্যবাদ।</b>\n\n━━━━━━━━━━━━━━━━━━━━━\n✨ <b>𝗧𝗵𝗮𝗻𝗸𝘀 𝗙𝗼𝗿 𝗨𝘀𝗶𝗻𝗴</b> ✨\n🚀 <b>𝗔𝗱𝘃𝗮𝗻𝗰𝗲 𝗠𝗲𝘁𝗮𝗧𝗼𝗼𝗹</b> 🚀\n━━━━━━━━━━━━━━━━━━━━━`;
     }
 
-    shortcutBtn.addEventListener('click', () => {
-        messageInput.value = getAdminMessage();
-        statusDiv.innerHTML = "📋 এডমিন মেসেজ বসানো হয়েছে। এখন সেন্ড করুন।";
-        statusDiv.style.borderLeftColor = "#EC4899";
+    document.getElementById('shortcutBtn').addEventListener('click', () => {
+        document.getElementById('messageInput').value = getAdminMessage();
+        document.getElementById('statusMsg').innerHTML = "📋 এডমিন মেসেজ বসানো হয়েছে। এখন সেন্ড করুন।";
+    });
+
+    document.getElementById('chatIdInput').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
     });
 
     async function sendToTelegram(chatId, text) {
-        if (!chatId || chatId.trim() === "") throw new Error("চ্যাট আইডি খালি!");
-        if (!text || text.trim() === "") throw new Error("মেসেজ খালি!");
         const payload = {
             chat_id: chatId.trim(),
             text: text.trim(),
             parse_mode: "HTML",
             reply_markup: JSON.stringify(getInlineKeyboard())
         };
-        const response = await fetch(TELEGRAM_API, {
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
         const result = await response.json();
-        if (!result.ok) throw new Error(result.description || "টেলিগ্রাম এপিআই ত্রুটি");
+        if (!result.ok) throw new Error(result.description);
         return result;
     }
 
-    sendButton.addEventListener('click', async () => {
-        const rawChatId = chatIdInput.value.trim();
-        const messageText = messageInput.value.trim();
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+        const chatId = document.getElementById('chatIdInput').value.trim();
+        const message = document.getElementById('messageInput').value.trim();
+        const statusDiv = document.getElementById('statusMsg');
 
-        if (!rawChatId) {
+        if (!chatId) {
             statusDiv.innerHTML = "❌ চ্যাট আইডি দিন!";
             statusDiv.style.borderLeftColor = "#F87171";
             return;
         }
-        if (!messageText) {
-            statusDiv.innerHTML = "❓ মেসেজ খালি! কিছু লিখুন বা শর্টকাট ব্যবহার করুন।";
+        if (!message) {
+            statusDiv.innerHTML = "❓ মেসেজ লিখুন!";
             statusDiv.style.borderLeftColor = "#FBBF24";
             return;
         }
-        if (!/^\d+$/.test(rawChatId)) {
+        if (!/^\d+$/.test(chatId)) {
             statusDiv.innerHTML = "⚠️ চ্যাট আইডি শুধুমাত্র সংখ্যা হতে হবে!";
             statusDiv.style.borderLeftColor = "#F87171";
             return;
@@ -199,28 +237,22 @@
 
         statusDiv.innerHTML = "⏳ মেসেজ পাঠানো হচ্ছে...";
         statusDiv.style.borderLeftColor = "#FBBF24";
-        sendButton.disabled = true;
-        sendButton.style.opacity = "0.7";
+        document.getElementById('sendBtn').disabled = true;
+        document.getElementById('sendBtn').style.opacity = "0.7";
 
         try {
-            await sendToTelegram(rawChatId, messageText);
-            // সফল হলে চ্যাট আইডি সেভ করবে
-            const isNew = saveChatId(rawChatId);
-            const savedMsg = isNew ? " + নতুন আইডি স্টোর করা হয়েছে!" : " (আইডি আগে থেকেই স্টোরে ছিল)";
+            await sendToTelegram(chatId, message);
+            await saveChatIdToFirebase(chatId);
             const nowTime = new Date().toLocaleString('bn-BD');
-            statusDiv.innerHTML = `✅ সফল! ${savedMsg}\n📨 চ্যাট আইডি: ${rawChatId} (${nowTime})`;
+            statusDiv.innerHTML = `✅ সফল! চ্যাট আইডি সংরক্ষিত হয়েছে (${nowTime})`;
             statusDiv.style.borderLeftColor = "#10B981";
         } catch (error) {
             statusDiv.innerHTML = `❌ ব্যর্থ: ${error.message}`;
             statusDiv.style.borderLeftColor = "#EF4444";
         } finally {
-            sendButton.disabled = false;
-            sendButton.style.opacity = "1";
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('sendBtn').style.opacity = "1";
         }
-    });
-
-    chatIdInput.addEventListener('input', function(e) {
-        this.value = this.value.replace(/[^0-9]/g, '');
     });
 </script>
 </body>
