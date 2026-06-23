@@ -1,0 +1,2790 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 - Quad Sheet</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #eef2f7;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #0b2b44 0%, #1a4a6e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 30000;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .loading-screen.hide { display: none; }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid #FFD700;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loading-text { color: white; font-size: 16px; font-weight: 500; letter-spacing: 1px; }
+
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #0b2b44 0%, #1a4a6e 100%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20000;
+    }
+    .login-overlay.visible { display: flex; }
+    .login-card {
+      background: rgba(255,255,255,0.98);
+      border-radius: 48px;
+      max-width: 420px;
+      width: 90%;
+      padding: 36px 28px;
+      box-shadow: 0 30px 50px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .login-logo {
+      font-size: 42px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #0b2b44, #1e5a88);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 8px;
+    }
+    .login-sub { color: #4b5563; font-size: 13px; margin-bottom: 28px; }
+    .input-group-login { margin-bottom: 20px; text-align: left; }
+    .input-group-login label { font-weight: 600; font-size: 13px; color: #1f2937; display: block; margin-bottom: 6px; }
+    .input-group-login input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 60px;
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+      background: #f9fafb;
+    }
+    .input-group-login input:focus {
+      border-color: #1e5a88;
+      box-shadow: 0 0 0 3px rgba(30,90,136,0.2);
+      background: white;
+    }
+    .login-btn {
+      background: linear-gradient(95deg, #0b2b44, #1e5a88);
+      width: 100%;
+      border: none;
+      padding: 14px;
+      border-radius: 60px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: 0.2s;
+    }
+    .login-btn:active { transform: scale(0.97); }
+    .error-msg {
+      color: #dc2626;
+      font-size: 12px;
+      margin-top: 8px;
+      background: #fee2e2;
+      padding: 6px 12px;
+      border-radius: 40px;
+      display: inline-block;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .app-container.visible { opacity: 1; }
+
+    .header {
+      background: linear-gradient(135deg, #0b2b44 0%, #1e5a88 100%);
+      padding: 8px 10px;
+      flex-shrink: 0;
+    }
+    
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .logo-area {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .logo {
+      font-size: 18px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .smart-sheet {
+      font-size: 9px;
+      font-weight: 500;
+      background: rgba(255,255,255,0.2);
+      padding: 2px 6px;
+      border-radius: 20px;
+      color: #FFE4B5;
+    }
+    .user-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .username-badge {
+      color: white;
+      font-size: 11px;
+      font-weight: 500;
+      background: rgba(0,0,0,0.3);
+      padding: 4px 10px;
+      border-radius: 30px;
+    }
+    .logout-btn {
+      background: rgba(220,38,38,0.85);
+      border: none;
+      color: white;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .logout-btn:active { transform: scale(0.95); }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .admin-btn-header {
+      background: linear-gradient(95deg, #8e2de2, #4a00e0);
+      border: none;
+      padding: 6px 18px;
+      border-radius: 32px;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .submit-main-btn {
+      background: linear-gradient(95deg, #00a86b, #00c853);
+      border: none;
+      padding: 6px 18px;
+      border-radius: 32px;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .admin-btn-header:active, .submit-main-btn:active { transform: scale(0.96); }
+    
+    .tool-button-group {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: none;
+      padding: 6px 14px;
+      border-radius: 35px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-select { background: #137333; color: white; }
+    .btn-copy { background: #1a73e8; color: white; }
+    .btn-delete { background: #dc2626; color: white; }
+    .btn-clear { background: #ea580c; color: white; }
+    
+    @media (max-width: 400px) {
+      .top-bar { flex-direction: column; align-items: stretch; }
+      .user-controls { justify-content: flex-end; margin-top: -28px; }
+      .action-buttons { gap: 8px; margin-top: 4px; }
+      .admin-btn-header, .submit-main-btn { padding: 5px 14px; font-size: 11px; }
+      .btn { padding: 5px 10px; font-size: 10px; }
+      .username-badge { font-size: 10px; padding: 3px 8px; }
+      .logout-btn { font-size: 10px; padding: 3px 10px; }
+    }
+
+    .reg-section {
+      background: #f1f5f9;
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .tg-input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: white;
+      padding: 6px 12px;
+      border-radius: 40px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      flex: 1;
+      min-width: 100px;
+      max-width: 150px;
+    }
+    .tg-input-group label { font-weight: 600; font-size: 8px; color: #1e293b; }
+    .tg-input-group input {
+      border: none;
+      padding: 6px 0;
+      font-size: 12px;
+      flex: 1;
+      outline: none;
+      background: transparent;
+    }
+    .save-user-btn {
+      background: #137333;
+      border: none;
+      padding: 10px 50px;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      opacity: 0;
+      visibility: hidden;
+      width: auto;
+      position: absolute;
+      bottom: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+      z-index: 100;
+    }
+    .save-user-btn.show { opacity: 1; visibility: visible; }
+    
+    .confirm-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10005;
+      backdrop-filter: blur(5px);
+      padding: 15px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .confirm-modal {
+      background: white;
+      border-radius: 40px;
+      max-width: 520px;
+      width: 100%;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+      animation: fadeInScale 0.2s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    @media (max-width: 480px) {
+      .confirm-modal {
+        padding: 20px 16px;
+        border-radius: 32px;
+      }
+      .confirm-modal h3 {
+        font-size: 20px;
+        margin-bottom: 12px;
+      }
+      .info-box {
+        padding: 10px;
+        font-size: 12px;
+        margin: 10px 0;
+      }
+      .input-area {
+        margin: 15px 0 12px;
+      }
+      .input-area label {
+        font-size: 13px;
+        padding: 6px 10px;
+      }
+      .input-area input {
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+      .confirm-actions {
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .confirm-actions button {
+        padding: 12px 0;
+        font-size: 14px;
+      }
+    }
+    
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .admin-modal { border-top: 6px solid #8e2de2; }
+    .submit-modal { border-top: 6px solid #00a86b; }
+    .confirm-modal .icon { font-size: 56px; margin-bottom: 8px; }
+    .confirm-modal h3 { font-size: 24px; margin-bottom: 16px; font-weight: 800; color: #1e293b; }
+    .info-box {
+      background: #f0fdf4;
+      padding: 16px;
+      border-radius: 24px;
+      text-align: left;
+      font-size: 13px;
+      margin: 12px 0;
+      line-height: 1.6;
+    }
+    .info-box p {
+      margin: 6px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 5px;
+    }
+    .info-box .label {
+      font-weight: 700;
+      min-width: 100px;
+      color: #065f46;
+    }
+    .info-box .value {
+      color: #14532d;
+      word-break: break-word;
+    }
+    .admin-info-box { background: #f3e8ff; color: #4c1d95; }
+    .input-area {
+      margin: 20px 0 16px;
+      text-align: left;
+    }
+    .input-area label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #1e293b;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 60px;
+    }
+    .required-star { color: #dc2626; margin-left: 4px; font-size: 16px; }
+    .input-area input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #cbd5e1;
+      border-radius: 48px;
+      font-size: 15px;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s;
+      background: #ffffff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .input-area input:focus {
+      border-color: #8e2de2;
+      box-shadow: 0 0 0 3px rgba(142,45,226,0.2);
+    }
+    .input-hint { font-size: 11px; color: #6c757d; margin-top: 8px; margin-left: 12px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .copy-btn-small {
+      background: #1a73e8;
+      border: none;
+      color: white;
+      font-size: 10px;
+      padding: 4px 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-left: 8px;
+      font-weight: 500;
+    }
+    .copy-btn-small:active { transform: scale(0.95); }
+    .confirm-actions { display: flex; gap: 14px; margin-top: 20px; }
+    .confirm-actions button {
+      flex: 1;
+      border: none;
+      padding: 14px 0;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .confirm-yes { background: #10b981; color: white; }
+    .confirm-no { background: #e2e8f0; color: #1e293b; }
+    .save-admin-username-btn {
+      background: #8e2de2;
+      color: white;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 60px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.2s;
+    }
+    .save-admin-username-btn:active { transform: scale(0.96); }
+    
+    .success-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10007;
+      backdrop-filter: blur(5px);
+      padding: 15px;
+    }
+    .success-modal {
+      background: white;
+      border-radius: 48px;
+      max-width: 500px;
+      width: 100%;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+      border-top: 6px solid #10b981;
+      animation: fadeInScale 0.2s ease;
+    }
+    .success-modal .success-icon {
+      font-size: 72px;
+      margin-bottom: 8px;
+    }
+    .success-modal h3 {
+      color: #065f46;
+      font-size: 24px;
+      margin-bottom: 16px;
+      font-weight: 800;
+    }
+    .success-details {
+      background: #f0fdf4;
+      padding: 18px;
+      border-radius: 28px;
+      margin: 16px 0;
+      text-align: left;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .success-details p {
+      margin: 8px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .success-details .label {
+      font-weight: 800;
+      min-width: 110px;
+      color: #065f46;
+    }
+    .success-details .value {
+      color: #14532d;
+      word-break: break-word;
+    }
+    .admin-confirm-badge {
+      background: #dcfce7;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: bold;
+      color: #15803d;
+      font-size: 14px;
+    }
+    .warning-note {
+      margin-top: 12px;
+      background: #fef3c7;
+      padding: 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: #c2410c;
+      text-align: center;
+    }
+    .close-success-btn {
+      background: linear-gradient(95deg, #0b2b44, #1e5a88);
+      border: none;
+      padding: 14px 24px;
+      border-radius: 60px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 12px;
+      transition: 0.2s;
+    }
+    .close-success-btn:active { transform: scale(0.96); }
+    
+    .table-wrapper {
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: white;
+      position: relative;
+    }
+    table { border-collapse: collapse; table-layout: fixed; min-width: max-content; }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 0;
+      background-color: white;
+      width: 90px;
+      min-width: 90px;
+      max-width: 90px;
+      height: 32px;
+      min-height: 32px;
+    }
+    td .cell-content {
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 6px 5px;
+      font-size: 11px;
+      line-height: 1.3;
+      white-space: nowrap;
+      outline: none;
+      cursor: text;
+    }
+    th:first-child, td:first-child {
+      background-color: #f2f4f8;
+      text-align: center;
+      font-weight: 500;
+      color: #2c3e66;
+      width: 45px !important;
+      min-width: 45px !important;
+      max-width: 45px !important;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+    td:first-child {
+      background-color: #fafbfd;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+    }
+    th {
+      background-color: #f7f9fd;
+      font-weight: 600;
+      padding: 5px 3px;
+      font-size: 10px;
+      text-align: center;
+      position: relative;
+    }
+    .uid-toggle-switch {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 16px;
+      background-color: #ccc;
+      border-radius: 32px;
+      display: inline-block;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .uid-toggle-switch::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background-color: white;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: 0.2s;
+    }
+    .uid-toggle-switch.active {
+      background-color: #10b981;
+    }
+    .uid-toggle-switch.active::after {
+      transform: translateX(16px);
+    }
+    .password-toggle-switch {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 16px;
+      background-color: #ccc;
+      border-radius: 32px;
+      display: inline-block;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .password-toggle-switch::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background-color: white;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: 0.2s;
+    }
+    .password-toggle-switch.active {
+      background-color: #10b981;
+    }
+    .password-toggle-switch.active::after {
+      transform: translateX(16px);
+    }
+    th[data-col="1"] {
+      padding-left: 5px;
+      padding-right: 35px;
+      text-align: left;
+    }
+    th[data-col="2"] {
+      padding-left: 5px;
+      padding-right: 35px;
+      text-align: left;
+    }
+    .resize-handle {
+      position: absolute;
+      top: 0;
+      right: -5px;
+      width: 10px;
+      height: 100%;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 10;
+    }
+    td.selected { background-color: #cce5ff !important; outline: 1px solid #1366d0; }
+    td.duplicate-error { background-color: #ffdddd !important; }
+    .toast-msg {
+      position: fixed;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e2f3f;
+      color: white;
+      padding: 5px 14px;
+      border-radius: 30px;
+      font-size: 11px;
+      z-index: 2000;
+      opacity: 0;
+      transition: 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      max-width: 350px;
+      width: 90%;
+      padding: 20px;
+      text-align: center;
+    }
+    .close-modal-btn { background: #1e5a88; border: none; color: white; font-weight: bold; padding: 10px 18px; border-radius: 45px; width: 100%; cursor: pointer; }
+    .system-off-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    .system-off-card { background: white; border-radius: 24px; max-width: 300px; width: 85%; padding: 20px; text-align: center; }
+    
+    .sheet-selector {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      padding: 6px 10px;
+      background: #f1f5f9;
+      border-top: 1px solid #e2e8f0;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .sheet-btn {
+      flex: 0 0 auto;
+      min-width: 70px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #e2e8f0;
+      color: #475569;
+      text-align: center;
+    }
+    .sheet-btn.active {
+      background: linear-gradient(95deg, #0b2b44, #1e5a88);
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .sheet-btn:active { transform: scale(0.96); }
+    
+    .bulk-delete-confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10006;
+      backdrop-filter: blur(5px);
+    }
+    .bulk-delete-confirm {
+      background: white;
+      border-radius: 40px;
+      max-width: 440px;
+      width: 90%;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+      border-top: 6px solid #dc2626;
+      animation: fadeInScale 0.2s ease;
+    }
+    .bulk-delete-confirm .icon { font-size: 56px; margin-bottom: 8px; }
+    .bulk-delete-confirm h3 { color: #991b1b; font-size: 24px; margin-bottom: 16px; font-weight: 800; }
+    .bulk-delete-confirm .delete-info-box {
+      background: #fef2f2;
+      padding: 14px;
+      border-radius: 24px;
+      text-align: left;
+      font-size: 13px;
+      margin: 12px 0;
+      color: #7f1d1d;
+      line-height: 1.6;
+    }
+    .bulk-delete-confirm .warning-text {
+      color: #b91c1c;
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 12px;
+    }
+    .bulk-delete-actions { display: flex; gap: 14px; margin-top: 20px; }
+    .bulk-delete-actions button {
+      flex: 1;
+      border: none;
+      padding: 14px 0;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .delete-confirm-yes { background: #dc2626; color: white; }
+    .delete-confirm-no { background: #e2e8f0; color: #1e293b; }
+    .delete-confirm-yes:active { transform: scale(0.96); }
+    .delete-confirm-no:active { transform: scale(0.96); }
+    
+    .bot-warning-box {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      border-radius: 20px;
+      padding: 16px;
+      margin: 15px 0;
+      text-align: left;
+      border-left: 5px solid #f97316;
+    }
+    .bot-warning-box .warning-title {
+      font-weight: bold;
+      color: #c2410c;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bot-warning-box .warning-text {
+      color: #431407;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div id="loadingScreen" class="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text">লোড হচ্ছে...</div>
+</div>
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-card">
+    <div class="login-logo">𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 SHEET</div>
+    <div class="login-sub">আপনার অ্যাকাউন্ট দিয়ে প্রবেশ করুন</div>
+    <div id="loginError" class="error-msg" style="display:none;"></div>
+    <div class="input-group-login">
+      <label>📛 ইউজারনেম</label>
+      <input type="text" id="loginUsername" placeholder="আপনার ইউজারনেম" autocomplete="off">
+    </div>
+    <div class="input-group-login">
+      <label>🔒 পাসওয়ার্ড</label>
+      <input type="password" id="loginPassword" placeholder="পাসওয়ার্ড">
+    </div>
+    <button id="loginSubmitBtn" class="login-btn">লগইন/রেজিস্ট্রার</button>
+  </div>
+</div>
+<div id="appContainer" class="app-container">
+  <div class="header">
+    <div class="top-bar">
+      <div class="logo-area">
+        <span class="logo">𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟</span>
+        <span class="smart-sheet">𝗤𝘂𝗮𝗱 𝗦𝗵𝗲𝗲𝘁</span>
+      </div>
+      <div class="user-controls">
+        <span class="username-badge" id="displayUsername">-</span>
+        <button id="logoutHeaderBtn" class="logout-btn">🚪 লগআউট</button>
+      </div>
+    </div>
+    <div class="action-buttons">
+      <button id="adminPanelBtn" class="admin-btn-header">👑 এডমিন রেজিষ্ট্রেশন </button>
+      <button id="submitMainBtn" class="submit-main-btn">📤 ফাইল সাবমিট করুন</button>
+    </div>
+    <div class="tool-button-group">
+      <button id="selectAllColsBtn" class="btn btn-select">📌 সব কলাম</button>
+      <button id="copyBtn" class="btn btn-copy">📋 কপি</button>
+      <button id="deleteBtn" class="btn btn-delete">🗑️ ডিলিট</button>
+      <button id="clearSelectionBtn" class="btn btn-clear">✖️ ক্লিয়ার</button>
+    </div>
+  </div>
+  <div class="reg-section">
+    <div class="tg-input-group">
+      <label>👤 টেলিগ্রাম ইউজার:</label>
+      <input type="text" id="tgUsername" placeholder="@username" autocomplete="off">
+    </div>
+    <div class="tg-input-group">
+      <label>🆔 চ্যাট আইডি:</label>
+      <input type="text" id="tgChatId" placeholder="123456789" autocomplete="off" inputmode="numeric">
+    </div>
+    <button id="saveUserBtn" class="save-user-btn">💾 তথ্য সেভ করুন</button>
+  </div>
+  <div class="table-wrapper" id="tableWrapper">
+    <table id="masterSheet">
+      <thead id="sheetHeader">
+        <tr id="headerRow">
+          <th data-col="0">#</th>
+          <th data-col="1">
+            UID            <div class="uid-toggle-switch" id="uidValidationToggle" title="শুধুমাত্র সংখ্যা অনুমোদন অন/অফ"></div>
+          </th>
+          <th data-col="2">
+            পাসওয়ার্ড
+            <div class="password-toggle-switch" id="passwordAutoToggle" title="অটো পাসওয়ার্ড অন/অফ"></div>
+          </th>
+          <th data-col="3">কুকিজ/2FA</th>
+          <th data-col="4">D</th>
+          <th data-col="5">E</th>
+        </tr>
+      </thead>
+      <tbody id="sheetBody"></tbody>
+    </table>
+  </div>
+  <div class="sheet-selector">
+    <button id="sheet1Btn" class="sheet-btn active">📄 শীট ১</button>
+    <button id="sheet2Btn" class="sheet-btn">📄 শীট ২</button>
+    <button id="sheet3Btn" class="sheet-btn">📄 শীট ৩</button>
+    <button id="sheet4Btn" class="sheet-btn">📄 শীট ৪</button>
+  </div>
+</div>
+<div id="liveToast" class="toast-msg"></div>
+<script>
+(function() {
+  const firebaseConfig = {
+    apiKey: "AIzaSyCHqx6dAHeGFdtvY8682b_iQkdnk2ie0ug",
+    authDomain: "saprahik-kaj.firebaseapp.com",
+    databaseURL: "https://saprahik-kaj-default-rtdb.firebaseio.com",
+    projectId: "saprahik-kaj",
+    storageBucket: "saprahik-kaj.firebasestorage.app",
+    messagingSenderId: "336661054558",
+    appId: "1:336661054558:web:1beb394b660c9d6cf520cf"
+  };
+  
+  let firebaseDb = null;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    firebaseDb = firebase.database();
+    console.log("Firebase connected");
+  } catch(e) { console.warn(e); }
+
+  const BOT_TOKEN = "8901671743:AAGmtT_ZE9Ex70KISpKQDCL-H-u24kvxEsk";
+  const BOT_USERNAME = "@metatool_filesubmit_bot";
+  const FILE_RECEIVE_LINK = "https://t.me/metatool_filesubmit_bot/filereceive";
+  const OFFICIAL_CHANNEL_LINK = "https://t.me/EBH_METATOOL";
+  
+  const ROWS = 200;
+  const COLS = 6;
+  let colWidths = [45, 90, 90, 90, 90, 90];
+  let selectedCells = new Set();
+  
+  let sheetData1 = [];
+  let submittedUIDs1 = new Set();
+  let sheetData2 = [];
+  let submittedUIDs2 = new Set();
+  let sheetData3 = [];
+  let submittedUIDs3 = new Set();
+  let sheetData4 = [];
+  let submittedUIDs4 = new Set();
+  
+  let currentSheet = 1;
+  let currentTelegramUsername = "";
+  let currentChatId = "";
+  let systemStatusListener = null;
+  
+  const SHEET1_STORAGE_KEY = "META_Sheet_Data_";
+  const SHEET1_SUBMITTED_KEY = "META_Submitted_UIDs_";
+  const SHEET2_STORAGE_KEY = "META_Sheet_Data_2_";
+  const SHEET2_SUBMITTED_KEY = "META_Submitted_UIDs_2_";
+  const SHEET3_STORAGE_KEY = "META_Sheet_Data_3_";
+  const SHEET3_SUBMITTED_KEY = "META_Submitted_UIDs_3_";
+  const SHEET4_STORAGE_KEY = "META_Sheet_Data_4_";
+  const SHEET4_SUBMITTED_KEY = "META_Submitted_UIDs_4_";
+  
+  const AUTH_TOKEN_KEY = "META_Auth_Token";
+  const SCROLL_POSITION_KEY = "META_Scroll_Position";
+  const UID_VALIDATION_STATE_KEY = "META_UidValidationState";
+  const PASSWORD_AUTO_STATE_KEY = "META_PasswordAutoState";
+  const SAVED_ADMIN_USERNAME_KEY = "META_Saved_Admin_Username";
+  const LAST_SHEET_KEY = "META_Last_Sheet";
+  
+  let undoStack = [];
+  let redoStack = [];
+  let isUndoRedo = false;
+  const MAX_HISTORY = 30;
+  
+  let sheetBody, tableWrapper;
+  let currentLoggedInUser = null;
+
+  const loadingScreen = document.getElementById('loadingScreen');
+  const loginOverlay = document.getElementById('loginOverlay');
+  const appContainer = document.getElementById('appContainer');
+  const loginBtn = document.getElementById('loginSubmitBtn');
+  const loginUsernameInput = document.getElementById('loginUsername');
+  const loginPasswordInput = document.getElementById('loginPassword');
+  const loginError = document.getElementById('loginError');
+  const displayUsernameSpan = document.getElementById('displayUsername');
+  const logoutHeaderBtn = document.getElementById('logoutHeaderBtn');
+  const tgUsernameInput = document.getElementById('tgUsername');
+  const tgChatIdInput = document.getElementById('tgChatId');
+  const uidToggle = document.getElementById('uidValidationToggle');
+  const passwordAutoToggle = document.getElementById('passwordAutoToggle');
+  const sheet1Btn = document.getElementById('sheet1Btn');
+  const sheet2Btn = document.getElementById('sheet2Btn');
+  const sheet3Btn = document.getElementById('sheet3Btn');
+  const sheet4Btn = document.getElementById('sheet4Btn');
+  const adminPanelBtn = document.getElementById('adminPanelBtn');
+
+  let isUidValidationEnabled = true;
+  let isPasswordAutoEnabled = true;
+
+  function showToast(msg) { 
+    const toast = document.getElementById('liveToast'); 
+    if(!toast) return;
+    toast.innerText = msg; 
+    toast.style.opacity = '1'; 
+    setTimeout(function() { toast.style.opacity = '0'; }, 1800); 
+  }
+  
+  function escapeHtml(str) { 
+    if(!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
+      if(m === '&') return '&amp;';
+      if(m === '<') return '&lt;';
+      if(m === '>') return '&gt;';
+      return m;
+    });
+  }
+  
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+      showToast("✅ কপি হয়েছে: " + text);
+    }).catch(function() {
+      showToast("❌ কপি করতে ব্যর্থ");
+    });
+  }
+
+  function getCurrentSheetData() {
+    if(currentSheet === 1) return sheetData1;
+    if(currentSheet === 2) return sheetData2;
+    if(currentSheet === 3) return sheetData3;
+    if(currentSheet === 4) return sheetData4;
+    return sheetData1;
+  }
+  
+  function getCurrentSubmittedUIDs() {
+    if(currentSheet === 1) return submittedUIDs1;
+    if(currentSheet === 2) return submittedUIDs2;
+    if(currentSheet === 3) return submittedUIDs3;
+    if(currentSheet === 4) return submittedUIDs4;
+    return submittedUIDs1;
+  }
+  
+  function updateCurrentSheetData(newData) {
+    if(currentSheet === 1) sheetData1 = newData;
+    else if(currentSheet === 2) sheetData2 = newData;
+    else if(currentSheet === 3) sheetData3 = newData;
+    else if(currentSheet === 4) sheetData4 = newData;
+  }
+  
+  function saveLastSheet() {
+    if(currentLoggedInUser) {
+      localStorage.setItem(LAST_SHEET_KEY + "_" + currentLoggedInUser, currentSheet);
+    }
+  }
+  
+  function loadLastSheet() {
+    if(currentLoggedInUser) {
+      const saved = localStorage.getItem(LAST_SHEET_KEY + "_" + currentLoggedInUser);
+      if(saved && saved >= 1 && saved <= 4) {
+        return parseInt(saved);
+      }
+    }
+    return 1;
+  }
+
+  function loadUidValidationState() {
+    const saved = localStorage.getItem(UID_VALIDATION_STATE_KEY);
+    if(saved !== null) isUidValidationEnabled = saved === 'true';
+    else isUidValidationEnabled = true;
+    if(uidToggle) {
+      if(isUidValidationEnabled) uidToggle.classList.add('active');
+      else uidToggle.classList.remove('active');
+    }
+  }
+  
+  function saveUidValidationState() {
+    localStorage.setItem(UID_VALIDATION_STATE_KEY, isUidValidationEnabled);
+  }
+
+  function loadPasswordAutoState() {
+    const saved = localStorage.getItem(PASSWORD_AUTO_STATE_KEY);
+    if(saved !== null) isPasswordAutoEnabled = saved === 'true';
+    else isPasswordAutoEnabled = true;
+    if(passwordAutoToggle) {
+      if(isPasswordAutoEnabled) passwordAutoToggle.classList.add('active');
+      else passwordAutoToggle.classList.remove('active');
+    }
+  }
+  
+  function savePasswordAutoState() {
+    localStorage.setItem(PASSWORD_AUTO_STATE_KEY, isPasswordAutoEnabled);
+  }
+
+  function toggleUidValidation() {
+    isUidValidationEnabled = !isUidValidationEnabled;
+    if(uidToggle) {
+      if(isUidValidationEnabled) uidToggle.classList.add('active');
+      else uidToggle.classList.remove('active');
+    }
+    saveUidValidationState();
+    showToast(isUidValidationEnabled ? "UID ভ্যালিডেশন চালু (শুধু সংখ্যা)" : "UID ভ্যালিডেশন বন্ধ (যেকোনো লেখা)");
+  }
+
+  function togglePasswordAuto() {
+    isPasswordAutoEnabled = !isPasswordAutoEnabled;
+    if(passwordAutoToggle) {
+      if(isPasswordAutoEnabled) passwordAutoToggle.classList.add('active');
+      else passwordAutoToggle.classList.remove('active');
+    }
+    savePasswordAutoState();
+    showToast(isPasswordAutoEnabled ? "পাসওয়ার্ড অটো অন (নতুন UID-তে অটো সেট হবে)" : "পাসওয়ার্ড অটো অফ (ম্যানুয়ালি লিখুন)");
+    fullRender();
+  }
+
+  function switchToSheet1() {
+    if(currentSheet === 1) return;
+    currentSheet = 1;
+    sheet1Btn.classList.add('active');
+    sheet2Btn.classList.remove('active');
+    sheet3Btn.classList.remove('active');
+    sheet4Btn.classList.remove('active');
+    saveLastSheet();
+    fullRender();
+    showToast("শীট ১ এ স্যুইচ করা হয়েছে");
+  }
+  
+  function switchToSheet2() {
+    if(currentSheet === 2) return;
+    currentSheet = 2;
+    sheet2Btn.classList.add('active');
+    sheet1Btn.classList.remove('active');
+    sheet3Btn.classList.remove('active');
+    sheet4Btn.classList.remove('active');
+    saveLastSheet();
+    fullRender();
+    showToast("শীট ২ এ স্যুইচ করা হয়েছে");
+  }
+  
+  function switchToSheet3() {
+    if(currentSheet === 3) return;
+    currentSheet = 3;
+    sheet3Btn.classList.add('active');
+    sheet1Btn.classList.remove('active');
+    sheet2Btn.classList.remove('active');
+    sheet4Btn.classList.remove('active');
+    saveLastSheet();
+    fullRender();
+    showToast("শীট ৩ এ স্যুইচ করা হয়েছে");
+  }
+  
+  function switchToSheet4() {
+    if(currentSheet === 4) return;
+    currentSheet = 4;
+    sheet4Btn.classList.add('active');
+    sheet1Btn.classList.remove('active');
+    sheet2Btn.classList.remove('active');
+    sheet3Btn.classList.remove('active');
+    saveLastSheet();
+    fullRender();
+    showToast("শীট ৪ এ স্যুইচ করা হয়েছে");
+  }
+
+  function saveAuthToken(username, password) {
+    localStorage.setItem(AUTH_TOKEN_KEY, JSON.stringify({ username: username, password: password, timestamp: Date.now() }));
+  }
+  
+  function getAuthToken() {
+    try {
+      const data = localStorage.getItem(AUTH_TOKEN_KEY);
+      if(data) return JSON.parse(data);
+    } catch(e) {}
+    return null;
+  }
+  
+  function clearAuthToken() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+
+  function loadSheet1FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET1_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData1 = parsed;
+        else sheetData1 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData1 = createEmptySheet(); }
+    } else {
+      sheetData1 = createEmptySheet();
+    }
+    const savedSubmitted = localStorage.getItem(SHEET1_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs1 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
+    }
+  }
+  
+  function loadSheet2FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET2_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData2 = parsed;
+        else sheetData2 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData2 = createEmptySheet(); }
+    } else {
+      sheetData2 = createEmptySheet();
+    }
+    const savedSubmitted = localStorage.getItem(SHEET2_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs2 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
+    }
+  }
+  
+  function loadSheet3FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET3_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData3 = parsed;
+        else sheetData3 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData3 = createEmptySheet(); }
+    } else {
+      sheetData3 = createEmptySheet();
+    }
+    const savedSubmitted = localStorage.getItem(SHEET3_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs3 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
+    }
+  }
+  
+  function loadSheet4FromLocalStorage(username) {
+    const savedSheet = localStorage.getItem(SHEET4_STORAGE_KEY + username);
+    if(savedSheet) {
+      try { 
+        const parsed = JSON.parse(savedSheet);
+        if(parsed && parsed.length === ROWS) sheetData4 = parsed;
+        else sheetData4 = createEmptySheet();
+      } catch(e) { console.warn(e); sheetData4 = createEmptySheet(); }
+    } else {
+      sheetData4 = createEmptySheet();
+    }
+    const savedSubmitted = localStorage.getItem(SHEET4_SUBMITTED_KEY + username);
+    if(savedSubmitted) {
+      try { submittedUIDs4 = new Set(JSON.parse(savedSubmitted)); } catch(e) { console.warn(e); }
+    }
+  }
+  
+  function saveSheet1ToLocalStorage(username) {
+    localStorage.setItem(SHEET1_STORAGE_KEY + username, JSON.stringify(sheetData1));
+    localStorage.setItem(SHEET1_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs1)));
+  }
+  
+  function saveSheet2ToLocalStorage(username) {
+    localStorage.setItem(SHEET2_STORAGE_KEY + username, JSON.stringify(sheetData2));
+    localStorage.setItem(SHEET2_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs2)));
+  }
+  
+  function saveSheet3ToLocalStorage(username) {
+    localStorage.setItem(SHEET3_STORAGE_KEY + username, JSON.stringify(sheetData3));
+    localStorage.setItem(SHEET3_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs3)));
+  }
+  
+  function saveSheet4ToLocalStorage(username) {
+    localStorage.setItem(SHEET4_STORAGE_KEY + username, JSON.stringify(sheetData4));
+    localStorage.setItem(SHEET4_SUBMITTED_KEY + username, JSON.stringify(Array.from(submittedUIDs4)));
+  }
+  
+  function saveAllToLocalStorage(username) {
+    if(!username) return;
+    saveSheet1ToLocalStorage(username);
+    saveSheet2ToLocalStorage(username);
+    saveSheet3ToLocalStorage(username);
+    saveSheet4ToLocalStorage(username);
+  }
+
+  async function loadUserDataFromFirebase(username) {
+    if(!firebaseDb) return false;
+    try {
+      const snapshot = await firebaseDb.ref('userSheets/' + username).once('value');
+      const data = snapshot.val();
+      if(data) {
+        if(data.sheetData && data.sheetData.length === ROWS) sheetData1 = data.sheetData;
+        if(data.submittedUIDs) submittedUIDs1 = new Set(data.submittedUIDs);
+        if(data.sheetData2 && data.sheetData2.length === ROWS) sheetData2 = data.sheetData2;
+        if(data.submittedUIDs2) submittedUIDs2 = new Set(data.submittedUIDs2);
+        if(data.sheetData3 && data.sheetData3.length === ROWS) sheetData3 = data.sheetData3;
+        if(data.submittedUIDs3) submittedUIDs3 = new Set(data.submittedUIDs3);
+        if(data.sheetData4 && data.sheetData4.length === ROWS) sheetData4 = data.sheetData4;
+        if(data.submittedUIDs4) submittedUIDs4 = new Set(data.submittedUIDs4);
+        if(data.chatId) currentChatId = data.chatId;
+        if(data.telegramUsername) currentTelegramUsername = data.telegramUsername;
+        if(tgUsernameInput) tgUsernameInput.value = currentTelegramUsername || '';
+        if(tgChatIdInput && currentChatId) tgChatIdInput.value = currentChatId;
+        saveAllToLocalStorage(username);
+        return true;
+      }
+    } catch(e) { console.warn(e); }
+    return false;
+  }
+
+  function saveUserDataToFirebase(username) {
+    if(!firebaseDb || !username) return;
+    const tgUsernameRaw = tgUsernameInput ? tgUsernameInput.value.trim() : "";
+    const chatIdRaw = tgChatIdInput ? tgChatIdInput.value.trim() : "";
+    if (tgUsernameRaw && !tgUsernameRaw.startsWith('@')) currentTelegramUsername = '@' + tgUsernameRaw;
+    else currentTelegramUsername = tgUsernameRaw;
+    currentChatId = chatIdRaw;
+    
+    const dataToSave = {
+      sheetData: sheetData1,
+      submittedUIDs: Array.from(submittedUIDs1),
+      sheetData2: sheetData2,
+      submittedUIDs2: Array.from(submittedUIDs2),
+      sheetData3: sheetData3,
+      submittedUIDs3: Array.from(submittedUIDs3),
+      sheetData4: sheetData4,
+      submittedUIDs4: Array.from(submittedUIDs4),
+      chatId: currentChatId,
+      telegramUsername: currentTelegramUsername,
+      lastUpdated: Date.now()
+    };
+    firebaseDb.ref('userSheets/' + username).set(dataToSave).catch(function(e){ console.warn(e); });
+    
+    if(currentTelegramUsername && currentTelegramUsername !== "") {
+      var cleanUser = currentTelegramUsername.replace('@', '').toLowerCase();
+      firebaseDb.ref('telegramUsers/' + cleanUser).set({
+        chatId: parseInt(currentChatId) || 0,
+        username: currentTelegramUsername,
+        linkedAccount: username
+      }).catch(function(e){ console.warn(e); });
+    }
+  }
+
+  function createEmptySheet() {
+    var newSheet = [];
+    for (var i = 0; i < ROWS; i++) {
+      newSheet[i] = [];
+      for (var j = 0; j < COLS; j++) {
+        newSheet[i][j] = '';
+      }
+      newSheet[i][0] = (i+1).toString();
+    }
+    return newSheet;
+  }
+
+  async function initUserSession(username, password, isNew) {
+    undoStack = [];
+    redoStack = [];
+    
+    currentLoggedInUser = username;
+    
+    sheetData1 = createEmptySheet();
+    sheetData2 = createEmptySheet();
+    sheetData3 = createEmptySheet();
+    sheetData4 = createEmptySheet();
+    submittedUIDs1 = new Set();
+    submittedUIDs2 = new Set();
+    submittedUIDs3 = new Set();
+    submittedUIDs4 = new Set();
+    
+    var loaded = await loadUserDataFromFirebase(username);
+    if(!loaded) {
+      loadSheet1FromLocalStorage(username);
+      loadSheet2FromLocalStorage(username);
+      loadSheet3FromLocalStorage(username);
+      loadSheet4FromLocalStorage(username);
+    }
+    
+    if(!sheetData1 || sheetData1.length !== ROWS) sheetData1 = createEmptySheet();
+    if(!sheetData2 || sheetData2.length !== ROWS) sheetData2 = createEmptySheet();
+    if(!sheetData3 || sheetData3.length !== ROWS) sheetData3 = createEmptySheet();
+    if(!sheetData4 || sheetData4.length !== ROWS) sheetData4 = createEmptySheet();
+    
+    if(tgUsernameInput && tgUsernameInput.value) currentTelegramUsername = tgUsernameInput.value;
+    if(tgChatIdInput && tgChatIdInput.value) currentChatId = tgChatIdInput.value;
+    
+    if(displayUsernameSpan) displayUsernameSpan.innerText = username;
+    
+    var lastSheet = loadLastSheet();
+    currentSheet = lastSheet;
+    if(currentSheet === 1) { sheet1Btn.classList.add('active'); sheet2Btn.classList.remove('active'); sheet3Btn.classList.remove('active'); sheet4Btn.classList.remove('active'); }
+    else if(currentSheet === 2) { sheet2Btn.classList.add('active'); sheet1Btn.classList.remove('active'); sheet3Btn.classList.remove('active'); sheet4Btn.classList.remove('active'); }
+    else if(currentSheet === 3) { sheet3Btn.classList.add('active'); sheet1Btn.classList.remove('active'); sheet2Btn.classList.remove('active'); sheet4Btn.classList.remove('active'); }
+    else if(currentSheet === 4) { sheet4Btn.classList.add('active'); sheet1Btn.classList.remove('active'); sheet2Btn.classList.remove('active'); sheet3Btn.classList.remove('active'); }
+    
+    fullRender();
+    saveUserDataToFirebase(username);
+    
+    if(loadingScreen) loadingScreen.classList.add('hide');
+    if(loginOverlay) loginOverlay.classList.remove('visible');
+    if(appContainer) appContainer.classList.add('visible');
+    saveAuthToken(username, password);
+  }
+
+  function logout() {
+    if(currentLoggedInUser) {
+      saveUserDataToFirebase(currentLoggedInUser);
+    }
+    clearAuthToken();
+    currentLoggedInUser = null;
+    currentTelegramUsername = "";
+    sheetData1 = [];
+    sheetData2 = [];
+    sheetData3 = [];
+    sheetData4 = [];
+    if(submittedUIDs1) submittedUIDs1.clear();
+    if(submittedUIDs2) submittedUIDs2.clear();
+    if(submittedUIDs3) submittedUIDs3.clear();
+    if(submittedUIDs4) submittedUIDs4.clear();
+    
+    if(loadingScreen) loadingScreen.classList.add('hide');
+    if(loginOverlay) loginOverlay.classList.add('visible');
+    if(appContainer) appContainer.classList.remove('visible');
+    if(loginUsernameInput) loginUsernameInput.value = '';
+    if(loginPasswordInput) loginPasswordInput.value = '';
+    if(loginError) loginError.style.display = 'none';
+  }
+
+  async function handleLoginOrRegister() {
+    var username = loginUsernameInput.value.trim();
+    var password = loginPasswordInput.value.trim();
+    if(!username || !password) {
+      if(loginError) {
+        loginError.innerText = "ইউজারনেম ও পাসওয়ার্ড দিন";
+        loginError.style.display = 'block';
+      }
+      return;
+    }
+    if(loginError) loginError.style.display = 'none';
+    if(!firebaseDb) {
+      if(loginError) {
+        loginError.innerText = "Firebase সংযোগ নেই!";
+        loginError.style.display = 'block';
+      }
+      return;
+    }
+    
+    if(loadingScreen) loadingScreen.classList.remove('hide');
+    
+    try {
+      var userRef = firebaseDb.ref('users/' + username);
+      var snapshot = await userRef.once('value');
+      var userData = snapshot.val();
+      
+      if(userData) {
+        if(userData.password === password) {
+          await initUserSession(username, password, false);
+        } else {
+          if(loadingScreen) loadingScreen.classList.add('hide');
+          if(loginError) {
+            loginError.innerText = "ভুল পাসওয়ার্ড!";
+            loginError.style.display = 'block';
+          }
+        }
+      } else {
+        await userRef.set({ password: password, createdAt: Date.now() });
+        await initUserSession(username, password, true);
+        showToast("রেজিস্ট্রেশন সফল! স্বাগতম!");
+      }
+    } catch(err) {
+      console.error(err);
+      if(loadingScreen) loadingScreen.classList.add('hide');
+      if(loginError) {
+        loginError.innerText = "সার্ভার ত্রুটি, আবার চেষ্টা করুন";
+        loginError.style.display = 'block';
+      }
+    }
+  }
+
+  async function checkAutoLogin() {
+    var token = getAuthToken();
+    if(token && token.username && token.password && firebaseDb) {
+      try {
+        var ref = firebaseDb.ref('users/' + token.username);
+        var snap = await ref.once('value');
+        if(snap.exists() && snap.val().password === token.password) {
+          await initUserSession(token.username, token.password, false);
+          return true;
+        } else {
+          clearAuthToken();
+        }
+      } catch(e) { console.warn(e); }
+    }
+    return false;
+  }
+
+  function getMasterPassword() { 
+    var data = getCurrentSheetData();
+    return (data[0] && data[0][2]) ? data[0][2] : ''; 
+  }
+  
+  function autoFillPasswordIfNeeded(row) {
+    var data = getCurrentSheetData();
+    if(!data[row]) return;
+    
+    var uid = data[row][1] ? data[row][1].toString().trim() : "";
+    var currentPass = data[row][2] ? data[row][2].toString().trim() : "";
+    var masterPass = getMasterPassword();
+    
+    if (isPasswordAutoEnabled && uid !== "" && currentPass === "" && masterPass && masterPass.trim() !== "" && row !== 0) {
+      data[row][2] = masterPass;
+      var passCell = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
+      if(passCell && passCell.innerText !== masterPass) {
+        passCell.innerText = masterPass;
+      }
+      return true;
+    }
+    return false;
+  }
+  
+  function updateBFromARow(row, newAValue) {
+    var data = getCurrentSheetData();
+    if(!data[row]) return;
+    
+    data[row][1] = newAValue;
+    
+    if (newAValue && newAValue.toString().trim() !== "") {
+      autoFillPasswordIfNeeded(row);
+    } else if (!newAValue || newAValue.toString().trim() === "") {
+      data[row][2] = "";
+      var passCell2 = document.querySelector('#sheetBody td[data-row="' + row + '"][data-col="2"] .cell-content');
+      if(passCell2) passCell2.innerText = "";
+    }
+    
+    saveAllToLocalStorage(currentLoggedInUser);
+    saveUserDataToFirebase(currentLoggedInUser);
+    checkDuplicateHighlight();
+  }
+  
+  function pushToUndo() { 
+    if (!isUndoRedo) { 
+      var currentData = getCurrentSheetData();
+      var copy = JSON.parse(JSON.stringify(currentData)); 
+      undoStack.push(copy); 
+      if (undoStack.length > MAX_HISTORY) undoStack.shift(); 
+      redoStack = []; 
+    } 
+  }
+  
+  function undo() { 
+    if (undoStack.length === 0) { showToast("আর Undo নেই"); return; } 
+    isUndoRedo = true; 
+    var currentData = getCurrentSheetData();
+    redoStack.push(JSON.parse(JSON.stringify(currentData))); 
+    var newData = undoStack.pop();
+    updateCurrentSheetData(newData);
+    fullRender(); 
+    saveAllToLocalStorage(currentLoggedInUser); 
+    saveUserDataToFirebase(currentLoggedInUser); 
+    isUndoRedo = false; 
+    showToast("Undone"); 
+  }
+  
+  function redo() { 
+    if (redoStack.length === 0) { showToast("আর Redo নেই"); return; } 
+    isUndoRedo = true; 
+    var currentData = getCurrentSheetData();
+    undoStack.push(JSON.parse(JSON.stringify(currentData))); 
+    var newData = redoStack.pop();
+    updateCurrentSheetData(newData);
+    fullRender(); 
+    saveAllToLocalStorage(currentLoggedInUser); 
+    saveUserDataToFirebase(currentLoggedInUser); 
+    isUndoRedo = false; 
+    showToast("Redone"); 
+  }
+  
+  function checkDuplicateHighlight() {
+    var cellsA = document.querySelectorAll('#sheetBody td[data-col="1"] .cell-content');
+    cellsA.forEach(function(cell) { 
+      if(cell.parentElement) cell.parentElement.classList.remove('duplicate-error'); 
+    });
+    var valueMap = new Map();
+    for (var i = 0; i < cellsA.length; i++) { 
+      var val = cellsA[i].innerText.trim(); 
+      if (val !== "") { 
+        if (!valueMap.has(val)) valueMap.set(val, []); 
+        valueMap.get(val).push(cellsA[i].parentElement); 
+      } 
+    }
+    for (var pair of valueMap.entries()) { 
+      if (pair[1].length > 1) {
+        for(var k=0; k<pair[1].length; k++) {
+          pair[1][k].classList.add('duplicate-error');
+        }
+      }
+    }
+  }
+  
+  function clearAllSelection() { 
+    for (var cell of selectedCells) {
+      if(cell) cell.classList.remove('selected');
+    }
+    selectedCells.clear(); 
+  }
+  
+  function isAllDataColumnsSelected() {
+    if (selectedCells.size === 0) return false;
+    
+    var selectedRowsSet = new Set();
+    var selectedColsSet = new Set();
+    
+    for (var cell of selectedCells) {
+      var row = parseInt(cell.getAttribute('data-row'));
+      var col = parseInt(cell.getAttribute('data-col'));
+      if (!isNaN(row) && !isNaN(col) && col >= 1 && col <= 5) {
+        selectedRowsSet.add(row);
+        selectedColsSet.add(col);
+      }
+    }
+    
+    if (selectedColsSet.size !== 5) return false;
+    if (selectedRowsSet.size !== ROWS) return false;
+    
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 1; c <= 5; c++) {
+        var found = false;
+        for (var cell2 of selectedCells) {
+          var rr = parseInt(cell2.getAttribute('data-row'));
+          var cc = parseInt(cell2.getAttribute('data-col'));
+          if (rr === r && cc === c) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  function showBulkDeleteConfirmation(count) {
+    return new Promise(function(resolve) {
+      var sheetName = currentSheet === 1 ? "শীট ১" : (currentSheet === 2 ? "শীট ২" : (currentSheet === 3 ? "শীট ৩" : "শীট ৪"));
+      var modalDiv = document.createElement('div');
+      modalDiv.className = 'bulk-delete-confirm-overlay';
+      modalDiv.innerHTML = '<div class="bulk-delete-confirm">' +
+        '<div class="icon">⚠️🗑️</div>' +
+        '<h3>সমস্ত ডাটা ডিলিট!</h3>' +
+        '<div class="delete-info-box">' +
+        '<strong>শীট:</strong> ' + sheetName + '<br>' +
+        '<strong>মোট সেল:</strong> ' + count + ' টি সেল<br>' +
+        '<strong>মোট রো:</strong> ' + ROWS + ' টি<br>' +
+        '<strong>কলাম:</strong> UID, পাসওয়ার্ড, কুকিজ/2FA, D, E' +
+        '</div>' +
+        '<div class="warning-text">' +
+        'সতর্কতা: এই অপারেশনটি স্থায়ীভাবে সব ডাটা মুছে ফেলবে!<br>' +
+        'একবার ডিলিট করলে আর Undo করা যাবে না!' +
+        '</div>' +
+        '<div class="bulk-delete-actions">' +
+        '<button class="delete-confirm-yes" id="bulkDeleteYesBtn">হ্যাঁ, সম্পূর্ণ ডিলিট করুন</button>' +
+        '<button class="delete-confirm-no" id="bulkDeleteNoBtn">বাতিল করুন</button>' +
+        '</div></div>';
+      document.body.appendChild(modalDiv);
+      
+      var yesBtn = document.getElementById('bulkDeleteYesBtn');
+      var noBtn = document.getElementById('bulkDeleteNoBtn');
+      
+      var cleanup = function() { if(modalDiv) modalDiv.remove(); };
+      
+      if(yesBtn) {
+        yesBtn.addEventListener('click', function() {
+          cleanup();
+          resolve(true);
+        });
+      }
+      if(noBtn) {
+        noBtn.addEventListener('click', function() {
+          cleanup();
+          resolve(false);
+        });
+      }
+      modalDiv.addEventListener('click', function(e) {
+        if(e.target === modalDiv) {
+          cleanup();
+          resolve(false);
+        }
+      });
+    });
+  }
+  
+  async function deleteSelected() {
+    if (selectedCells.size === 0) { 
+      showToast("কিছু সিলেক্ট করেনি"); 
+      return; 
+    }
+    
+    var isBulkDelete = isAllDataColumnsSelected();
+    
+    if (isBulkDelete) {
+      var confirmed = await showBulkDeleteConfirmation(selectedCells.size);
+      if (!confirmed) {
+        showToast("ডিলিট বাতিল করা হয়েছে");
+        return;
+      }
+      undoStack = [];
+      redoStack = [];
+      showToast("বাল্ক ডিলিট: Undo স্ট্যাক ক্লিয়ার করা হয়েছে");
+    } else {
+      if (!isUndoRedo) pushToUndo();
+    }
+    
+    var cellsToDelete = Array.from(selectedCells);
+    var data = getCurrentSheetData();
+    
+    for (var i = 0; i < cellsToDelete.length; i++) {
+      var cell = cellsToDelete[i];
+      var r = parseInt(cell.getAttribute('data-row')); 
+      var c = parseInt(cell.getAttribute('data-col')); 
+      var contentDiv = cell.querySelector('.cell-content'); 
+      if (contentDiv && c !== 0 && data[r]) { 
+        contentDiv.innerText = ''; 
+        data[r][c] = ''; 
+      } 
+      if (c === 1 && data[r]) {
+        data[r][2] = '';
+        var passContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content');
+        if(passContent) passContent.innerText = '';
+      }
+    }
+    
+    saveAllToLocalStorage(currentLoggedInUser);
+    saveUserDataToFirebase(currentLoggedInUser);
+    checkDuplicateHighlight(); 
+    clearAllSelection(); 
+    
+    if (isBulkDelete) {
+      showToast("সম্পূর্ণ শীটের সমস্ত ডাটা স্থায়ীভাবে ডিলিট হয়েছে!");
+    } else {
+      showToast(cellsToDelete.length + " টি সেল ডিলিট হয়েছে");
+    }
+  }
+  
+  function makeEditable(contentDiv, row, col) {
+    if (col === 0) return;
+    if (col === 1) {
+      contentDiv.addEventListener('input', function() { 
+        if (!isUndoRedo) pushToUndo();
+        var newVal = this.innerText;
+        if(isUidValidationEnabled) {
+          var onlyNumbers = newVal.replace(/[^0-9]/g, '');
+          if (onlyNumbers !== newVal) this.innerText = onlyNumbers;
+          newVal = onlyNumbers;
+        }
+        var data = getCurrentSheetData();
+        if(data[row] && data[row][1] !== newVal) {
+          data[row][1] = newVal;
+          updateBFromARow(row, newVal);
+        }
+        saveAllToLocalStorage(currentLoggedInUser);
+        saveUserDataToFirebase(currentLoggedInUser);
+        checkDuplicateHighlight();
+      });
+    } else if (col === 2) {
+      contentDiv.addEventListener('input', function() { 
+        if (!isUndoRedo) pushToUndo(); 
+        var data = getCurrentSheetData(); 
+        if(data[row]) data[row][2] = this.innerText; 
+        saveAllToLocalStorage(currentLoggedInUser); 
+        saveUserDataToFirebase(currentLoggedInUser); 
+      });
+    } else {
+      contentDiv.addEventListener('input', function() { 
+        if (!isUndoRedo) pushToUndo(); 
+        var data = getCurrentSheetData(); 
+        if(data[row]) data[row][col] = this.innerText; 
+        saveAllToLocalStorage(currentLoggedInUser); 
+        saveUserDataToFirebase(currentLoggedInUser); 
+      });
+    }
+  }
+  
+  function fullRender() {
+    if (!sheetBody) sheetBody = document.getElementById('sheetBody'); 
+    if (!sheetBody) return;
+    sheetBody.innerHTML = '';
+    var currentData = getCurrentSheetData();
+    
+    if(!currentData || currentData.length !== ROWS) {
+      if(currentSheet === 1) sheetData1 = createEmptySheet();
+      else if(currentSheet === 2) sheetData2 = createEmptySheet();
+      else if(currentSheet === 3) sheetData3 = createEmptySheet();
+      else if(currentSheet === 4) sheetData4 = createEmptySheet();
+      currentData = getCurrentSheetData();
+    }
+    
+    var masterPass = getMasterPassword();
+    
+    for (var row = 0; row < ROWS; row++) {
+      var tr = document.createElement('tr');
+      for (var col = 0; col < COLS; col++) {
+        var td = document.createElement('td'); 
+        td.setAttribute('data-row', row); 
+        td.setAttribute('data-col', col); 
+        td.style.width = colWidths[col] + 'px'; 
+        td.style.minWidth = colWidths[col] + 'px';
+        var contentDiv = document.createElement('div'); 
+        contentDiv.className = 'cell-content'; 
+        contentDiv.setAttribute('contenteditable', col !== 0 ? 'true' : 'false');
+        var cellValue = (currentData[row] && currentData[row][col]) ? currentData[row][col] : ''; 
+        if (col === 0 && (!cellValue || cellValue === "")) cellValue = (row+1).toString();
+        
+        if (col === 2 && row !== 0 && isPasswordAutoEnabled && currentData[row] && currentData[row][1] && currentData[row][1].toString().trim() !== "") {
+          if (!cellValue || cellValue === "") {
+            if (masterPass && masterPass.trim() !== "") {
+              cellValue = masterPass;
+              currentData[row][2] = masterPass;
+            }
+          }
+        }
+        
+        contentDiv.innerText = cellValue || '';
+        if (col === 0) { 
+          contentDiv.style.textAlign = 'center'; 
+          contentDiv.style.overflow = 'hidden'; 
+          contentDiv.style.whiteSpace = 'nowrap'; 
+        }
+        td.appendChild(contentDiv);
+        if (col !== 0) { 
+          makeEditable(contentDiv, row, col); 
+          (function(tdElement) {
+            contentDiv.addEventListener('click', function(e) { 
+              e.stopPropagation(); 
+              if (!e.ctrlKey && !e.metaKey) clearAllSelection(); 
+              tdElement.classList.add('selected'); 
+              selectedCells.add(tdElement); 
+            });
+          })(td);
+        } else { 
+          td.addEventListener('click', function(e) { e.stopPropagation(); }); 
+        }
+        tr.appendChild(td);
+      }
+      sheetBody.appendChild(tr);
+    }
+    checkDuplicateHighlight();
+    
+    var masterCell = document.querySelector('#sheetBody td[data-row="0"][data-col="2"] .cell-content');
+    if (masterCell) { 
+      masterCell.addEventListener('blur', function() { 
+        var newMaster = getMasterPassword(); 
+        if (newMaster && newMaster.trim() !== "" && isPasswordAutoEnabled) { 
+          var data = getCurrentSheetData();
+          for (var r = 1; r < ROWS; r++) { 
+            if (data[r] && data[r][1] && data[r][1].toString().trim() !== "") {
+              if (!data[r][2] || data[r][2] === "") {
+                data[r][2] = newMaster; 
+                var tBContent = document.querySelector('#sheetBody td[data-row="' + r + '"][data-col="2"] .cell-content'); 
+                if (tBContent) tBContent.innerText = newMaster;
+              }
+            } 
+          } 
+          saveAllToLocalStorage(currentLoggedInUser); 
+          saveUserDataToFirebase(currentLoggedInUser); 
+        } 
+      }); 
+    }
+    restoreScrollPosition();
+    addResizeHandles(); 
+    bindColumnSelection();
+  }
+  
+  function addResizeHandles() {
+    var ths = document.querySelectorAll('#headerRow th');
+    for(var idx=0; idx<ths.length; idx++) {
+      var th = ths[idx];
+      if (idx === 0) continue;
+      var existingHandle = th.querySelector('.resize-handle');
+      if(existingHandle) existingHandle.remove();
+      var handle = document.createElement('div'); 
+      handle.className = 'resize-handle';
+      var startX, startW, isResizing = false;
+      var onMove = function(e, colIdx) { 
+        if (!isResizing) return; 
+        var clientX = e.touches ? e.touches[0].clientX : e.clientX; 
+        var diff = clientX - startX; 
+        var newW = startW + diff; 
+        if (newW < 60) newW = 60; 
+        if (newW > 180) newW = 180; 
+        colWidths[colIdx] = newW; 
+        var allCells = document.querySelectorAll('#sheetBody td[data-col="' + colIdx + '"], #headerRow th[data-col="' + colIdx + '"]'); 
+        for(var i=0; i<allCells.length; i++) {
+          allCells[i].style.width = newW + 'px'; 
+          allCells[i].style.minWidth = newW + 'px';
+        }
+      };
+      var onUp = function() { 
+        isResizing = false; 
+        window.removeEventListener('mousemove', onMove); 
+        window.removeEventListener('mouseup', onUp); 
+        window.removeEventListener('touchmove', onMove); 
+        window.removeEventListener('touchend', onUp); 
+      };
+      (function(colIdx) {
+        handle.addEventListener('touchstart', function(e) { 
+          e.preventDefault(); 
+          isResizing = true; 
+          startX = e.touches[0].clientX; 
+          startW = colWidths[colIdx]; 
+          window.addEventListener('touchmove', function(ev) { onMove(ev, colIdx); }, { passive: false }); 
+          window.addEventListener('touchend', onUp); 
+        });
+        handle.addEventListener('mousedown', function(e) { 
+          e.preventDefault(); 
+          isResizing = true; 
+          startX = e.clientX; 
+          startW = colWidths[colIdx]; 
+          window.addEventListener('mousemove', function(ev) { onMove(ev, colIdx); }); 
+          window.addEventListener('mouseup', onUp); 
+        });
+      })(idx);
+      th.appendChild(handle); 
+      th.style.position = 'relative';
+    }
+  }
+  
+  function bindColumnSelection() {
+    var headers = document.querySelectorAll('#headerRow th');
+    for(var colIdx=0; colIdx<headers.length; colIdx++) {
+      var th = headers[colIdx];
+      if (colIdx === 0) continue;
+      (function(cIdx) {
+        th.addEventListener('click', function(e) { 
+          if (e.target.classList && (e.target.classList.contains('resize-handle') || e.target.classList.contains('uid-toggle-switch') || e.target.classList.contains('password-toggle-switch'))) return; 
+          clearAllSelection(); 
+          var cells = document.querySelectorAll('#sheetBody td[data-col="' + cIdx + '"]');
+          for(var i=0; i<cells.length; i++) {
+            cells[i].classList.add('selected'); 
+            selectedCells.add(cells[i]);
+          }
+          showToast(th.innerText + " সিলেক্টেড"); 
+        });
+      })(colIdx);
+    }
+  }
+  
+  function selectAllDataColumns() { 
+    clearAllSelection(); 
+    for (var col = 1; col < COLS; col++) { 
+      var cells = document.querySelectorAll('#sheetBody td[data-col="' + col + '"]');
+      for(var i=0; i<cells.length; i++) {
+        cells[i].classList.add('selected'); 
+        selectedCells.add(cells[i]);
+      }
+    } 
+    showToast("সব ডাটা কলাম সিলেক্ট হয়েছে"); 
+  }
+  
+  async function copySelected() {
+    if (selectedCells.size === 0) { showToast("কিছু সিলেক্ট করেনি"); return; }
+    var minR=Infinity, maxR=-Infinity, minC=Infinity, maxC=-Infinity;
+    for (var cell of selectedCells) { 
+      var r = parseInt(cell.getAttribute('data-row')), c = parseInt(cell.getAttribute('data-col')); 
+      if (!isNaN(r) && !isNaN(c)) { 
+        minR = Math.min(minR, r); maxR = Math.max(maxR, r); 
+        minC = Math.min(minC, c); maxC = Math.max(maxC, c); 
+      } 
+    }
+    if (minR === Infinity) { showToast("সিলেক্ট ভ্যালিড না"); return; }
+    var matrix = [];
+    for (var i = 0; i <= maxR-minR; i++) {
+      matrix[i] = [];
+      for (var j = 0; j <= maxC-minC; j++) {
+        matrix[i][j] = '';
+      }
+    }
+    for (var cell of selectedCells) { 
+      var rr = parseInt(cell.getAttribute('data-row')), cc = parseInt(cell.getAttribute('data-col')); 
+      var contentDiv = cell.querySelector('.cell-content'); 
+      matrix[rr-minR][cc-minC] = contentDiv ? contentDiv.innerText : ''; 
+    }
+    var tsv = '';
+    for(var i=0; i<matrix.length; i++) {
+      tsv += matrix[i].join('\t');
+      if(i < matrix.length-1) tsv += '\n';
+    }
+    try { await navigator.clipboard.writeText(tsv); showToast(selectedCells.size + " সেল কপি"); } catch(e) { showToast("কপি ব্যর্থ"); }
+  }
+  
+  function saveUserInfo() {
+    var username = tgUsernameInput ? tgUsernameInput.value.trim() : "";
+    var chatId = tgChatIdInput ? tgChatIdInput.value.trim() : "";
+    if (username && !username.startsWith('@')) username = '@' + username;
+    currentTelegramUsername = username;
+    currentChatId = chatId || "";
+    
+    if(currentLoggedInUser) {
+        localStorage.setItem(currentLoggedInUser + "_tg_username", currentTelegramUsername);
+        localStorage.setItem(currentLoggedInUser + "_chat_id", currentChatId);
+    }
+    
+    if(firebaseDb && currentLoggedInUser) { saveUserDataToFirebase(currentLoggedInUser); }
+    showToast("✅ টেলিগ্রাম তথ্য সেভ হয়েছে!");
+  }
+
+  function getNewUnsubmittedUIDs() { 
+    var arr = []; 
+    var data = getCurrentSheetData();
+    var submitted = getCurrentSubmittedUIDs();
+    for (var i=0;i<ROWS;i++) { 
+      if(!data[i]) continue;
+      var uid = data[i][1] ? data[i][1].toString().trim() : ""; 
+      if(uid && !submitted.has(uid)) arr.push({ row:i, uid: uid, password: data[i][2] || "", cookies: data[i][3] || "", colD: data[i][4] || "", colE: data[i][5] || "" }); 
+    } 
+    return arr; 
+  }
+  
+  function hasAnyUnsubmittedData() { 
+    var data = getCurrentSheetData();
+    var submitted = getCurrentSubmittedUIDs();
+    for (var i=0;i<ROWS;i++) { 
+      if(!data[i]) continue;
+      var uid = data[i][1] ? data[i][1].toString().trim() : ""; 
+      if(uid && !submitted.has(uid)) return true; 
+    } 
+    return false; 
+  }
+  
+  function showTelegramWarning() {
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'confirm-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="confirm-modal" style="border-top: 6px solid #f97316;">
+        <div class="icon">⚠️</div>
+        <h3 style="color:#c2410c;">টেলিগ্রাম তথ্য প্রয়োজন!</h3>
+        <div class="info-box" style="background:#fffbeb; color:#78350f;">
+          <p><strong>📌 আপনার টেলিগ্রাম ইউজারনেম ও চ্যাট আইডি সেট করুন</strong></p>
+          <p>🔹 <strong>টেলিগ্রাম ইউজারনেম:</strong> আপনার টেলিগ্রাম আইডি (যেমন: @username)</p>
+          <p>🔹 <strong>চ্যাট আইডি:</strong> আপনার টেলিগ্রাম চ্যাট আইডি</p>
+          <p>🤖 <strong>কিভাবে চ্যাট আইডি পাবেন?</strong><br>
+          টেলিগ্রামে <strong>@idbot</strong> সার্চ করুন → /start কমান্ড দিন → আপনার চ্যাট আইডি দেখাবে</p>
+          <p>✅ উপরের বক্সে তথ্য দিন এবং "তথ্য সেভ করুন" বাটনে ক্লিক করুন</p>
+        </div>
+        <div class="confirm-actions">
+          <button class="confirm-yes" id="tgWarningCloseBtn" style="background:#f97316;">🔒 বুঝেছি</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    var closeBtn = document.getElementById('tgWarningCloseBtn');
+    if(closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        modalDiv.remove();
+      });
+    }
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) modalDiv.remove();
+    });
+  }
+  
+  async function sendTelegramFileWithRetry(chatId, file, caption, replyMarkup = null, retryCount = 0) {
+    if (!chatId) return { success: false, error: "No chat ID" };
+    
+    const maxRetries = 3;
+    const retryDelay = 2000;
+    
+    try { 
+      var formData = new FormData(); 
+      formData.append("chat_id", chatId.toString()); 
+      formData.append("document", file); 
+      formData.append("caption", caption); 
+      formData.append("parse_mode", "HTML");
+      
+      if (replyMarkup) {
+        formData.append("reply_markup", JSON.stringify(replyMarkup));
+      }
+      
+      var response = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendDocument", { 
+        method: "POST", 
+        body: formData 
+      }); 
+      
+      var result = await response.json();
+      
+      if (result.ok) {
+        return { success: true, messageId: result.result.message_id };
+      } else {
+        console.warn("Telegram API error:", result);
+        if (retryCount < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          return sendTelegramFileWithRetry(chatId, file, caption, replyMarkup, retryCount + 1);
+        }
+        return { success: false, error: result.description || "Unknown error" };
+      }
+    } catch(e) { 
+      if (retryCount < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return sendTelegramFileWithRetry(chatId, file, caption, replyMarkup, retryCount + 1);
+      }
+      return { success: false, error: e.message }; 
+    } 
+  }
+  
+  function showSuccessModal(newDataCount, accountType, adminUsername, adminConfirmed, userSent, sheetName) {
+    var todayBangla = new Date().toLocaleDateString('bn-BD', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    var timeBangla = new Date().toLocaleTimeString('bn-BD', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    var fullDateTime = todayBangla + ", " + timeBangla;
+    
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'success-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="success-modal">
+        <div class="success-icon">${adminConfirmed ? '✅✅' : '✅'}</div>
+        <h3>${adminConfirmed ? '🎉 সাবমিট সফল! (এডমিন কনফার্মড)' : '📤 সাবমিট সম্পন্ন!'}</h3>
+        
+        <div class="success-details">
+          <p><span class="label">📄 শীট নম্বর:</span> <span class="value">${escapeHtml(sheetName)}</span></p>
+          <p><span class="label">👤 টেলিগ্রাম ইউজার:</span> <span class="value">${escapeHtml(currentTelegramUsername || "সেট করা হয়নি")}</span></p>
+          <p><span class="label">🆔 চ্যাট আইডি:</span> <span class="value">${escapeHtml(currentChatId || "সেট করা হয়নি")}</span></p>
+          <p><span class="label">📁 একাউন্ট ধরণ:</span> <span class="value">${escapeHtml(accountType)}</span></p>
+          <p><span class="label">👑 এডমিন ইউজারনেম:</span> <span class="value">${escapeHtml(adminUsername)}</span></p>
+          <p><span class="label">📊 মোট সাবমিটকৃত UID:</span> <span class="value">${newDataCount} টি</span></p>
+          <p><span class="label">📅 সাবমিটের তারিখ:</span> <span class="value">${fullDateTime}</span></p>
+          ${adminConfirmed ? `
+          <div class="admin-confirm-badge">
+            <span>👑✅</span> এডমিনের কাছে ১০০% কনফার্ম হয়েছে! 
+            <span>✅👑</span>
+          </div>
+          ` : ''}
+        </div>
+        
+        ${userSent ? '<div style="background:#dcfce7; padding:10px; border-radius:16px; margin-top:8px; text-align:center; color:#15803d;">✅ আপনার টেলিগ্রাম ইনবক্সে ফাইল পাঠানো হয়েছে!</div>' : ''}
+        ${!userSent && adminConfirmed ? '<div class="warning-note">⚠️ আপনি যদি আপনার ইনবক্সে ফাইল না পান, দয়া করে ' + BOT_USERNAME + ' এ গিয়ে /start দিন!</div>' : ''}
+        
+        <button class="close-success-btn" id="closeSuccessModalBtn">🔒 ক্লোজ</button>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    var closeBtn = document.getElementById('closeSuccessModalBtn');
+    if(closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        modalDiv.remove();
+      });
+    }
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) {
+        modalDiv.remove();
+      }
+    });
+  }
+  
+  function showAdminNotFoundError(adminUsername) {
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'confirm-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="confirm-modal" style="border-top: 6px solid #dc2626;">
+        <div class="icon">❌</div>
+        <h3 style="color:#991b1b;">এডমিন খুঁজে পাওয়া যায়নি!</h3>
+        <div class="info-box" style="background:#fef2f2; color:#7f1d1d;">
+          <p><strong>👑 আপনি যে এডমিন ব্যবহার করছেন:</strong> ${escapeHtml(adminUsername)}</p>
+          <p><strong>⚠️ সমস্যা:</strong> এই ইউজারনেমের কোনো এডমিন রেজিস্ট্রেশন নেই!</p>
+          <p><strong>📌 সমাধান:</strong> দয়া করে নিচের কাজগুলো করুন:</p>
+          <ul style="margin-left: 20px; margin-top: 8px;">
+            <li>✅ আপনার এডমিনকে বলুন "এডমিন প্যানেল" এ গিয়ে রেজিস্ট্রেশন করতে</li>
+            <li>✅ অথবা সঠিক এডমিন ইউজারনেম ব্যবহার করুন</li>
+            <li>✅ অথবা সরাসরি আপনার এডমিনের ইনবক্সে ফাইল পাঠান</li>
+          </ul>
+        </div>
+        <div class="confirm-actions">
+          <button class="confirm-no" id="adminNotFoundCloseBtn" style="background:#dc2626; color:white;">🔒 বুঝেছি</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    var closeBtn = document.getElementById('adminNotFoundCloseBtn');
+    if(closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        modalDiv.remove();
+      });
+    }
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) modalDiv.remove();
+    });
+  }
+  
+  async function showSubmitModal() {
+    if(!currentLoggedInUser) return;
+    
+    if(!currentTelegramUsername || !currentChatId) {
+      showTelegramWarning();
+      return;
+    }
+    
+    if(!hasAnyUnsubmittedData()) {
+      showToast("এই শীটে কোনো নতুন UID নেই!");
+      return;
+    }
+    
+    var newDataCount = getNewUnsubmittedUIDs().length;
+    var sheetName = currentSheet === 1 ? "শীট ১" : (currentSheet === 2 ? "শীট ২" : (currentSheet === 3 ? "শীট ৩" : "শীট ৪"));
+    var savedAdminUsername = localStorage.getItem(SAVED_ADMIN_USERNAME_KEY) || "";
+    var userDisplayName = currentTelegramUsername || "আপনার ইউজারনেম";
+    var todayDate = new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+    var currentTime = new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
+    
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'confirm-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="confirm-modal submit-modal">
+        <div class="icon">📋</div>
+        <h3>📤 𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗙𝗜𝗟𝗘 𝗦𝗨𝗕𝗠𝗜𝗧</h3>
+        
+        <div class="info-box" style="background:#eef2ff;">
+          <p><span class="label">📄 শীট:</span> <span class="value">${escapeHtml(sheetName)}</span></p>
+          <p><span class="label">👤 আপনার ইউজার:</span> <span class="value">${escapeHtml(userDisplayName)}</span></p>
+          <p><span class="label">🆔 আপনার চ্যাট আইডি:</span> <span class="value">${escapeHtml(currentChatId)}</span></p>
+          <p><span class="label">📊 নতুন আইডি সংখ্যা:</span> <span class="value">${newDataCount} টি</span></p>
+          <p><span class="label">📅 আজকের তারিখ:</span> <span class="value">${todayDate}</span></p>
+          <p><span class="label">⏰ বর্তমান সময়:</span> <span class="value">${currentTime}</span></p>
+        </div>
+        
+        <div class="bot-warning-box">
+          <div class="warning-title">
+            ⚠️ <strong>গুরুত্বপূর্ণ নির্দেশনা!</strong>
+          </div>
+          <div class="warning-text">
+            <p>🤖 <strong>আমাদের বট:</strong> ${BOT_USERNAME}</p>
+            <p>📌 আপনি যদি আগে কখনো এই বটে <strong>/start</strong> না করে থাকেন, তাহলে দয়া করে <strong>প্রথমে বটে গিয়ে স্টার্ট করুন</strong>, তারপরে ফাইল সাবমিট করুন।</p>
+            <p>✅ <strong>একবার স্টার্ট করলেই হলো!</strong> পরবর্তী সকল ফাইল সাবমিট স্বয়ংক্রিয়ভাবে আপনার ইনবক্সে পৌঁছে যাবে।</p>
+            <p>🔗 <strong>বট লিংক:</strong> <a href="https://t.me/${BOT_USERNAME.replace('@', '')}" target="_blank" style="color:#1e5a88;">https://t.me/${BOT_USERNAME.replace('@', '')}</a>
+            <button class="copy-btn-small" id="copyBotLinkBtn">📋 কপি</button>
+            </p>
+          </div>
+        </div>
+        
+        <div class="input-area">
+          <label>📂 একাউন্টের ধরণ <span class="required-star">*</span></label>
+          <input type="text" id="confirmAccountType" placeholder="যেমন: 0FND COOKIES, 2FA+COOKIES" autocomplete="off">
+          <div class="input-hint">একাউন্টের নাম লেখা বাধ্যতামূলক</div>
+        </div>
+        
+        <div class="input-area">
+          <label>👑 এডমিন ইউজারনেম <span class="required-star">*</span></label>
+          <input type="text" id="adminUsernameInput" placeholder="@adminusername" autocomplete="off" value="${escapeHtml(savedAdminUsername)}">
+          <div class="input-hint">যে এডমিনের কাছে ফাইল জমা দিতে চান, তার ইউজারনেম দিন</div>
+        </div>
+        
+        <button class="save-admin-username-btn" id="saveAdminUsernameBtn">💾 এডমিন ইউজারনেম সেভ করুন</button>
+        
+        <div class="confirm-actions">
+          <button class="confirm-yes" id="submitConfirmYesBtn">✅ হ্যাঁ, সাবমিট করুন</button>
+          <button class="confirm-no" id="submitConfirmNoBtn">❌ বাতিল করুন</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    var yesBtn = document.getElementById('submitConfirmYesBtn');
+    var noBtn = document.getElementById('submitConfirmNoBtn');
+    var accountInput = document.getElementById('confirmAccountType');
+    var adminUsernameInput = document.getElementById('adminUsernameInput');
+    var saveAdminBtn = document.getElementById('saveAdminUsernameBtn');
+    var copyBotLinkBtn = document.getElementById('copyBotLinkBtn');
+    
+    if(copyBotLinkBtn) {
+      copyBotLinkBtn.addEventListener('click', function() {
+        copyToClipboard(BOT_USERNAME);
+      });
+    }
+    
+    var cleanup = function() { if(modalDiv) modalDiv.remove(); };
+    
+    if(saveAdminBtn) {
+      saveAdminBtn.addEventListener('click', function() {
+        var adminUsername = adminUsernameInput.value.trim();
+        if(adminUsername) {
+          localStorage.setItem(SAVED_ADMIN_USERNAME_KEY, adminUsername);
+          showToast("✅ এডমিন ইউজারনেম সেভ করা হয়েছে!");
+        } else {
+          showToast("❌ দয়া করে একটি ইউজারনেম দিন!");
+        }
+      });
+    }
+    
+    if(yesBtn) {
+      yesBtn.addEventListener('click', async function() {
+        var accountType = accountInput ? accountInput.value.trim() : "";
+        var adminUsername = adminUsernameInput ? adminUsernameInput.value.trim() : "";
+        
+        if(accountType === "") {
+          showToast("❌ দয়া করে একাউন্টের ধরণ লিখুন");
+          if(accountInput) accountInput.style.borderColor = "#dc2626";
+          return;
+        }
+        
+        if(adminUsername === "") {
+          showToast("❌ দয়া করে এডমিনের ইউজারনেম দিন");
+          if(adminUsernameInput) adminUsernameInput.style.borderColor = "#dc2626";
+          return;
+        }
+        
+        cleanup();
+        await processSubmit(accountType, adminUsername);
+      });
+    }
+    
+    if(noBtn) {
+      noBtn.addEventListener('click', function() { cleanup(); showToast("সাবমিশন বাতিল"); });
+    }
+    
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) { cleanup(); showToast("সাবমিশন বাতিল"); }
+    });
+  }
+  
+  async function processSubmit(accountType, adminUsername) {
+    if(!currentLoggedInUser) return;
+    
+    if(!currentTelegramUsername || !currentChatId) {
+      showTelegramWarning();
+      return;
+    }
+    
+    var newData = getNewUnsubmittedUIDs();
+    if(newData.length === 0) return;
+    
+    var cleanAdminUsername = adminUsername.replace('@', '').toLowerCase();
+    var adminInfo = null;
+    
+    if(firebaseDb) {
+      try {
+        var snapshot = await firebaseDb.ref('adminUsers/' + cleanAdminUsername).once('value');
+        adminInfo = snapshot.val();
+        console.log("Admin info from Firebase:", adminInfo);
+      } catch(e) { console.warn(e); }
+    }
+    
+    if(!adminInfo || !adminInfo.chatId) {
+      showAdminNotFoundError(adminUsername);
+      return;
+    }
+    
+    var excelRows = [];
+    for(var idx=0; idx<newData.length; idx++) {
+      excelRows.push([newData[idx].uid, newData[idx].password, newData[idx].cookies, newData[idx].colD, newData[idx].colE]);
+    }
+    var ws = XLSX.utils.aoa_to_sheet(excelRows);
+    ws['!cols'] = [{wch:12},{wch:12},{wch:12},{wch:12},{wch:12}];
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "META_Data");
+    var excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    var blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var file = new File([blob], "meta_tool_data_sheet" + currentSheet + "_" + Date.now() + ".xlsx", { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    
+    var tomorrowDay = getTomorrowDay();
+    var todayBangla = new Date().toLocaleDateString('bn-BD');
+    var timeBangla = new Date().toLocaleTimeString('bn-BD');
+    
+    var accountTypeMsg = accountType ? "📂 <b>একাউন্ট ধরণ:</b> " + escapeHtml(accountType) + "\n" : "";
+    var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : (currentSheet === 2 ? "📄 <b>শীট ২</b>" : (currentSheet === 3 ? "📄 <b>শীট ৩</b>" : "📄 <b>শীট ৪</b>"));
+    var channelLinkMsg = adminInfo.channelLink ? "\n🔗 <b>চ্যানেল লিংক:</b> " + adminInfo.channelLink : "";
+    
+    // ইউজারের মেসেজ
+    var userCaption = "✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n" +
+      "📌 " + sheetInfo + "\n" +
+      "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
+      "📊 <b>মোট আইডি:</b> " + newData.length + " টি\n" +
+      accountTypeMsg +
+      "👑 <b>এডমিন:</b> " + escapeHtml(adminInfo.username) + channelLinkMsg + "\n" +
+      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
+      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
+      "🎯 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n" +
+      "📌 আপনি <b>" + tomorrowDay + "</b> তারিখ দিয়ে নতুন করে কাজ শুরু করে দিন।\n\n" +
+      "✨ 𝗧𝗵𝗮𝗻𝗸𝘀 𝗙𝗼𝗿 𝗨𝘀𝗶𝗻𝗴 ✨\n" +
+      "🚀 𝗔𝗱𝘃𝗮𝗻𝗰𝗲 𝗠𝗲𝘁𝗮𝗧𝗼𝗼𝗹";
+    
+    // এডমিনের মেসেজ
+    var adminCaption = "✅ <b>𝗠𝗘𝗧𝗔 𝗧𝗢𝗢𝗟 𝗙𝗜𝗟𝗘 𝗦𝗨𝗕𝗠𝗜𝗧</b> ✅\n\n" +
+      "📌 " + sheetInfo + "\n" +
+      "👤 <b>সাবমিটকারী ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
+      "🆔 <b>ইউজারের চ্যাট আইডি:</b> <code>" + escapeHtml(currentChatId) + "</code>\n" +
+      accountTypeMsg +
+      "📋 <b>মোট নতুন UID:</b> " + newData.length + " টি\n" +
+      "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
+      "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
+      "✨ 𝗧𝗵𝗮𝗻𝗸𝘀 𝗙𝗼𝗿 𝗨𝘀𝗶𝗻𝗴 ✨\n" +
+      "🚀 𝗔𝗱𝘃𝗮𝗻𝗰𝗲 𝗠𝗲𝘁𝗮𝗧𝗼𝗼𝗹";
+    
+    // ইউজারের রিপ্লাই মার্কআপ (জয়েন চ্যানেল বাটন)
+    const userReplyMarkup = {
+      inline_keyboard: [
+        [
+          { text: "🚀 Join Official Channel", url: OFFICIAL_CHANNEL_LINK }
+        ]
+      ]
+    };
+    
+    // এডমিনের রিপ্লাই মার্কআপ (শুধু ফাইল রিসিভ বাটন)
+    const adminReplyMarkup = {
+      inline_keyboard: [
+        [
+          { text: "📂 ফাইল রিসিভ করুন", url: FILE_RECEIVE_LINK }
+        ]
+      ]
+    };
+    
+    showToast(newData.length + " টি নতুন UID সাবমিট হচ্ছে... (প্রথমে এডমিনে পাঠানো হচ্ছে)");
+    
+    try {
+      var adminResult = await sendTelegramFileWithRetry(adminInfo.chatId, file, adminCaption, adminReplyMarkup);
+      
+      if (!adminResult.success) {
+        showToast("❌ এডমিনে ফাইল পাঠাতে ব্যর্থ! নেটওয়ার্ক চেক করুন। দয়া করে এডমিন নিশ্চিত করুন যে তিনি রেজিস্ট্রেশন করেছেন।");
+        return;
+      }
+      
+      showToast("✅ এডমিনে সফল! এখন আপনার ইনবক্সে পাঠানো হচ্ছে...");
+      var userResult = await sendTelegramFileWithRetry(currentChatId, file, userCaption, userReplyMarkup);
+      
+      var submitted = getCurrentSubmittedUIDs();
+      for(var ix=0; ix<newData.length; ix++) submitted.add(newData[ix].uid);
+      saveAllToLocalStorage(currentLoggedInUser);
+      saveUserDataToFirebase(currentLoggedInUser);
+      
+      var sheetName = currentSheet === 1 ? "শীট ১" : (currentSheet === 2 ? "শীট ২" : (currentSheet === 3 ? "শীট ৩" : "শীট ৪"));
+      showSuccessModal(newData.length, accountType, adminUsername, true, userResult.success, sheetName);
+      showToast(newData.length + " টি নতুন UID সফলভাবে সাবমিট হয়েছে (এডমিন কনফার্মড)!");
+      
+    } catch(err) {
+      console.error(err);
+      showToast("❌ নেটওয়ার্ক ত্রুটি! আবার চেষ্টা করুন।");
+    }
+  }
+
+  function getTomorrowDay() { 
+    var tomorrow = new Date(); 
+    tomorrow.setDate(tomorrow.getDate()+1); 
+    return tomorrow.getDate(); 
+  }
+
+  function checkSystemStatus() { 
+    if(!firebaseDb) return; 
+    if(systemStatusListener) systemStatusListener.off(); 
+    systemStatusListener = firebaseDb.ref('systemControl/status'); 
+    systemStatusListener.on('value', function(snapshot) { 
+      var data = snapshot.val(); 
+      var isOn = data === null ? true : data.isOn !== false; 
+      var existing = document.querySelector('.system-off-overlay'); 
+      if(existing) existing.remove(); 
+      if(!isOn) { 
+        var overlay = document.createElement('div'); 
+        overlay.className = 'system-off-overlay'; 
+        overlay.innerHTML = '<div class="system-off-card"><div style="font-size:40px;">🔒</div><h3>সিস্টেম বন্ধ আছে</h3></div>'; 
+        document.body.appendChild(overlay); 
+        var cells = document.querySelectorAll('#sheetBody td .cell-content');
+        for(var i=0; i<cells.length; i++) cells[i].setAttribute('contenteditable', 'false'); 
+      } else { 
+        var cells2 = document.querySelectorAll('#sheetBody td .cell-content');
+        for(var j=0; j<cells2.length; j++) { 
+          var parentTd = cells2[j].parentElement;
+          if(parentTd && parentTd.getAttribute('data-col') !== '0') cells2[j].setAttribute('contenteditable', 'true'); 
+        } 
+      } 
+    }); 
+  }
+  
+  function saveScrollPosition() { 
+    if(tableWrapper) localStorage.setItem(SCROLL_POSITION_KEY, JSON.stringify({ scrollTop: tableWrapper.scrollTop, scrollLeft: tableWrapper.scrollLeft })); 
+  }
+  
+  function restoreScrollPosition() { 
+    if(!tableWrapper) return; 
+    try { 
+      var saved = localStorage.getItem(SCROLL_POSITION_KEY); 
+      if(saved) { 
+        var pos = JSON.parse(saved); 
+        setTimeout(function() { 
+          if(tableWrapper) {
+            tableWrapper.scrollTop = pos.scrollTop || 0; 
+            tableWrapper.scrollLeft = pos.scrollLeft || 0;
+          }
+        }, 50); 
+      } 
+    } catch(e){} 
+  }
+
+  async function showAdminModal() {
+    if(!currentLoggedInUser) return;
+    
+    var currentAdminInfo = null;
+    var currentAdminUsername = currentTelegramUsername ? currentTelegramUsername.replace('@', '').toLowerCase() : null;
+    
+    if(firebaseDb && currentAdminUsername) {
+        try {
+            var snapshot = await firebaseDb.ref('adminUsers/' + currentAdminUsername).once('value');
+            currentAdminInfo = snapshot.val();
+        } catch(e) { console.warn(e); }
+    }
+    
+    var savedAdminTg = localStorage.getItem("ADMIN_TG_USERNAME");
+    var savedAdminChatId = localStorage.getItem("ADMIN_CHAT_ID");
+    var savedAdminChannel = localStorage.getItem("ADMIN_CHANNEL_LINK");
+    
+    var tgUsernameValue = (currentAdminInfo && currentAdminInfo.username) ? currentAdminInfo.username : (savedAdminTg || "");
+    var chatIdValue = (currentAdminInfo && currentAdminInfo.chatId) ? currentAdminInfo.chatId : (savedAdminChatId || "");
+    var channelValue = (currentAdminInfo && currentAdminInfo.channelLink) ? currentAdminInfo.channelLink : (savedAdminChannel || "");
+    
+    var modalDiv = document.createElement('div');
+    modalDiv.className = 'confirm-modal-overlay';
+    modalDiv.innerHTML = `
+      <div class="confirm-modal admin-modal">
+        <div class="icon">👑</div>
+        <h3>${currentAdminInfo ? '📝 এডমিন তথ্য আপডেট করুন' : '✨ এডমিন রেজিস্ট্রেশন'}</h3>
+        <div class="info-box admin-info-box">
+          <strong>⚠️ শুধুমাত্র এডমিনদের জন্য!</strong><br>
+          👑 আপনি যদি এডমিন হন তবেই এখানে রেজিস্ট্রেশন করুন।<br>
+          ${currentAdminInfo ? '✅ আপনি ইতিমধ্যে রেজিস্ট্রেশন করেছেন। নিচে আপনার তথ্য দেখুন এবং চাইলে আপডেট করতে পারেন।' : 'রেজিস্ট্রেশন করলে আপনার ইউজাররা আপনার ইউজারনেম ব্যবহার করে ফাইল সাবমিট করলে তা আপনার কাছে পৌঁছাবে।'}
+        </div>
+        <div class="input-area">
+          <label>📛 টেলিগ্রাম ইউজারনেম <span class="required-star">*</span></label>
+          <input type="text" id="adminTgUsername" placeholder="@username" autocomplete="off" value="${escapeHtml(tgUsernameValue)}">
+          <div class="input-hint">আপনার টেলিগ্রাম ইউজারনেম দিন (যেটা আপনি @ দিয়ে শুরু করবেন)</div>
+        </div>
+        <div class="input-area">
+          <label>🆔 টেলিগ্রাম চ্যাট আইডি <span class="required-star">*</span></label>
+          <input type="text" id="adminChatId" placeholder="123456789" autocomplete="off" inputmode="numeric" value="${escapeHtml(chatIdValue)}">
+          <div class="input-hint">🆔 শুধুমাত্র সংখ্যা দিন - অন্য লেখা থাকলে অটো ডিলিট হবে। 🤖 চ্যাট আইডি পেতে @idbot এ /start দিন</div>
+        </div>
+        <div class="input-area">
+          <label>🔗 টেলিগ্রাম চ্যানেল লিংক</label>
+          <input type="text" id="adminChannelLink" placeholder="https://t.me/yourchannel" autocomplete="off" value="${escapeHtml(channelValue)}">
+          <div class="input-hint">(ঐচ্ছিক) আপনার চ্যানেলের লিংক দিন</div>
+        </div>
+        <div class="confirm-actions">
+          <button class="confirm-yes" id="adminRegisterYesBtn">${currentAdminInfo ? '💾 তথ্য আপডেট করুন' : '✅ রেজিস্ট্রার করুন'}</button>
+          <button class="confirm-no" id="adminRegisterNoBtn">❌ বাতিল করুন</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+    
+    var yesBtn = document.getElementById('adminRegisterYesBtn');
+    var noBtn = document.getElementById('adminRegisterNoBtn');
+    var adminTgUsernameInput = document.getElementById('adminTgUsername');
+    var adminChatIdInput = document.getElementById('adminChatId');
+    var channelInput = document.getElementById('adminChannelLink');
+    
+    if(adminChatIdInput) {
+      adminChatIdInput.addEventListener('input', function(e) {
+        var rawValue = e.target.value;
+        var numbersOnly = rawValue.replace(/[^0-9]/g, '');
+        if (rawValue !== numbersOnly) {
+          e.target.value = numbersOnly;
+        }
+      });
+    }
+    
+    var cleanup = function() { if(modalDiv) modalDiv.remove(); };
+    
+    if(yesBtn) {
+      yesBtn.addEventListener('click', async function() {
+        var tgUsername = adminTgUsernameInput.value.trim();
+        var chatId = adminChatIdInput.value.trim();
+        var channelLink = channelInput.value.trim();
+        
+        chatId = chatId.replace(/[^0-9]/g, '');
+        
+        if(!tgUsername || !chatId) {
+            showToast("❌ দয়া করে ইউজারনেম এবং চ্যাট আইডি দিন!");
+            if(!tgUsername) adminTgUsernameInput.style.border = "2px solid #dc2626";
+            if(!chatId) adminChatIdInput.style.border = "2px solid #dc2626";
+            setTimeout(() => {
+                adminTgUsernameInput.style.border = "";
+                adminChatIdInput.style.border = "";
+            }, 2000);
+            return;
+        }
+        
+        if(tgUsername && !tgUsername.startsWith('@')) tgUsername = '@' + tgUsername;
+        var cleanUsername = tgUsername.replace('@', '').toLowerCase();
+        
+        localStorage.setItem("ADMIN_TG_USERNAME", tgUsername);
+        localStorage.setItem("ADMIN_CHAT_ID", chatId);
+        localStorage.setItem("ADMIN_CHANNEL_LINK", channelLink);
+        
+        if(!firebaseDb) {
+            showToast("❌ Firebase সংযোগ নেই!");
+            return;
+        }
+        
+        showToast(currentAdminInfo ? "🔄 তথ্য আপডেট হচ্ছে..." : "📝 রেজিস্ট্রেশন হচ্ছে...");
+        
+        try {
+            await firebaseDb.ref('adminUsers/' + cleanUsername).set({
+                username: tgUsername,
+                chatId: chatId,
+                channelLink: channelLink || "",
+                registeredAt: currentAdminInfo ? currentAdminInfo.registeredAt : Date.now(),
+                lastUpdated: Date.now()
+            });
+            showToast(currentAdminInfo ? "✅ এডমিন তথ্য আপডেট সফল!" : "✅ এডমিন রেজিস্ট্রেশন সফল!");
+            cleanup();
+            setTimeout(() => {
+                showToast("🎉 স্বাগতম এডমিন! এখন আপনি ফাইল রিসিভ করতে পারবেন।");
+            }, 1500);
+            
+        } catch(err) {
+            console.error(err);
+            showToast("❌ অপারেশন ব্যর্থ! নেটওয়ার্ক চেক করুন।");
+        }
+      });
+    }
+    
+    if(noBtn) {
+      noBtn.addEventListener('click', function() { cleanup(); });
+    }
+    
+    modalDiv.addEventListener('click', function(e) {
+      if(e.target === modalDiv) cleanup();
+    });
+  }
+
+  function bindButtons() { 
+    var copyBtn = document.getElementById('copyBtn');
+    if(copyBtn) copyBtn.addEventListener('click', copySelected);
+    var deleteBtn = document.getElementById('deleteBtn');
+    if(deleteBtn) deleteBtn.addEventListener('click', deleteSelected);
+    var clearBtn = document.getElementById('clearSelectionBtn');
+    if(clearBtn) clearBtn.addEventListener('click', function() { clearAllSelection(); showToast("সিলেকশন ক্লিয়ার"); });
+    var selectAllBtn = document.getElementById('selectAllColsBtn');
+    if(selectAllBtn) selectAllBtn.addEventListener('click', selectAllDataColumns);
+    var saveBtn = document.getElementById('saveUserBtn');
+    if(saveBtn) saveBtn.addEventListener('click', saveUserInfo);
+    
+    var submitBtn = document.getElementById('submitMainBtn');
+    if(submitBtn) {
+      var newSubmitBtn = submitBtn.cloneNode(true);
+      submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+      newSubmitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showSubmitModal();
+      });
+    }
+    
+    var adminBtn = document.getElementById('adminPanelBtn');
+    if(adminBtn) {
+      var newAdminBtn = adminBtn.cloneNode(true);
+      adminBtn.parentNode.replaceChild(newAdminBtn, adminBtn);
+      newAdminBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showAdminModal();
+      });
+    }
+    
+    var logoutBtn = document.getElementById('logoutHeaderBtn');
+    if(logoutBtn) logoutBtn.addEventListener('click', logout);
+    if(uidToggle) uidToggle.addEventListener('click', toggleUidValidation);
+    if(passwordAutoToggle) passwordAutoToggle.addEventListener('click', togglePasswordAuto);
+    if(sheet1Btn) sheet1Btn.addEventListener('click', switchToSheet1);
+    if(sheet2Btn) sheet2Btn.addEventListener('click', switchToSheet2);
+    if(sheet3Btn) sheet3Btn.addEventListener('click', switchToSheet3);
+    if(sheet4Btn) sheet4Btn.addEventListener('click', switchToSheet4);
+  }
+
+  function setupInputFocus() { 
+    var save = document.getElementById('saveUserBtn');
+    if(tgUsernameInput && tgChatIdInput && save) { 
+      var show = function() { save.classList.add('show'); }; 
+      var hide = function() { save.classList.remove('show'); };
+      tgUsernameInput.addEventListener('focus', show); 
+      tgUsernameInput.addEventListener('blur', hide);
+      tgChatIdInput.addEventListener('focus', show); 
+      tgChatIdInput.addEventListener('blur', hide);
+    }
+  }
+
+  async function init() {
+    sheetBody = document.getElementById('sheetBody');
+    tableWrapper = document.getElementById('tableWrapper');
+    if(tableWrapper) tableWrapper.addEventListener('scroll', saveScrollPosition);
+    loadUidValidationState();
+    loadPasswordAutoState();
+    bindButtons();
+    setupInputFocus();
+    checkSystemStatus();
+    if(tgChatIdInput) {
+      tgChatIdInput.addEventListener('input', function(e) { 
+        this.value = this.value.replace(/[^0-9]/g, ''); 
+      });
+    }
+    if(loginBtn) loginBtn.addEventListener('click', handleLoginOrRegister);
+    if(loginUsernameInput) {
+      loginUsernameInput.addEventListener('keypress', function(e) { if(e.key === 'Enter') handleLoginOrRegister(); });
+    }
+    if(loginPasswordInput) {
+      loginPasswordInput.addEventListener('keypress', function(e) { if(e.key === 'Enter') handleLoginOrRegister(); });
+    }
+    
+    if(loadingScreen) loadingScreen.classList.remove('hide');
+    var autoLogged = await checkAutoLogin();
+    if(!autoLogged) {
+      if(loadingScreen) loadingScreen.classList.add('hide');
+      if(loginOverlay) loginOverlay.classList.add('visible');
+      if(appContainer) appContainer.classList.remove('visible');
+    } else {
+      if(loadingScreen) loadingScreen.classList.add('hide');
+      if(loginOverlay) loginOverlay.classList.remove('visible');
+      if(appContainer) appContainer.classList.add('visible');
+    }
+  }
+  
+  init();
+})();
+</script>
+</body>
+</html>
