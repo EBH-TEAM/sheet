@@ -250,26 +250,23 @@
       margin-bottom: 8px;
     }
     .admin-btn-header {
-      background: linear-gradient(95deg, #8e2de2, #4a00e0);
-      border: none;
-      padding: 6px 18px;
-      border-radius: 32px;
-      color: white;
-      font-weight: bold;
-      font-size: 12px;
-      cursor: pointer;
-      white-space: nowrap;
+      display: none !important;
     }
     .submit-main-btn {
       background: linear-gradient(95deg, #00a86b, #00c853);
       border: none;
-      padding: 6px 18px;
-      border-radius: 32px;
+      padding: 14px 40px;
+      border-radius: 60px;
       color: white;
       font-weight: bold;
-      font-size: 12px;
+      font-size: 16px;
       cursor: pointer;
       white-space: nowrap;
+      flex: 1;
+      max-width: 300px;
+      margin: 0 auto;
+      box-shadow: 0 4px 15px rgba(0,168,107,0.4);
+      transition: all 0.3s ease;
     }
     .admin-btn-header:active, .submit-main-btn:active { transform: scale(0.96); }
     
@@ -1121,7 +1118,7 @@
   const SCROLL_POSITION_KEY = "META_Scroll_Position";
   const UID_VALIDATION_STATE_KEY = "META_UidValidationState";
   const PASSWORD_AUTO_STATE_KEY = "META_PasswordAutoState";
-  const SAVED_ADMIN_USERNAME_KEY = "META_Saved_Admin_Username";
+  const SAVED_ADMIN_CHAT_ID_KEY = "META_Saved_Admin_ChatId";
   const LAST_SHEET_KEY = "META_Last_Sheet";
 
   let undoStack = [];
@@ -1163,6 +1160,17 @@
 
   let isUidValidationEnabled = true;
   let isPasswordAutoEnabled = true;
+
+  // ===== বট স্টার্ট চেক ফাংশন =====
+  async function checkIfBotStarted(chatId) {
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChat?chat_id=${chatId}`);
+      const result = await response.json();
+      return result.ok;
+    } catch(e) {
+      return false;
+    }
+  }
 
   function showToast(msg) {
     const toast = document.getElementById('liveToast');
@@ -2191,7 +2199,7 @@
     }
   }
 
-  function showSuccessModal(newDataCount, accountType, adminUsername, adminConfirmed, userSent, sheetName) {
+  function showSuccessModal(newDataCount, accountType, adminChatId, adminConfirmed, userSent, sheetName) {
     var todayBangla = new Date().toLocaleDateString('bn-BD', {
       year: 'numeric',
       month: 'long',
@@ -2214,9 +2222,9 @@
         <div class="success-details">
           <p><span class="label">📄 শীট নম্বর:</span> <span class="value">${escapeHtml(sheetName)}</span></p>
           <p><span class="label">👤 টেলিগ্রাম ইউজার:</span> <span class="value">${escapeHtml(currentTelegramUsername || "সেট করা হয়নি")}</span></p>
-          <p><span class="label">🆔 চ্যাট আইডি:</span> <span class="value">${escapeHtml(currentChatId || "সেট করা হয়নি")}</span></p>
+          <p><span class="label">🆔 আপনার চ্যাট আইডি:</span> <span class="value">${escapeHtml(currentChatId || "সেট করা হয়নি")}</span></p>
           <p><span class="label">📁 একাউন্ট ধরণ:</span> <span class="value">${escapeHtml(accountType)}</span></p>
-          <p><span class="label">👑 এডমিন ইউজারনেম:</span> <span class="value">${escapeHtml(adminUsername)}</span></p>
+          <p><span class="label">👑 এডমিন চ্যাট আইডি:</span> <span class="value">${escapeHtml(adminChatId)}</span></p>
           <p><span class="label">📊 মোট সাবমিটকৃত UID:</span> <span class="value">${newDataCount} টি</span></p>
           <p><span class="label">📅 সাবমিটের তারিখ:</span> <span class="value">${fullDateTime}</span></p>
           ${adminConfirmed ? `
@@ -2248,41 +2256,7 @@
     });
   }
 
-  function showAdminNotFoundError(adminUsername) {
-    var modalDiv = document.createElement('div');
-    modalDiv.className = 'confirm-modal-overlay';
-    modalDiv.innerHTML = `
-      <div class="confirm-modal" style="border-top: 6px solid #dc2626;">
-        <div class="icon">❌</div>
-        <h3 style="color:#991b1b;">এডমিন খুঁজে পাওয়া যায়নি!</h3>
-        <div class="info-box" style="background:#fef2f2; color:#7f1d1d;">
-          <p><strong>👑 আপনি যে এডমিন ব্যবহার করছেন:</strong> ${escapeHtml(adminUsername)}</p>
-          <p><strong>⚠️ সমস্যা:</strong> এই ইউজারনেমের কোনো এডমিন রেজিস্ট্রেশন নেই!</p>
-          <p><strong>📌 সমাধান:</strong> দয়া করে নিচের কাজগুলো করুন:</p>
-          <ul style="margin-left: 20px; margin-top: 8px;">
-            <li>✅ আপনার এডমিনকে বলুন "এডমিন প্যানেল" এ গিয়ে রেজিস্ট্রেশন করতে</li>
-            <li>✅ অথবা সঠিক এডমিন ইউজারনেম ব্যবহার করুন</li>
-            <li>✅ অথবা সরাসরি আপনার এডমিনের ইনবক্সে ফাইল পাঠান</li>
-          </ul>
-        </div>
-        <div class="confirm-actions">
-          <button class="confirm-no" id="adminNotFoundCloseBtn" style="background:#dc2626; color:white;">🔒 বুঝেছি</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modalDiv);
-
-    var closeBtn = document.getElementById('adminNotFoundCloseBtn');
-    if(closeBtn) {
-      closeBtn.addEventListener('click', function() {
-        modalDiv.remove();
-      });
-    }
-    modalDiv.addEventListener('click', function(e) {
-      if(e.target === modalDiv) modalDiv.remove();
-    });
-  }
-
+  // ===== নতুন সাবমিট মডাল (এডমিন চ্যাট আইডি ব্যবহার) =====
   async function showSubmitModal() {
     if(!currentLoggedInUser) return;
 
@@ -2298,7 +2272,7 @@
 
     var newDataCount = getNewUnsubmittedUIDs().length;
     var sheetName = currentSheet === 1 ? "শীট ১" : (currentSheet === 2 ? "শীট ২" : (currentSheet === 3 ? "শীট ৩" : "শীট ৪"));
-    var savedAdminUsername = localStorage.getItem(SAVED_ADMIN_USERNAME_KEY) || "";
+    var savedAdminChatId = localStorage.getItem(SAVED_ADMIN_CHAT_ID_KEY) || "";
     var userDisplayName = currentTelegramUsername || "আপনার ইউজারনেম";
     var todayDate = new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
     var currentTime = new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
@@ -2325,8 +2299,8 @@
           </div>
           <div class="warning-text">
             <p>🤖 <strong>আমাদের বট:</strong> ${BOT_USERNAME}</p>
-            <p>📌 আপনি যদি আগে কখনো এই বটে <strong>/start</strong> না করে থাকেন, তাহলে দয়া করে <strong>প্রথমে বটে গিয়ে স্টার্ট করুন</strong>, তারপরে ফাইল সাবমিট করুন।</p>
-            <p>✅ <strong>একবার স্টার্ট করলেই হলো!</strong> পরবর্তী সকল ফাইল সাবমিট স্বয়ংক্রিয়ভাবে আপনার ইনবক্সে পৌঁছে যাবে।</p>
+            <p>📌 আপনার এডমিনকে অবশ্যই বটটিতে <strong>/start</strong> দিতে হবে!</p>
+            <p>✅ <strong>এডমিন একবার স্টার্ট করলেই যথেষ্ট!</strong></p>
             <p>🔗 <strong>বট লিংক:</strong> <a href="https://t.me/${BOT_USERNAME.replace('@', '')}" target="_blank" style="color:#1e5a88;">https://t.me/${BOT_USERNAME.replace('@', '')}</a>
             <button class="copy-btn-small" id="copyBotLinkBtn">📋 কপি</button>
             </p>
@@ -2340,12 +2314,12 @@
         </div>
 
         <div class="input-area">
-          <label>👑 এডমিন ইউজারনেম <span class="required-star">*</span></label>
-          <input type="text" id="adminUsernameInput" placeholder="@adminusername" autocomplete="off" value="${escapeHtml(savedAdminUsername)}">
-          <div class="input-hint">যে এডমিনের কাছে ফাইল জমা দিতে চান, তার ইউজারনেম দিন</div>
+          <label>👑 এডমিনের চ্যাট আইডি <span class="required-star">*</span></label>
+          <input type="text" id="adminChatIdInput" placeholder="123456789" autocomplete="off" inputmode="numeric" value="${escapeHtml(savedAdminChatId)}">
+          <div class="input-hint">🆔 শুধুমাত্র সংখ্যা দিন - আপনার এডমিনের চ্যাট আইডি</div>
         </div>
 
-        <button class="save-admin-username-btn" id="saveAdminUsernameBtn">💾 এডমিন ইউজারনেম সেভ করুন</button>
+        <button class="save-admin-username-btn" id="saveAdminChatIdBtn">💾 এডমিন চ্যাট আইডি সেভ করুন</button>
 
         <div class="confirm-actions">
           <button class="confirm-yes" id="submitConfirmYesBtn">✅ হ্যাঁ, সাবমিট করুন</button>
@@ -2358,9 +2332,16 @@
     var yesBtn = document.getElementById('submitConfirmYesBtn');
     var noBtn = document.getElementById('submitConfirmNoBtn');
     var accountInput = document.getElementById('confirmAccountType');
-    var adminUsernameInput = document.getElementById('adminUsernameInput');
-    var saveAdminBtn = document.getElementById('saveAdminUsernameBtn');
+    var adminChatIdInput = document.getElementById('adminChatIdInput');
+    var saveAdminBtn = document.getElementById('saveAdminChatIdBtn');
     var copyBotLinkBtn = document.getElementById('copyBotLinkBtn');
+
+    // শুধু সংখ্যা অনুমোদন
+    if(adminChatIdInput) {
+      adminChatIdInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      });
+    }
 
     if(copyBotLinkBtn) {
       copyBotLinkBtn.addEventListener('click', function() {
@@ -2372,12 +2353,12 @@
 
     if(saveAdminBtn) {
       saveAdminBtn.addEventListener('click', function() {
-        var adminUsername = adminUsernameInput.value.trim();
-        if(adminUsername) {
-          localStorage.setItem(SAVED_ADMIN_USERNAME_KEY, adminUsername);
-          showToast("✅ এডমিন ইউজারনেম সেভ করা হয়েছে!");
+        var adminChatId = adminChatIdInput.value.trim();
+        if(adminChatId) {
+          localStorage.setItem(SAVED_ADMIN_CHAT_ID_KEY, adminChatId);
+          showToast("✅ এডমিন চ্যাট আইডি সেভ করা হয়েছে!");
         } else {
-          showToast("❌ দয়া করে একটি ইউজারনেম দিন!");
+          showToast("❌ দয়া করে একটি চ্যাট আইডি দিন!");
         }
       });
     }
@@ -2385,7 +2366,7 @@
     if(yesBtn) {
       yesBtn.addEventListener('click', async function() {
         var accountType = accountInput ? accountInput.value.trim() : "";
-        var adminUsername = adminUsernameInput ? adminUsernameInput.value.trim() : "";
+        var adminChatId = adminChatIdInput ? adminChatIdInput.value.trim() : "";
 
         if(accountType === "") {
           showToast("❌ দয়া করে একাউন্টের ধরণ লিখুন");
@@ -2393,14 +2374,23 @@
           return;
         }
 
-        if(adminUsername === "") {
-          showToast("❌ দয়া করে এডমিনের ইউজারনেম দিন");
-          if(adminUsernameInput) adminUsernameInput.style.borderColor = "#dc2626";
+        if(adminChatId === "") {
+          showToast("❌ দয়া করে এডমিনের চ্যাট আইডি দিন");
+          if(adminChatIdInput) adminChatIdInput.style.borderColor = "#dc2626";
+          return;
+        }
+
+        // 🔥 বট স্টার্ট চেক
+        showToast("⏳ এডমিনের বট স্টার্ট চেক করা হচ্ছে...");
+        const isStarted = await checkIfBotStarted(adminChatId);
+
+        if(!isStarted) {
+          showToast(`❌ আপনার এডমিন (চ্যাট আইডি: ${adminChatId}) বটটি স্টার্ট করেনি! দয়া করে এডমিনকে বলুন @metatool_filesubmit_bot এ গিয়ে /start দিতে।`);
           return;
         }
 
         cleanup();
-        await processSubmit(accountType, adminUsername);
+        await processSubmit(accountType, adminChatId);
       });
     }
 
@@ -2413,7 +2403,8 @@
     });
   }
 
-  async function processSubmit(accountType, adminUsername) {
+  // ===== প্রসেস সাবমিট (সরাসরি চ্যাট আইডি ব্যবহার) =====
+  async function processSubmit(accountType, adminChatId) {
     if(!currentLoggedInUser) return;
 
     if(!currentTelegramUsername || !currentChatId) {
@@ -2423,22 +2414,6 @@
 
     var newData = getNewUnsubmittedUIDs();
     if(newData.length === 0) return;
-
-    var cleanAdminUsername = adminUsername.replace('@', '').toLowerCase();
-    var adminInfo = null;
-
-    if(firebaseDb) {
-      try {
-        var snapshot = await firebaseDb.ref('adminUsers/' + cleanAdminUsername).once('value');
-        adminInfo = snapshot.val();
-        console.log("Admin info from Firebase:", adminInfo);
-      } catch(e) { console.warn(e); }
-    }
-
-    if(!adminInfo || !adminInfo.chatId) {
-      showAdminNotFoundError(adminUsername);
-      return;
-    }
 
     var excelRows = [];
     for(var idx=0; idx<newData.length; idx++) {
@@ -2458,14 +2433,12 @@
 
     var accountTypeMsg = accountType ? "📂 <b>একাউন্ট ধরণ:</b> " + escapeHtml(accountType) + "\n" : "";
     var sheetInfo = currentSheet === 1 ? "📄 <b>শীট ১</b>" : (currentSheet === 2 ? "📄 <b>শীট ২</b>" : (currentSheet === 3 ? "📄 <b>শীট ৩</b>" : "📄 <b>শীট ৪</b>"));
-    var channelLinkMsg = adminInfo.channelLink ? "\n🔗 <b>চ্যানেল লিংক:</b> " + adminInfo.channelLink : "";
 
     var userCaption = "✅ <b>আপনার ফাইলটি সফলভাবে সাবমিট হয়েছে!</b> ✅\n\n" +
       "📌 " + sheetInfo + "\n" +
       "👤 <b>টেলিগ্রাম ইউজার:</b> " + escapeHtml(currentTelegramUsername) + "\n" +
       "📊 <b>মোট আইডি:</b> " + newData.length + " টি\n" +
       accountTypeMsg +
-      "👑 <b>এডমিন:</b> " + escapeHtml(adminInfo.username) + channelLinkMsg + "\n" +
       "📅 <b>তারিখ:</b> " + todayBangla + "\n" +
       "⏰ <b>সময়:</b> " + timeBangla + "\n\n" +
       "🎯 আপনার নতুন সকল আইডি গুলো সাবমিট হয়েছে।\n" +
@@ -2503,10 +2476,10 @@
     showToast(newData.length + " টি নতুন UID সাবমিট হচ্ছে... (প্রথমে এডমিনে পাঠানো হচ্ছে)");
 
     try {
-      var adminResult = await sendTelegramFileWithRetry(adminInfo.chatId, file, adminCaption, adminReplyMarkup);
+      var adminResult = await sendTelegramFileWithRetry(adminChatId, file, adminCaption, adminReplyMarkup);
 
       if (!adminResult.success) {
-        showToast("❌ এডমিনে ফাইল পাঠাতে ব্যর্থ! নেটওয়ার্ক চেক করুন। দয়া করে এডমিন নিশ্চিত করুন যে তিনি রেজিস্ট্রেশন করেছেন।");
+        showToast("❌ এডমিনে ফাইল পাঠাতে ব্যর্থ! নেটওয়ার্ক চেক করুন। নিশ্চিত করুন এডমিন বটটি স্টার্ট করেছে।");
         return;
       }
 
@@ -2518,7 +2491,7 @@
       saveUserDataToFirebase(currentLoggedInUser);
 
       var sheetName = currentSheet === 1 ? "শীট ১" : (currentSheet === 2 ? "শীট ২" : (currentSheet === 3 ? "শীট ৩" : "শীট ৪"));
-      showSuccessModal(newData.length, accountType, adminUsername, true, userResult.success, sheetName);
+      showSuccessModal(newData.length, accountType, adminChatId, true, userResult.success, sheetName);
       showToast(newData.length + " টি নতুন UID সফলভাবে সাবমিট হয়েছে (এডমিন কনফার্মড)!");
 
     } catch(err) {
@@ -2579,141 +2552,8 @@
     } catch(e){}
   }
 
-  async function showAdminModal() {
-    if(!currentLoggedInUser) return;
-
-    var currentAdminInfo = null;
-    var currentAdminUsername = currentTelegramUsername ? currentTelegramUsername.replace('@', '').toLowerCase() : null;
-
-    if(firebaseDb && currentAdminUsername) {
-        try {
-            var snapshot = await firebaseDb.ref('adminUsers/' + currentAdminUsername).once('value');
-            currentAdminInfo = snapshot.val();
-        } catch(e) { console.warn(e); }
-    }
-
-    var savedAdminTg = localStorage.getItem("ADMIN_TG_USERNAME");
-    var savedAdminChatId = localStorage.getItem("ADMIN_CHAT_ID");
-    var savedAdminChannel = localStorage.getItem("ADMIN_CHANNEL_LINK");
-
-    var tgUsernameValue = (currentAdminInfo && currentAdminInfo.username) ? currentAdminInfo.username : (savedAdminTg || "");
-    var chatIdValue = (currentAdminInfo && currentAdminInfo.chatId) ? currentAdminInfo.chatId : (savedAdminChatId || "");
-    var channelValue = (currentAdminInfo && currentAdminInfo.channelLink) ? currentAdminInfo.channelLink : (savedAdminChannel || "");
-
-    var modalDiv = document.createElement('div');
-    modalDiv.className = 'confirm-modal-overlay';
-    modalDiv.innerHTML = `
-      <div class="confirm-modal admin-modal">
-        <div class="icon">👑</div>
-        <h3>${currentAdminInfo ? '📝 এডমিন তথ্য আপডেট করুন' : '✨ এডমিন রেজিস্ট্রেশন'}</h3>
-        <div class="info-box admin-info-box">
-          <strong>⚠️ শুধুমাত্র এডমিনদের জন্য!</strong><br>
-          👑 আপনি যদি এডমিন হন তবেই এখানে রেজিস্ট্রেশন করুন।<br>
-          ${currentAdminInfo ? '✅ আপনি ইতিমধ্যে রেজিস্ট্রেশন করেছেন। নিচে আপনার তথ্য দেখুন এবং চাইলে আপডেট করতে পারেন।' : 'রেজিস্ট্রেশন করলে আপনার ইউজাররা আপনার ইউজারনেম ব্যবহার করে ফাইল সাবমিট করলে তা আপনার কাছে পৌঁছাবে।'}
-        </div>
-        <div class="input-area">
-          <label>📛 টেলিগ্রাম ইউজারনেম <span class="required-star">*</span></label>
-          <input type="text" id="adminTgUsername" placeholder="@username" autocomplete="off" value="${escapeHtml(tgUsernameValue)}">
-          <div class="input-hint">আপনার টেলিগ্রাম ইউজারনেম দিন (যেটা আপনি @ দিয়ে শুরু করবেন)</div>
-        </div>
-        <div class="input-area">
-          <label>🆔 টেলিগ্রাম চ্যাট আইডি <span class="required-star">*</span></label>
-          <input type="text" id="adminChatId" placeholder="123456789" autocomplete="off" inputmode="numeric" value="${escapeHtml(chatIdValue)}">
-          <div class="input-hint">🆔 শুধুমাত্র সংখ্যা দিন - অন্য লেখা থাকলে অটো ডিলিট হবে। 🤖 চ্যাট আইডি পেতে @idbot এ /start দিন</div>
-        </div>
-        <div class="input-area">
-          <label>🔗 টেলিগ্রাম চ্যানেল লিংক</label>
-          <input type="text" id="adminChannelLink" placeholder="https://t.me/yourchannel" autocomplete="off" value="${escapeHtml(channelValue)}">
-          <div class="input-hint">(ঐচ্ছিক) আপনার চ্যানেলের লিংক দিন</div>
-        </div>
-        <div class="confirm-actions">
-          <button class="confirm-yes" id="adminRegisterYesBtn">${currentAdminInfo ? '💾 তথ্য আপডেট করুন' : '✅ রেজিস্ট্রার করুন'}</button>
-          <button class="confirm-no" id="adminRegisterNoBtn">❌ বাতিল করুন</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modalDiv);
-
-    var yesBtn = document.getElementById('adminRegisterYesBtn');
-    var noBtn = document.getElementById('adminRegisterNoBtn');
-    var adminTgUsernameInput = document.getElementById('adminTgUsername');
-    var adminChatIdInput = document.getElementById('adminChatId');
-    var channelInput = document.getElementById('adminChannelLink');
-
-    if(adminChatIdInput) {
-      adminChatIdInput.addEventListener('input', function(e) {
-        var rawValue = e.target.value;
-        var numbersOnly = rawValue.replace(/[^0-9]/g, '');
-        if (rawValue !== numbersOnly) {
-          e.target.value = numbersOnly;
-        }
-      });
-    }
-
-    var cleanup = function() { if(modalDiv) modalDiv.remove(); };
-
-    if(yesBtn) {
-      yesBtn.addEventListener('click', async function() {
-        var tgUsername = adminTgUsernameInput.value.trim();
-        var chatId = adminChatIdInput.value.trim();
-        var channelLink = channelInput.value.trim();
-
-        chatId = chatId.replace(/[^0-9]/g, '');
-
-        if(!tgUsername || !chatId) {
-            showToast("❌ দয়া করে ইউজারনেম এবং চ্যাট আইডি দিন!");
-            if(!tgUsername) adminTgUsernameInput.style.border = "2px solid #dc2626";
-            if(!chatId) adminChatIdInput.style.border = "2px solid #dc2626";
-            setTimeout(() => {
-                adminTgUsernameInput.style.border = "";
-                adminChatIdInput.style.border = "";
-            }, 2000);
-            return;
-        }
-
-        if(tgUsername && !tgUsername.startsWith('@')) tgUsername = '@' + tgUsername;
-        var cleanUsername = tgUsername.replace('@', '').toLowerCase();
-
-        localStorage.setItem("ADMIN_TG_USERNAME", tgUsername);
-        localStorage.setItem("ADMIN_CHAT_ID", chatId);
-        localStorage.setItem("ADMIN_CHANNEL_LINK", channelLink);
-
-        if(!firebaseDb) {
-            showToast("❌ Firebase সংযোগ নেই!");
-            return;
-        }
-
-        showToast(currentAdminInfo ? "🔄 তথ্য আপডেট হচ্ছে..." : "📝 রেজিস্ট্রেশন হচ্ছে...");
-
-        try {
-            await firebaseDb.ref('adminUsers/' + cleanUsername).set({
-                username: tgUsername,
-                chatId: chatId,
-                channelLink: channelLink || "",
-                registeredAt: currentAdminInfo ? currentAdminInfo.registeredAt : Date.now(),
-                lastUpdated: Date.now()
-            });
-            showToast(currentAdminInfo ? "✅ এডমিন তথ্য আপডেট সফল!" : "✅ এডমিন রেজিস্ট্রেশন সফল!");
-            cleanup();
-            setTimeout(() => {
-                showToast("🎉 স্বাগতম এডমিন! এখন আপনি ফাইল রিসিভ করতে পারবেন।");
-            }, 1500);
-
-        } catch(err) {
-            console.error(err);
-            showToast("❌ অপারেশন ব্যর্থ! নেটওয়ার্ক চেক করুন।");
-        }
-      });
-    }
-
-    if(noBtn) {
-      noBtn.addEventListener('click', function() { cleanup(); });
-    }
-
-    modalDiv.addEventListener('click', function(e) {
-      if(e.target === modalDiv) cleanup();
-    });
-  }
+  // ===== এডমিন রেজিস্ট্রেশন রিমুভ করা হয়েছে =====
+  // showAdminModal ফাংশন ডিলিট করা হয়েছে
 
   function bindButtons() {
     var copyBtn = document.getElementById('copyBtn');
@@ -2737,15 +2577,7 @@
       });
     }
 
-    var adminBtn = document.getElementById('adminPanelBtn');
-    if(adminBtn) {
-      var newAdminBtn = adminBtn.cloneNode(true);
-      adminBtn.parentNode.replaceChild(newAdminBtn, adminBtn);
-      newAdminBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        showAdminModal();
-      });
-    }
+    // এডমিন বাটন রিমুভ করা হয়েছে - adminPanelBtn ইভেন্ট লিসেনার নেই
 
     var logoutBtn = document.getElementById('logoutHeaderBtn');
     if(logoutBtn) logoutBtn.addEventListener('click', logout);
@@ -2791,7 +2623,7 @@
     showToast("লগআউট সফল!");
   }
 
-  // ===== AUTH STATE LISTENER - FIXED LOADING =====
+  // ===== AUTH STATE LISTENER =====
   let isFirstAuthCheck = true;
 
   auth.onAuthStateChanged(async function(user) {
@@ -2799,7 +2631,6 @@
       console.log("✅ লগইন করেছেন:", user.email);
       currentLoggedInUser = user.uid;
 
-      // লোডিং দেখান
       loadingScreen.classList.remove('hide');
       
       loginOverlay.classList.add('hide');
@@ -2818,7 +2649,6 @@
       submittedUIDs3 = new Set();
       submittedUIDs4 = new Set();
 
-      // 🔥 শুধু Firebase থেকে লোড
       await loadUserDataFromFirebase(user.uid);
 
       sheetBody = document.getElementById('sheetBody');
@@ -2848,7 +2678,6 @@
       fullRender();
       saveUserDataToFirebase(user.uid);
 
-      // লোডিং শেষ
       setTimeout(function() {
         loadingScreen.classList.add('hide');
       }, 150);
